@@ -4,9 +4,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { PatientService } from '../../core/services/patient.service';
 import { Gender, Patient, PatientDto } from '../../shared/models/patient.model';
+import { DateTimeUtils } from '../../shared/utils/date-time.utils';
 
 export interface PatientFormDialogData {
   patientId?: string;
@@ -16,7 +18,15 @@ export interface PatientFormDialogData {
   selector: 'app-patient-form',
   templateUrl: './patient-form.html',
   styleUrl: './patient-form.css',
-  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatDialogModule]
+  imports: [
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatDatepickerModule,
+    MatDialogModule
+  ]
 })
 export class PatientForm {
   private readonly fb = inject(FormBuilder);
@@ -28,13 +38,17 @@ export class PatientForm {
   readonly patientId = this.data.patientId;
   readonly isEditMode = !!this.patientId;
 
+  // Opens the multi-year date-of-birth picker somewhere in adulthood instead of the
+  // current year, so there are fewer "back" clicks to reach a typical birth year.
+  readonly dobPickerStartDate = new Date(new Date().getFullYear() - 30, 0, 1);
+
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
   readonly form = this.fb.nonNullable.group({
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
-    dateOfBirth: [''],
+    dateOfBirth: [null as Date | null],
     gender: [null as Gender | null],
     phone: [''],
     email: ['', Validators.email],
@@ -52,7 +66,7 @@ export class PatientForm {
         this.form.patchValue({
           firstName: patient.firstName,
           lastName: patient.lastName,
-          dateOfBirth: patient.dateOfBirth ?? '',
+          dateOfBirth: patient.dateOfBirth ? new Date(patient.dateOfBirth) : null,
           gender: patient.gender ?? null,
           phone: patient.phone ?? '',
           email: patient.email ?? '',
@@ -76,7 +90,7 @@ export class PatientForm {
     const dto: PatientDto = {
       firstName: raw.firstName,
       lastName: raw.lastName,
-      dateOfBirth: raw.dateOfBirth || undefined,
+      dateOfBirth: raw.dateOfBirth ? DateTimeUtils.toLocalDateString(raw.dateOfBirth) : undefined,
       gender: raw.gender ?? undefined,
       phone: raw.phone || undefined,
       email: raw.email || undefined,

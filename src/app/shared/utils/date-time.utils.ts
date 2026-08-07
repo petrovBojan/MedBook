@@ -1,15 +1,20 @@
-// Helpers for bridging ISO datetime strings (how Appointment.start/end are stored)
-// and the value format native <input type="datetime-local"> controls expect/emit.
+// Helpers for bridging plain Date objects (what the Material date/time pickers bind to)
+// and how dates/datetimes are actually stored: Appointment.start/end as full ISO
+// datetime strings, Patient.dateOfBirth as a plain yyyy-MM-dd date string.
 export class DateTimeUtils {
-  static toLocalInputValue(iso: string): string {
-    const date = new Date(iso);
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(
-      date.getHours()
-    )}:${pad(date.getMinutes())}`;
+  private static pad(n: number): string {
+    return n.toString().padStart(2, '0');
   }
 
-  static fromLocalInputValue(value: string): string {
-    return new Date(value).toISOString();
+  /** Local (not UTC) yyyy-MM-dd, for date-only values like a patient's date of birth. */
+  static toLocalDateString(date: Date): string {
+    return `${date.getFullYear()}-${this.pad(date.getMonth() + 1)}-${this.pad(date.getDate())}`;
+  }
+
+  /** Merges a date's Y/M/D with a separate time value's H/M into a single Date. */
+  static combineDateAndTime(date: Date, time: Date): Date {
+    const combined = new Date(date);
+    combined.setHours(time.getHours(), time.getMinutes(), 0, 0);
+    return combined;
   }
 }

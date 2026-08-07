@@ -31,6 +31,7 @@ import { Appointment, AppointmentStatus } from '../shared/models/appointment.mod
 import { StaffMember } from '../shared/models/staff-member.model';
 import { Patient } from '../shared/models/patient.model';
 import { AppointmentForm, AppointmentFormDialogData } from '../appointments/appointment-form/appointment-form';
+import { DateTimeUtils } from '../shared/utils/date-time.utils';
 
 interface AppointmentEventMeta {
   appointmentId: string;
@@ -141,7 +142,7 @@ export class Calendar {
           month: 'long',
           day: 'numeric'
         }),
-        dateParam: this.toDateParam(date),
+        dateParam: DateTimeUtils.toLocalDateString(date),
         items
       };
     });
@@ -197,11 +198,6 @@ export class Calendar {
         this.appointmentSrv.getAppointments().subscribe((appointments) => (this.appointments = appointments));
       }
     });
-  }
-
-  private toDateParam(date: Date): string {
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   }
 
   private toCalendarEvent(

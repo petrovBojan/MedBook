@@ -4,6 +4,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatTimepickerModule } from '@angular/material/timepicker';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { addMinutes } from 'date-fns';
 import { AppointmentService } from '../../core/services/appointment.service';
@@ -26,7 +28,16 @@ export interface AppointmentFormDialogData {
   selector: 'app-appointment-form',
   templateUrl: './appointment-form.html',
   styleUrl: './appointment-form.css',
-  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatDialogModule]
+  imports: [
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatDatepickerModule,
+    MatTimepickerModule,
+    MatDialogModule
+  ]
 })
 export class AppointmentForm {
   private readonly fb = inject(FormBuilder);
@@ -49,8 +60,10 @@ export class AppointmentForm {
   readonly form = this.fb.nonNullable.group({
     doctorId: ['', Validators.required],
     patientId: ['', Validators.required],
-    start: [DateTimeUtils.toLocalInputValue(new Date().toISOString()), Validators.required],
-    end: [DateTimeUtils.toLocalInputValue(addMinutes(new Date(), 30).toISOString()), Validators.required],
+    startDate: [new Date(), Validators.required],
+    startTime: [new Date(), Validators.required],
+    endDate: [new Date(), Validators.required],
+    endTime: [addMinutes(new Date(), 30), Validators.required],
     reason: [''],
     notes: [''],
     status: [AppointmentStatus.Scheduled, Validators.required]
@@ -66,11 +79,15 @@ export class AppointmentForm {
           this.errorMessage.set('Appointment not found.');
           return;
         }
+        const start = new Date(appointment.start);
+        const end = new Date(appointment.end);
         this.form.patchValue({
           doctorId: appointment.doctorId,
           patientId: appointment.patientId,
-          start: DateTimeUtils.toLocalInputValue(appointment.start),
-          end: DateTimeUtils.toLocalInputValue(appointment.end),
+          startDate: start,
+          startTime: start,
+          endDate: end,
+          endTime: end,
           reason: appointment.reason ?? '',
           notes: appointment.notes ?? '',
           status: appointment.status
@@ -85,8 +102,10 @@ export class AppointmentForm {
         const start = new Date(`${this.data.date}T09:00`);
         const end = addMinutes(start, 30);
         this.form.patchValue({
-          start: DateTimeUtils.toLocalInputValue(start.toISOString()),
-          end: DateTimeUtils.toLocalInputValue(end.toISOString())
+          startDate: start,
+          startTime: start,
+          endDate: end,
+          endTime: end
         });
       }
     }
@@ -102,11 +121,13 @@ export class AppointmentForm {
     this.errorMessage.set(null);
 
     const raw = this.form.getRawValue();
+    const start = DateTimeUtils.combineDateAndTime(raw.startDate, raw.startTime);
+    const end = DateTimeUtils.combineDateAndTime(raw.endDate, raw.endTime);
     const dto: AppointmentDto = {
       doctorId: raw.doctorId,
       patientId: raw.patientId,
-      start: DateTimeUtils.fromLocalInputValue(raw.start),
-      end: DateTimeUtils.fromLocalInputValue(raw.end),
+      start: start.toISOString(),
+      end: end.toISOString(),
       reason: raw.reason || undefined,
       notes: raw.notes || undefined,
       status: raw.status

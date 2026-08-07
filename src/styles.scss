@@ -102,6 +102,15 @@ body {
   .mat-mdc-form-field-icon-suffix > .mat-icon {
     padding: 0;
   }
+
+  // The datepicker/timepicker toggle's icon-button defaults to a 40px touch target,
+  // which overflows our 44px-tall compact fields - shrink it to fit.
+  mat-datepicker-toggle .mat-mdc-icon-button,
+  mat-timepicker-toggle .mat-mdc-icon-button {
+    width: 32px;
+    height: 32px;
+    padding: 4px;
+  }
 }
 
 // The external label shown above a field once it has a value (see comment above).

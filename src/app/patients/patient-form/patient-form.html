@@ -2,8 +2,8 @@
 
 <form [formGroup]="form" (ngSubmit)="submit()" class="patient-form">
   <mat-dialog-content>
-    <div class="name-row">
-      <div class="name-field">
+    <div class="field-row">
+      <div class="field-col">
         @if (form.controls.firstName.value) {
           <label class="field-label">First name</label>
         }
@@ -15,7 +15,7 @@
         </mat-form-field>
       </div>
 
-      <div class="name-field">
+      <div class="field-col">
         @if (form.controls.lastName.value) {
           <label class="field-label">Last name</label>
         }
@@ -28,17 +28,19 @@
       </div>
     </div>
 
-    <div class="name-row">
-      <div class="name-field">
+    <div class="field-row">
+      <div class="field-col">
         @if (form.controls.dateOfBirth.value) {
           <label class="field-label">Date of birth</label>
         }
         <mat-form-field appearance="outline">
-          <input matInput type="date" formControlName="dateOfBirth" placeholder="Date of birth" />
+          <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth" placeholder="Date of birth" />
+          <mat-datepicker-toggle matIconSuffix [for]="dobPicker" />
+          <mat-datepicker #dobPicker startView="multi-year" [startAt]="dobPickerStartDate" />
         </mat-form-field>
       </div>
 
-      <div class="name-field">
+      <div class="field-col">
         @if (form.controls.gender.value) {
           <label class="field-label">Gender</label>
         }
@@ -53,8 +55,8 @@
       </div>
     </div>
 
-    <div class="name-row">
-      <div class="name-field">
+    <div class="field-row">
+      <div class="field-col">
         @if (form.controls.phone.value) {
           <label class="field-label">Phone</label>
         }
@@ -63,7 +65,7 @@
         </mat-form-field>
       </div>
 
-      <div class="name-field">
+      <div class="field-col">
         @if (form.controls.email.value) {
           <label class="field-label">Email</label>
         }

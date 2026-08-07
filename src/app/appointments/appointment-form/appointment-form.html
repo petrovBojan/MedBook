@@ -2,52 +2,85 @@
 
 <form [formGroup]="form" (ngSubmit)="submit()" class="appointment-form">
   <mat-dialog-content>
-    @if (form.controls.doctorId.value) {
-      <label class="field-label">Doctor</label>
-    }
-    <mat-form-field appearance="outline">
-      <mat-select formControlName="doctorId" placeholder="Doctor">
-        @for (doctor of doctors(); track doctor.id) {
-          <mat-option [value]="doctor.id">Dr. {{ doctor.firstName }} {{ doctor.lastName }}</mat-option>
-        }
-      </mat-select>
-      @if (form.controls.doctorId.hasError('required') && form.controls.doctorId.touched) {
-        <mat-error>Choose a doctor.</mat-error>
-      }
-    </mat-form-field>
-
-    @if (form.controls.patientId.value) {
-      <label class="field-label">Patient</label>
-    }
-    <mat-form-field appearance="outline">
-      <mat-select formControlName="patientId" placeholder="Patient">
-        @for (patient of patients(); track patient.id) {
-          <mat-option [value]="patient.id">{{ patient.firstName }} {{ patient.lastName }}</mat-option>
-        }
-      </mat-select>
-      @if (form.controls.patientId.hasError('required') && form.controls.patientId.touched) {
-        <mat-error>Choose a patient.</mat-error>
-      }
-    </mat-form-field>
-
-    <button type="button" class="add-patient-link" (click)="openAddPatient()">+ Add a new patient</button>
-
-    <div class="time-row">
-      <div class="time-field">
-        @if (form.controls.start.value) {
-          <label class="field-label">Start</label>
+    <div class="field-row">
+      <div class="field-col">
+        @if (form.controls.doctorId.value) {
+          <label class="field-label">Doctor</label>
         }
         <mat-form-field appearance="outline">
-          <input matInput type="datetime-local" formControlName="start" placeholder="Start" />
+          <mat-select formControlName="doctorId" placeholder="Doctor">
+            @for (doctor of doctors(); track doctor.id) {
+              <mat-option [value]="doctor.id">Dr. {{ doctor.firstName }} {{ doctor.lastName }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.doctorId.hasError('required') && form.controls.doctorId.touched) {
+            <mat-error>Choose a doctor.</mat-error>
+          }
         </mat-form-field>
       </div>
 
-      <div class="time-field">
-        @if (form.controls.end.value) {
-          <label class="field-label">End</label>
+      <div class="field-col">
+        @if (form.controls.patientId.value) {
+          <label class="field-label">Patient</label>
         }
         <mat-form-field appearance="outline">
-          <input matInput type="datetime-local" formControlName="end" placeholder="End" />
+          <mat-select formControlName="patientId" placeholder="Patient">
+            @for (patient of patients(); track patient.id) {
+              <mat-option [value]="patient.id">{{ patient.firstName }} {{ patient.lastName }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.patientId.hasError('required') && form.controls.patientId.touched) {
+            <mat-error>Choose a patient.</mat-error>
+          }
+        </mat-form-field>
+        <button type="button" class="add-patient-link" (click)="openAddPatient()">+ Add a new patient</button>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field-col">
+        @if (form.controls.startDate.value) {
+          <label class="field-label">Start date</label>
+        }
+        <mat-form-field appearance="outline">
+          <input matInput [matDatepicker]="startDatePicker" formControlName="startDate" placeholder="Start date" />
+          <mat-datepicker-toggle matIconSuffix [for]="startDatePicker" />
+          <mat-datepicker #startDatePicker />
+        </mat-form-field>
+      </div>
+
+      <div class="field-col">
+        @if (form.controls.startTime.value) {
+          <label class="field-label">Start time</label>
+        }
+        <mat-form-field appearance="outline">
+          <input matInput [matTimepicker]="startTimePicker" formControlName="startTime" placeholder="Start time" />
+          <mat-timepicker-toggle matIconSuffix [for]="startTimePicker" />
+          <mat-timepicker #startTimePicker interval="15m" />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field-col">
+        @if (form.controls.endDate.value) {
+          <label class="field-label">End date</label>
+        }
+        <mat-form-field appearance="outline">
+          <input matInput [matDatepicker]="endDatePicker" formControlName="endDate" placeholder="End date" />
+          <mat-datepicker-toggle matIconSuffix [for]="endDatePicker" />
+          <mat-datepicker #endDatePicker />
+        </mat-form-field>
+      </div>
+
+      <div class="field-col">
+        @if (form.controls.endTime.value) {
+          <label class="field-label">End time</label>
+        }
+        <mat-form-field appearance="outline">
+          <input matInput [matTimepicker]="endTimePicker" formControlName="endTime" placeholder="End time" />
+          <mat-timepicker-toggle matIconSuffix [for]="endTimePicker" />
+          <mat-timepicker #endTimePicker interval="15m" />
         </mat-form-field>
       </div>
     </div>

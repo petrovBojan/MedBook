@@ -3,9 +3,33 @@
   flex-direction: column;
 }
 
+/* mat-dialog-content doesn't stack its children by default (mat-form-field is
+   display:inline-block, so fields without a preceding block-level label were just
+   flowing side-by-side wherever they fit) - make it an explicit column, and let
+   .field-row opt specific pairs back into a row. */
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+mat-dialog-content mat-form-field {
+  width: 100%;
+}
+
+.field-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.field-col {
+  flex: 1;
+  min-width: 0;
+}
+
 .add-patient-link {
   align-self: flex-start;
-  margin: -0.5rem 0 0.75rem;
+  margin: -0.25rem 0 0;
   padding: 0;
   border: none;
   background: none;
@@ -15,16 +39,7 @@
   text-decoration: underline;
 }
 
-.time-row {
-  display: flex;
-  gap: 1rem;
-}
-
-.time-field {
-  flex: 1;
-}
-
 .error-message {
   color: var(--mat-sys-error);
-  margin: 0 0 0.5rem;
+  margin: 0;
 }

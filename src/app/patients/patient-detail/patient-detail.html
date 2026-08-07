@@ -1,0 +1,46 @@
+@if (patient(); as p) {
+  <mat-card class="patient-summary">
+    <mat-card-header>
+      <mat-card-title>{{ p.firstName }} {{ p.lastName }}</mat-card-title>
+      <mat-card-subtitle>{{ p.dateOfBirth ? (p.dateOfBirth | date: 'longDate') : 'Date of birth not set' }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <dl class="patient-facts">
+        <dt>Gender</dt>
+        <dd>{{ p.gender || '—' }}</dd>
+        <dt>Phone</dt>
+        <dd>{{ p.phone || '—' }}</dd>
+        <dt>Email</dt>
+        <dd>{{ p.email || '—' }}</dd>
+        <dt>Address</dt>
+        <dd>{{ p.address || '—' }}</dd>
+        @if (p.notes) {
+          <dt>Notes</dt>
+          <dd>{{ p.notes }}</dd>
+        }
+      </dl>
+    </mat-card-content>
+    <mat-card-actions>
+      <a mat-button [routerLink]="['/patients', p.id, 'edit']">Edit patient</a>
+      <a mat-flat-button color="primary" [routerLink]="['/appointments/new']" [queryParams]="{ patientId: p.id }">
+        Book appointment
+      </a>
+    </mat-card-actions>
+  </mat-card>
+
+  <h3 class="section-title">Appointment history</h3>
+  @if (appointmentsForPatient().length > 0) {
+    <mat-list>
+      @for (appt of appointmentsForPatient(); track appt.id) {
+        <mat-list-item [routerLink]="['/appointments', appt.id, 'edit']" class="appointment-row">
+          <span matListItemTitle>{{ appt.start | date: 'medium' }} &middot; {{ doctorName(appt.doctorId) }}</span>
+          <span matListItemLine>{{ appt.reason || 'No reason given' }} &mdash; {{ appt.status }}</span>
+        </mat-list-item>
+      }
+    </mat-list>
+  } @else {
+    <p class="empty-state">No appointments yet.</p>
+  }
+} @else {
+  <p class="empty-state">Patient not found.</p>
+}

@@ -1,0 +1,54 @@
+<div class="calendar-toolbar">
+  <div class="nav-controls">
+    <button mat-icon-button mwlCalendarPreviousView [view]="view" [viewDate]="viewDate" (viewDateChange)="viewDate = $event">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <button mat-stroked-button mwlCalendarToday [(viewDate)]="viewDate">Today</button>
+    <button mat-icon-button mwlCalendarNextView [view]="view" [viewDate]="viewDate" (viewDateChange)="viewDate = $event">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+    <h2 class="view-title">{{ viewDate | calendarDate: view + 'ViewTitle' : 'en' }}</h2>
+  </div>
+
+  <div class="right-controls">
+    <mat-form-field appearance="outline" class="doctor-filter">
+      <mat-label>Doctor</mat-label>
+      <mat-select [(ngModel)]="selectedDoctorId">
+        <mat-option [value]="null">All doctors</mat-option>
+        @for (doctor of doctors; track doctor.id) {
+          <mat-option [value]="doctor.id">Dr. {{ doctor.lastName }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-button-toggle-group [value]="view" (change)="setView($event.value)">
+      <mat-button-toggle [value]="CalendarView.Day">Day</mat-button-toggle>
+      <mat-button-toggle [value]="CalendarView.Week">Week</mat-button-toggle>
+      <mat-button-toggle [value]="CalendarView.Month">Month</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    <button mat-flat-button color="primary" (click)="createAppointment()">
+      <mat-icon>add</mat-icon>
+      New appointment
+    </button>
+  </div>
+</div>
+
+<div class="calendar-body">
+  @switch (view) {
+    @case (CalendarView.Month) {
+      <mwl-calendar-month-view
+        [viewDate]="viewDate"
+        [events]="events"
+        (dayClicked)="onDayClicked($event.day)"
+        (eventClicked)="onEventClicked($event)"
+      />
+    }
+    @case (CalendarView.Week) {
+      <mwl-calendar-week-view [viewDate]="viewDate" [events]="events" (eventClicked)="onEventClicked($event)" />
+    }
+    @case (CalendarView.Day) {
+      <mwl-calendar-day-view [viewDate]="viewDate" [events]="events" (eventClicked)="onEventClicked($event)" />
+    }
+  }
+</div>

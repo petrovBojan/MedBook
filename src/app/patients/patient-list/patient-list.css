@@ -1,0 +1,21 @@
+.list-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.search-field {
+  width: 320px;
+}
+
+.patients-table {
+  width: 100%;
+  background: var(--mat-sys-surface);
+}
+
+.empty-state {
+  padding: 1rem;
+  color: var(--mat-sys-on-surface-variant);
+}

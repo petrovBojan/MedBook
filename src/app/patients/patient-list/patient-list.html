@@ -1,0 +1,43 @@
+<div class="list-toolbar">
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-label>Search patients</mat-label>
+    <input matInput [(ngModel)]="searchTerm" placeholder="Name" />
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+
+  <a mat-flat-button color="primary" routerLink="/patients/new">
+    <mat-icon>person_add</mat-icon>
+    Add patient
+  </a>
+</div>
+
+<table mat-table [dataSource]="filteredPatients()" class="patients-table">
+  <ng-container matColumnDef="name">
+    <th mat-header-cell *matHeaderCellDef>Name</th>
+    <td mat-cell *matCellDef="let patient">
+      <a [routerLink]="['/patients', patient.id]">{{ patient.firstName }} {{ patient.lastName }}</a>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="dateOfBirth">
+    <th mat-header-cell *matHeaderCellDef>Date of birth</th>
+    <td mat-cell *matCellDef="let patient">{{ patient.dateOfBirth || '—' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="phone">
+    <th mat-header-cell *matHeaderCellDef>Phone</th>
+    <td mat-cell *matCellDef="let patient">{{ patient.phone || '—' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="email">
+    <th mat-header-cell *matHeaderCellDef>Email</th>
+    <td mat-cell *matCellDef="let patient">{{ patient.email || '—' }}</td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+</table>
+
+@if (filteredPatients().length === 0) {
+  <p class="empty-state">No patients found.</p>
+}

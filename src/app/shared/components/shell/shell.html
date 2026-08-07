@@ -1,0 +1,28 @@
+<mat-toolbar color="primary" class="shell-toolbar">
+  <span class="clinic-name">{{ (clinic$ | async)?.name ?? 'MedBook' }}</span>
+  <span class="spacer"></span>
+  @if (currentUser$ | async; as user) {
+    <span class="current-user">{{ user.firstName }} {{ user.lastName }} &middot; {{ user.role }}</span>
+  }
+  <button mat-icon-button (click)="logout()" aria-label="Log out" title="Log out">
+    <mat-icon>logout</mat-icon>
+  </button>
+</mat-toolbar>
+
+<mat-sidenav-container class="shell-container">
+  <mat-sidenav mode="side" opened class="shell-sidenav">
+    <mat-nav-list>
+      <a mat-list-item routerLink="/calendar" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>calendar_month</mat-icon>
+        <span matListItemTitle>Calendar</span>
+      </a>
+      <a mat-list-item routerLink="/patients" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>people</mat-icon>
+        <span matListItemTitle>Patients</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+  <mat-sidenav-content class="shell-content">
+    <router-outlet />
+  </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,0 +1,40 @@
+.calendar-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.view-title {
+  margin: 0 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.right-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.doctor-filter {
+  width: 180px;
+}
+
+.calendar-body {
+  background: var(--mat-sys-surface);
+  border-radius: 8px;
+  overflow: auto;
+}
+
+:host ::ng-deep .appt-cancelled {
+  opacity: 0.5;
+  text-decoration: line-through;
+}

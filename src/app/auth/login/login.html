@@ -1,47 +1,87 @@
 <div class="login-page">
-  <mat-card class="login-card">
-    <mat-card-header>
-      <mat-card-title>MedBook</mat-card-title>
-      <mat-card-subtitle>Sign in to manage your clinic</mat-card-subtitle>
-    </mat-card-header>
+  <div class="brand-panel">
+    <div class="brand-mark">
+      <mat-icon>local_hospital</mat-icon>
+      <span>MedBook</span>
+    </div>
 
-    <mat-card-content>
-      <form [formGroup]="form" (ngSubmit)="submit()" class="login-form">
-        <mat-form-field appearance="outline">
-          <mat-label>Email</mat-label>
-          <input matInput type="email" formControlName="email" autocomplete="email" />
-          @if (form.controls.email.hasError('required') && form.controls.email.touched) {
-            <mat-error>Email is required.</mat-error>
+    <h1>Run your clinic's day from one calendar.</h1>
+    <p class="brand-tagline">
+      Booking, patient records and daily schedules for your whole team &mdash; no more paper
+      notebooks or phone tag.
+    </p>
+
+    <ul class="feature-list">
+      <li>
+        <mat-icon>calendar_month</mat-icon>
+        <span>See every doctor's appointments in one shared calendar</span>
+      </li>
+      <li>
+        <mat-icon>group</mat-icon>
+        <span>Any staff member can book or update a visit</span>
+      </li>
+      <li>
+        <mat-icon>folder_shared</mat-icon>
+        <span>Patient details stay with the clinic, not a notebook</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="form-panel">
+    <mat-card class="login-card">
+      <mat-card-header>
+        <mat-card-title>Sign in</mat-card-title>
+        <mat-card-subtitle>Access your clinic's schedule</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="submit()" class="login-form">
+          @if (form.controls.email.value) {
+            <label class="field-label">Email</label>
           }
-          @if (form.controls.email.hasError('email') && form.controls.email.touched) {
-            <mat-error>Enter a valid email address.</mat-error>
+          <mat-form-field appearance="outline">
+            <input matInput type="email" formControlName="email" autocomplete="email" placeholder="Email" />
+            @if (form.controls.email.hasError('required') && form.controls.email.touched) {
+              <mat-error>Email is required.</mat-error>
+            }
+            @if (form.controls.email.hasError('email') && form.controls.email.touched) {
+              <mat-error>Enter a valid email address.</mat-error>
+            }
+          </mat-form-field>
+
+          @if (form.controls.password.value) {
+            <label class="field-label">Password</label>
           }
-        </mat-form-field>
+          <mat-form-field appearance="outline">
+            <input
+              matInput
+              type="password"
+              formControlName="password"
+              autocomplete="current-password"
+              placeholder="Password"
+            />
+            @if (form.controls.password.hasError('required') && form.controls.password.touched) {
+              <mat-error>Password is required.</mat-error>
+            }
+          </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Password</mat-label>
-          <input matInput type="password" formControlName="password" autocomplete="current-password" />
-          @if (form.controls.password.hasError('required') && form.controls.password.touched) {
-            <mat-error>Password is required.</mat-error>
+          @if (errorMessage()) {
+            <p class="error-message">{{ errorMessage() }}</p>
           }
-        </mat-form-field>
 
-        @if (errorMessage()) {
-          <p class="error-message">{{ errorMessage() }}</p>
-        }
+          <button mat-flat-button color="primary" type="submit" class="submit-button pill-button" [disabled]="isSubmitting()">
+            @if (isSubmitting()) {
+              <mat-spinner diameter="20" />
+            } @else {
+              Sign in
+            }
+          </button>
+        </form>
 
-        <button mat-flat-button color="primary" type="submit" class="submit-button" [disabled]="isSubmitting()">
-          @if (isSubmitting()) {
-            <mat-spinner diameter="20" />
-          } @else {
-            Sign in
-          }
-        </button>
-      </form>
-
-      <p class="demo-hint">
-        Demo doctor login: <strong>dr.carter&#64;medbook.demo</strong> / <strong>Doctor123!</strong>
-      </p>
-    </mat-card-content>
-  </mat-card>
+        <p class="demo-hint">
+          Demo doctor login: <strong>dr.carter&#64;medbook.demo</strong> / <strong>Doctor123!</strong>
+        </p>
+      </mat-card-content>
+    </mat-card>
+  </div>
 </div>

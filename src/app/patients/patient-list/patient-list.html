@@ -1,14 +1,18 @@
 <div class="list-toolbar">
-  <mat-form-field appearance="outline" class="search-field">
-    <mat-label>Search patients</mat-label>
-    <input matInput [(ngModel)]="searchTerm" placeholder="Name" />
-    <mat-icon matSuffix>search</mat-icon>
-  </mat-form-field>
+  <div class="search-field-group">
+    @if (searchTerm()) {
+      <label class="field-label">Search patients</label>
+    }
+    <mat-form-field appearance="outline" class="search-field">
+      <input matInput [(ngModel)]="searchTerm" placeholder="Search patients" />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
 
-  <a mat-flat-button color="primary" routerLink="/patients/new">
+  <button mat-flat-button color="primary" class="pill-button" (click)="addPatient()">
     <mat-icon>person_add</mat-icon>
     Add patient
-  </a>
+  </button>
 </div>
 
 <table mat-table [dataSource]="filteredPatients()" class="patients-table">

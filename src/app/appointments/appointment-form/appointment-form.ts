@@ -1,12 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatDialog } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { addMinutes } from 'date-fns';
 import { AppointmentService } from '../../core/services/appointment.service';
 import { StaffService } from '../../core/services/staff.service';
@@ -16,32 +14,31 @@ import { StaffMember } from '../../shared/models/staff-member.model';
 import { Patient } from '../../shared/models/patient.model';
 import { DateTimeUtils } from '../../shared/utils/date-time.utils';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
+import { PatientForm } from '../../patients/patient-form/patient-form';
+
+export interface AppointmentFormDialogData {
+  appointmentId?: string;
+  patientId?: string;
+  date?: string;
+}
 
 @Component({
   selector: 'app-appointment-form',
   templateUrl: './appointment-form.html',
   styleUrl: './appointment-form.css',
-  imports: [
-    ReactiveFormsModule,
-    RouterLink,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatCardModule
-  ]
+  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatDialogModule]
 })
 export class AppointmentForm {
   private readonly fb = inject(FormBuilder);
   private readonly appointmentSrv = inject(AppointmentService);
   private readonly staffSrv = inject(StaffService);
   private readonly patientSrv = inject(PatientService);
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
+  private readonly dialogRef = inject(MatDialogRef<AppointmentForm, boolean>);
+  private readonly data = inject<AppointmentFormDialogData>(MAT_DIALOG_DATA, { optional: true }) ?? {};
 
   readonly AppointmentStatus = AppointmentStatus;
-  readonly appointmentId = this.route.snapshot.paramMap.get('id');
+  readonly appointmentId = this.data.appointmentId;
   readonly isEditMode = !!this.appointmentId;
 
   readonly isSubmitting = signal(false);
@@ -80,9 +77,17 @@ export class AppointmentForm {
         });
       });
     } else {
-      const prefillPatientId = this.route.snapshot.queryParamMap.get('patientId');
-      if (prefillPatientId) {
-        this.form.patchValue({ patientId: prefillPatientId });
+      if (this.data.patientId) {
+        this.form.patchValue({ patientId: this.data.patientId });
+      }
+
+      if (this.data.date) {
+        const start = new Date(`${this.data.date}T09:00`);
+        const end = addMinutes(start, 30);
+        this.form.patchValue({
+          start: DateTimeUtils.toLocalInputValue(start.toISOString()),
+          end: DateTimeUtils.toLocalInputValue(end.toISOString())
+        });
       }
     }
   }
@@ -114,7 +119,7 @@ export class AppointmentForm {
     request.subscribe({
       next: () => {
         this.isSubmitting.set(false);
-        this.router.navigate(['/calendar']);
+        this.dialogRef.close(true);
       },
       error: (err: Error) => {
         this.isSubmitting.set(false);
@@ -142,5 +147,24 @@ export class AppointmentForm {
       this.form.patchValue({ status: AppointmentStatus.Cancelled });
       this.submit();
     });
+  }
+
+  openAddPatient(): void {
+    const dialogRef = this.dialog.open<PatientForm, unknown, Patient | undefined>(PatientForm, {
+      width: '640px',
+      autoFocus: false
+    });
+
+    dialogRef.afterClosed().subscribe((patient) => {
+      if (!patient) {
+        return;
+      }
+      this.patients.update((patients) => [...patients, patient]);
+      this.form.patchValue({ patientId: patient.id });
+    });
+  }
+
+  close(): void {
+    this.dialogRef.close(false);
   }
 }

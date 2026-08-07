@@ -19,26 +19,8 @@ export const routes: Routes = [
         loadComponent: () => import('./calendar/calendar').then((m) => m.Calendar)
       },
       {
-        path: 'appointments/new',
-        loadComponent: () =>
-          import('./appointments/appointment-form/appointment-form').then((m) => m.AppointmentForm)
-      },
-      {
-        path: 'appointments/:id/edit',
-        loadComponent: () =>
-          import('./appointments/appointment-form/appointment-form').then((m) => m.AppointmentForm)
-      },
-      {
         path: 'patients',
         loadComponent: () => import('./patients/patient-list/patient-list').then((m) => m.PatientList)
-      },
-      {
-        path: 'patients/new',
-        loadComponent: () => import('./patients/patient-form/patient-form').then((m) => m.PatientForm)
-      },
-      {
-        path: 'patients/:id/edit',
-        loadComponent: () => import('./patients/patient-form/patient-form').then((m) => m.PatientForm)
       },
       {
         path: 'patients/:id',

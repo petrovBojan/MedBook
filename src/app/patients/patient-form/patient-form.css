@@ -1,12 +1,6 @@
-.patient-card {
-  max-width: 640px;
-  margin: 0 auto;
-}
-
 .patient-form {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
 }
 
 .name-row {
@@ -14,18 +8,11 @@
   gap: 1rem;
 }
 
-.name-row mat-form-field {
+.name-field {
   flex: 1;
 }
 
 .error-message {
   color: var(--mat-sys-error);
   margin: 0 0 0.5rem;
-}
-
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
 }

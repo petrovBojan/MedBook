@@ -1,84 +1,98 @@
-<mat-card class="appointment-card">
-  <mat-card-header>
-    <mat-card-title>{{ isEditMode ? 'Edit appointment' : 'New appointment' }}</mat-card-title>
-  </mat-card-header>
+<h2 mat-dialog-title>{{ isEditMode ? 'Edit appointment' : 'New appointment' }}</h2>
 
-  <mat-card-content>
-    <form [formGroup]="form" (ngSubmit)="submit()" class="appointment-form">
-      <mat-form-field appearance="outline">
-        <mat-label>Doctor</mat-label>
-        <mat-select formControlName="doctorId">
-          @for (doctor of doctors(); track doctor.id) {
-            <mat-option [value]="doctor.id">Dr. {{ doctor.firstName }} {{ doctor.lastName }}</mat-option>
-          }
-        </mat-select>
-        @if (form.controls.doctorId.hasError('required') && form.controls.doctorId.touched) {
-          <mat-error>Choose a doctor.</mat-error>
+<form [formGroup]="form" (ngSubmit)="submit()" class="appointment-form">
+  <mat-dialog-content>
+    @if (form.controls.doctorId.value) {
+      <label class="field-label">Doctor</label>
+    }
+    <mat-form-field appearance="outline">
+      <mat-select formControlName="doctorId" placeholder="Doctor">
+        @for (doctor of doctors(); track doctor.id) {
+          <mat-option [value]="doctor.id">Dr. {{ doctor.firstName }} {{ doctor.lastName }}</mat-option>
         }
-      </mat-form-field>
+      </mat-select>
+      @if (form.controls.doctorId.hasError('required') && form.controls.doctorId.touched) {
+        <mat-error>Choose a doctor.</mat-error>
+      }
+    </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Patient</mat-label>
-        <mat-select formControlName="patientId">
-          @for (patient of patients(); track patient.id) {
-            <mat-option [value]="patient.id">{{ patient.firstName }} {{ patient.lastName }}</mat-option>
-          }
-        </mat-select>
-        @if (form.controls.patientId.hasError('required') && form.controls.patientId.touched) {
-          <mat-error>Choose a patient.</mat-error>
+    @if (form.controls.patientId.value) {
+      <label class="field-label">Patient</label>
+    }
+    <mat-form-field appearance="outline">
+      <mat-select formControlName="patientId" placeholder="Patient">
+        @for (patient of patients(); track patient.id) {
+          <mat-option [value]="patient.id">{{ patient.firstName }} {{ patient.lastName }}</mat-option>
         }
-      </mat-form-field>
+      </mat-select>
+      @if (form.controls.patientId.hasError('required') && form.controls.patientId.touched) {
+        <mat-error>Choose a patient.</mat-error>
+      }
+    </mat-form-field>
 
-      <a routerLink="/patients/new" class="add-patient-link">+ Add a new patient</a>
+    <button type="button" class="add-patient-link" (click)="openAddPatient()">+ Add a new patient</button>
 
-      <div class="time-row">
+    <div class="time-row">
+      <div class="time-field">
+        @if (form.controls.start.value) {
+          <label class="field-label">Start</label>
+        }
         <mat-form-field appearance="outline">
-          <mat-label>Start</mat-label>
-          <input matInput type="datetime-local" formControlName="start" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>End</mat-label>
-          <input matInput type="datetime-local" formControlName="end" />
+          <input matInput type="datetime-local" formControlName="start" placeholder="Start" />
         </mat-form-field>
       </div>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Reason for visit</mat-label>
-        <input matInput formControlName="reason" />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Notes</mat-label>
-        <textarea matInput formControlName="notes" rows="3"></textarea>
-      </mat-form-field>
-
-      @if (isEditMode) {
-        <mat-form-field appearance="outline">
-          <mat-label>Status</mat-label>
-          <mat-select formControlName="status">
-            @for (status of [AppointmentStatus.Scheduled, AppointmentStatus.Completed, AppointmentStatus.Cancelled, AppointmentStatus.NoShow]; track status) {
-              <mat-option [value]="status">{{ status }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-      }
-
-      @if (errorMessage()) {
-        <p class="error-message">{{ errorMessage() }}</p>
-      }
-
-      <div class="actions">
-        <a mat-button routerLink="/calendar">Cancel</a>
-        @if (isEditMode) {
-          <button mat-stroked-button color="warn" type="button" (click)="cancelAppointment()">
-            Cancel appointment
-          </button>
+      <div class="time-field">
+        @if (form.controls.end.value) {
+          <label class="field-label">End</label>
         }
-        <button mat-flat-button color="primary" type="submit" [disabled]="isSubmitting()">
-          {{ isEditMode ? 'Save changes' : 'Book appointment' }}
-        </button>
+        <mat-form-field appearance="outline">
+          <input matInput type="datetime-local" formControlName="end" placeholder="End" />
+        </mat-form-field>
       </div>
-    </form>
-  </mat-card-content>
-</mat-card>
+    </div>
+
+    @if (form.controls.reason.value) {
+      <label class="field-label">Reason for visit</label>
+    }
+    <mat-form-field appearance="outline">
+      <input matInput formControlName="reason" placeholder="Reason for visit" />
+    </mat-form-field>
+
+    @if (form.controls.notes.value) {
+      <label class="field-label">Notes</label>
+    }
+    <mat-form-field appearance="outline">
+      <textarea matInput formControlName="notes" rows="3" placeholder="Notes"></textarea>
+    </mat-form-field>
+
+    @if (isEditMode) {
+      @if (form.controls.status.value) {
+        <label class="field-label">Status</label>
+      }
+      <mat-form-field appearance="outline">
+        <mat-select formControlName="status" placeholder="Status">
+          @for (status of [AppointmentStatus.Scheduled, AppointmentStatus.Completed, AppointmentStatus.Cancelled, AppointmentStatus.NoShow]; track status) {
+            <mat-option [value]="status">{{ status }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+
+    @if (errorMessage()) {
+      <p class="error-message">{{ errorMessage() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="close()">Cancel</button>
+    @if (isEditMode) {
+      <button mat-stroked-button color="warn" type="button" (click)="cancelAppointment()">
+        Cancel appointment
+      </button>
+    }
+    <button mat-flat-button color="primary" class="pill-button" type="submit" [disabled]="isSubmitting()">
+      {{ isEditMode ? 'Save changes' : 'Book appointment' }}
+    </button>
+  </mat-dialog-actions>
+</form>

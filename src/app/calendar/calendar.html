@@ -1,33 +1,66 @@
-<div class="calendar-toolbar">
-  <div class="nav-controls">
-    <button mat-icon-button mwlCalendarPreviousView [view]="view" [viewDate]="viewDate" (viewDateChange)="viewDate = $event">
-      <mat-icon>chevron_left</mat-icon>
-    </button>
-    <button mat-stroked-button mwlCalendarToday [(viewDate)]="viewDate">Today</button>
-    <button mat-icon-button mwlCalendarNextView [view]="view" [viewDate]="viewDate" (viewDateChange)="viewDate = $event">
-      <mat-icon>chevron_right</mat-icon>
-    </button>
-    <h2 class="view-title">{{ viewDate | calendarDate: view + 'ViewTitle' : 'en' }}</h2>
+<div class="stats-row">
+  <div class="stat-tile">
+    <span class="stat-tile-icon"><mat-icon>today</mat-icon></span>
+    <div>
+      <div class="stat-tile-value">{{ todaysAppointmentsCount }}</div>
+      <div class="stat-tile-label">Appointments today</div>
+    </div>
   </div>
+  <div class="stat-tile">
+    <span class="stat-tile-icon"><mat-icon>medical_services</mat-icon></span>
+    <div>
+      <div class="stat-tile-value">{{ doctors.length }}</div>
+      <div class="stat-tile-label">Doctors</div>
+    </div>
+  </div>
+  <div class="stat-tile">
+    <span class="stat-tile-icon"><mat-icon>groups</mat-icon></span>
+    <div>
+      <div class="stat-tile-value">{{ totalPatientsCount }}</div>
+      <div class="stat-tile-label">Patients on file</div>
+    </div>
+  </div>
+</div>
+
+<div class="calendar-toolbar">
+  @if (view !== 'list') {
+    <div class="nav-controls">
+      <button mat-icon-button mwlCalendarPreviousView [view]="view" [viewDate]="viewDate" (viewDateChange)="viewDate = $event">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <button mat-stroked-button mwlCalendarToday [(viewDate)]="viewDate">Today</button>
+      <button mat-icon-button mwlCalendarNextView [view]="view" [viewDate]="viewDate" (viewDateChange)="viewDate = $event">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+      <h2 class="view-title">{{ viewDate | calendarDate: view + 'ViewTitle' : 'en' }}</h2>
+    </div>
+  } @else {
+    <h2 class="view-title">All booked appointments</h2>
+  }
 
   <div class="right-controls">
-    <mat-form-field appearance="outline" class="doctor-filter">
-      <mat-label>Doctor</mat-label>
-      <mat-select [(ngModel)]="selectedDoctorId">
-        <mat-option [value]="null">All doctors</mat-option>
-        @for (doctor of doctors; track doctor.id) {
-          <mat-option [value]="doctor.id">Dr. {{ doctor.lastName }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
+    <div class="doctor-filter-group">
+      @if (selectedDoctorId) {
+        <label class="field-label">Doctor</label>
+      }
+      <mat-form-field appearance="outline" class="doctor-filter">
+        <mat-select [(ngModel)]="selectedDoctorId" placeholder="Doctor">
+          <mat-option [value]="null">All doctors</mat-option>
+          @for (doctor of doctors; track doctor.id) {
+            <mat-option [value]="doctor.id">Dr. {{ doctor.lastName }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
 
     <mat-button-toggle-group [value]="view" (change)="setView($event.value)">
       <mat-button-toggle [value]="CalendarView.Day">Day</mat-button-toggle>
       <mat-button-toggle [value]="CalendarView.Week">Week</mat-button-toggle>
       <mat-button-toggle [value]="CalendarView.Month">Month</mat-button-toggle>
+      <mat-button-toggle value="list">List</mat-button-toggle>
     </mat-button-toggle-group>
 
-    <button mat-flat-button color="primary" (click)="createAppointment()">
+    <button mat-flat-button color="primary" class="pill-button" (click)="createAppointment()">
       <mat-icon>add</mat-icon>
       New appointment
     </button>
@@ -49,6 +82,44 @@
     }
     @case (CalendarView.Day) {
       <mwl-calendar-day-view [viewDate]="viewDate" [events]="events" (eventClicked)="onEventClicked($event)" />
+    }
+    @case ('list') {
+      <div class="appointment-list">
+        @if (listAppointments.length === 0) {
+          <p class="empty-state">No booked appointments.</p>
+        }
+        @for (group of listAppointments; track group.dateLabel) {
+          <h3 class="list-date-heading">{{ group.dateLabel }}</h3>
+          <mat-card class="list-day-card">
+            <mat-list class="list-day">
+              @for (appt of group.items; track appt.id; let last = $last) {
+                <mat-list-item class="list-appt-row" (click)="goToAppointment(appt.id)">
+                  <span matListItemTitle>
+                    <span class="list-appt-time">{{ appt.start | date: 'shortTime' }}</span>
+                    {{ patientName(appt.patientId) }}
+                  </span>
+                  <span matListItemLine>
+                    {{ doctorName(appt.doctorId) }}
+                    @if (appt.reason) {
+                      &middot; {{ appt.reason }}
+                    }
+                  </span>
+                  <span matListItemMeta class="status-chip" [class]="'status-' + appt.status.toLowerCase()">{{ appt.status }}</span>
+                </mat-list-item>
+                @if (!last) {
+                  <mat-divider />
+                }
+              }
+            </mat-list>
+          </mat-card>
+          <div class="list-day-footer">
+            <button mat-stroked-button color="primary" class="add-day-appointment" (click)="createAppointmentForDate(group.dateParam)">
+              <mat-icon>add</mat-icon>
+              Add appointment
+            </button>
+          </div>
+        }
+      </div>
     }
   }
 </div>

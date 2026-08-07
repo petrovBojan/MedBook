@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import {
   CalendarDatePipe,
   CalendarDayViewComponent,
@@ -14,11 +14,15 @@ import {
   provideCalendar
 } from 'angular-calendar';
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
+import { DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCardModule } from '@angular/material/card';
+import { MatListModule } from '@angular/material/list';
+import { MatDividerModule } from '@angular/material/divider';
 import { FormsModule } from '@angular/forms';
 import { AppointmentService } from '../core/services/appointment.service';
 import { StaffService } from '../core/services/staff.service';
@@ -26,9 +30,18 @@ import { PatientService } from '../core/services/patient.service';
 import { Appointment, AppointmentStatus } from '../shared/models/appointment.model';
 import { StaffMember } from '../shared/models/staff-member.model';
 import { Patient } from '../shared/models/patient.model';
+import { AppointmentForm, AppointmentFormDialogData } from '../appointments/appointment-form/appointment-form';
 
 interface AppointmentEventMeta {
   appointmentId: string;
+}
+
+type CalendarPageView = CalendarView | 'list';
+
+interface AppointmentListGroup {
+  dateLabel: string;
+  dateParam: string;
+  items: Appointment[];
 }
 
 @Component({
@@ -48,7 +61,11 @@ interface AppointmentEventMeta {
     MatButtonToggleModule,
     MatIconModule,
     MatFormFieldModule,
-    MatSelectModule
+    MatSelectModule,
+    MatCardModule,
+    MatListModule,
+    MatDividerModule,
+    DatePipe
   ],
   providers: [
     provideCalendar({
@@ -61,10 +78,10 @@ export class Calendar {
   private readonly appointmentSrv = inject(AppointmentService);
   private readonly staffSrv = inject(StaffService);
   private readonly patientSrv = inject(PatientService);
-  private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
 
   readonly CalendarView = CalendarView;
-  view: CalendarView = CalendarView.Week;
+  view: CalendarPageView = CalendarView.Week;
   viewDate: Date = new Date();
   selectedDoctorId: string | null = null;
 
@@ -78,6 +95,17 @@ export class Calendar {
     this.appointmentSrv.getAppointments().subscribe((appointments) => (this.appointments = appointments));
   }
 
+  get todaysAppointmentsCount(): number {
+    const today = new Date().toDateString();
+    return this.appointments.filter(
+      (appt) => appt.status !== AppointmentStatus.Cancelled && new Date(appt.start).toDateString() === today
+    ).length;
+  }
+
+  get totalPatientsCount(): number {
+    return this.patients.length;
+  }
+
   get events(): CalendarEvent<AppointmentEventMeta>[] {
     const doctorsById = new Map(this.doctors.map((d) => [d.id, d]));
     const patientsById = new Map(this.patients.map((p) => [p.id, p]));
@@ -87,7 +115,49 @@ export class Calendar {
       .map((appt) => this.toCalendarEvent(appt, doctorsById, patientsById));
   }
 
-  setView(view: CalendarView): void {
+  get listAppointments(): AppointmentListGroup[] {
+    const filtered = this.appointments
+      .filter((appt) => appt.status !== AppointmentStatus.Cancelled)
+      .filter((appt) => !this.selectedDoctorId || appt.doctorId === this.selectedDoctorId)
+      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+
+    const groups = new Map<string, Appointment[]>();
+    for (const appt of filtered) {
+      const key = new Date(appt.start).toDateString();
+      const group = groups.get(key);
+      if (group) {
+        group.push(appt);
+      } else {
+        groups.set(key, [appt]);
+      }
+    }
+
+    return Array.from(groups.entries()).map(([key, items]) => {
+      const date = new Date(key);
+      return {
+        dateLabel: date.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }),
+        dateParam: this.toDateParam(date),
+        items
+      };
+    });
+  }
+
+  doctorName(doctorId: string): string {
+    const doctor = this.doctors.find((d) => d.id === doctorId);
+    return doctor ? `Dr. ${doctor.firstName} ${doctor.lastName}` : 'Unknown doctor';
+  }
+
+  patientName(patientId: string): string {
+    const patient = this.patients.find((p) => p.id === patientId);
+    return patient ? `${patient.firstName} ${patient.lastName}` : 'Unknown patient';
+  }
+
+  setView(view: CalendarPageView): void {
     this.view = view;
   }
 
@@ -98,12 +168,40 @@ export class Calendar {
 
   onEventClicked({ event }: { event: CalendarEvent<AppointmentEventMeta> }): void {
     if (event.meta) {
-      this.router.navigate(['/appointments', event.meta.appointmentId, 'edit']);
+      this.goToAppointment(event.meta.appointmentId);
     }
   }
 
+  goToAppointment(appointmentId: string): void {
+    this.openAppointmentDialog({ appointmentId });
+  }
+
   createAppointment(): void {
-    this.router.navigate(['/appointments/new']);
+    this.openAppointmentDialog();
+  }
+
+  createAppointmentForDate(dateParam: string): void {
+    this.openAppointmentDialog({ date: dateParam });
+  }
+
+  private openAppointmentDialog(data: AppointmentFormDialogData = {}): void {
+    const dialogRef = this.dialog.open(AppointmentForm, {
+      width: '640px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      data
+    });
+
+    dialogRef.afterClosed().subscribe((saved) => {
+      if (saved) {
+        this.appointmentSrv.getAppointments().subscribe((appointments) => (this.appointments = appointments));
+      }
+    });
+  }
+
+  private toDateParam(date: Date): string {
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   }
 
   private toCalendarEvent(

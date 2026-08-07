@@ -2,6 +2,7 @@
   position: sticky;
   top: 0;
   z-index: 10;
+  background: cadetblue;
 }
 
 .clinic-name {
@@ -30,5 +31,7 @@
 }
 
 .active-link {
-  background: var(--mat-sys-secondary-container);
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  border-radius: 999px;
 }

@@ -6,10 +6,10 @@ html {
     (
       color: (
         theme-type: light,
-        primary: mat.$azure-palette,
-        tertiary: mat.$violet-palette,
+        primary: mat.$cyan-palette,
+        tertiary: mat.$spring-green-palette,
       ),
-      typography: Roboto,
+      typography: Montserrat,
       density: 0,
     )
   );
@@ -20,7 +20,137 @@ html,
 body {
   height: 100%;
   margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
-  background: var(--mat-sys-surface);
+  font-family: Montserrat, 'Helvetica Neue', sans-serif;
+  background: #f4f4f4;
   color: var(--mat-sys-on-surface);
+}
+
+// Cards sit on the grayish app background, so keep them white regardless of theme tokens.
+// !important because Material's own mat-card component style sets background-color on
+// this exact same class and is injected into the page after our global stylesheet loads,
+// so it otherwise wins the cascade tie despite matching specificity.
+.mat-mdc-card {
+  background-color: #fff !important;
+}
+
+// Angular Material's <mat-icon> renders with the "material-icons" ligature class by
+// default (see MatIconRegistry._defaultFontSetClass) - point that class at the Material
+// Symbols Outlined font we load in index.html, statically instanced at our chosen axes.
+.material-icons {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 200,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+// Borderless, white pill-style form fields - ported from expostudio-app's
+// edit-profile.component.css. That component also sidesteps Material's floating-label
+// positioning entirely: instead of an internal <mat-label> (which MDC absolutely
+// positions and animates between a "resting" and "floated" state - the source of every
+// misalignment we kept hitting), it renders a plain <label> *outside* the
+// mat-form-field, shown only once the control has a value, and relies on the native
+// <input>/<mat-select> placeholder for the empty state. See the .field-label rule below
+// and its usage in each form template - no <mat-label> is used inside mat-form-field
+// anywhere in this app anymore.
+.mat-mdc-form-field.mat-form-field-appearance-outline {
+  .mat-mdc-text-field-wrapper {
+    margin-top: 0.25em;
+  }
+
+  .mdc-text-field--outlined {
+    padding: 0 !important;
+  }
+
+  .mat-mdc-form-field-flex {
+    background-color: #f1f1f1;
+    border: 1px solid #d9d9d9;
+    border-radius: 12px;
+    padding: 0 16px;
+    min-height: 44px;
+  }
+
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border: none !important;
+  }
+
+  // Our own border (above) replaces MDC's notched outline, so re-create its
+  // focus/error color cues here instead of losing them.
+  &.mat-focused .mat-mdc-form-field-flex {
+    border-color: var(--mat-sys-primary);
+  }
+
+  &.mat-form-field-invalid .mat-mdc-form-field-flex {
+    border-color: var(--mat-sys-error);
+  }
+
+  .mat-mdc-form-field-icon-prefix > .mat-icon,
+  .mat-mdc-form-field-icon-suffix > .mat-icon {
+    padding: 0;
+  }
+}
+
+// The external label shown above a field once it has a value (see comment above).
+// Plain block-level text, not part of Material's form-field internals at all.
+.field-label {
+  display: block;
+  margin: 0 0 4px 2px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// Rounded, pill-shaped call-to-action buttons - applied selectively to primary
+// actions (not every button) to match the clinic-brand reference look.
+.pill-button {
+  border-radius: 999px !important;
+  padding-inline: 1.5rem !important;
+}
+
+// Icon-in-circle + number + label widget, used for the small stat rows on
+// dashboard-style pages (e.g. the calendar page's "today / this week / patients" tiles).
+.stat-tile {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.25rem;
+  background: var(--mat-sys-surface-container-low);
+  border-radius: 16px;
+}
+
+.stat-tile-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  flex-shrink: 0;
+}
+
+.stat-tile-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.stat-tile-label {
+  font-size: 0.8rem;
+  color: var(--mat-sys-on-surface-variant);
 }

@@ -1,36 +1,31 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { PatientService } from '../../core/services/patient.service';
-import { Gender, PatientDto } from '../../shared/models/patient.model';
+import { Gender, Patient, PatientDto } from '../../shared/models/patient.model';
+
+export interface PatientFormDialogData {
+  patientId?: string;
+}
 
 @Component({
   selector: 'app-patient-form',
   templateUrl: './patient-form.html',
   styleUrl: './patient-form.css',
-  imports: [
-    ReactiveFormsModule,
-    RouterLink,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatCardModule
-  ]
+  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatDialogModule]
 })
 export class PatientForm {
   private readonly fb = inject(FormBuilder);
   private readonly patientSrv = inject(PatientService);
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
+  private readonly dialogRef = inject(MatDialogRef<PatientForm, Patient | undefined>);
+  private readonly data = inject<PatientFormDialogData>(MAT_DIALOG_DATA, { optional: true }) ?? {};
 
   readonly Gender = Gender;
-  readonly patientId = this.route.snapshot.paramMap.get('id');
+  readonly patientId = this.data.patientId;
   readonly isEditMode = !!this.patientId;
 
   readonly isSubmitting = signal(false);
@@ -96,12 +91,16 @@ export class PatientForm {
     request.subscribe({
       next: (patient) => {
         this.isSubmitting.set(false);
-        this.router.navigate(['/patients', patient.id]);
+        this.dialogRef.close(patient);
       },
       error: (err: Error) => {
         this.isSubmitting.set(false);
         this.errorMessage.set(err.message);
       }
     });
+  }
+
+  close(): void {
+    this.dialogRef.close(undefined);
   }
 }

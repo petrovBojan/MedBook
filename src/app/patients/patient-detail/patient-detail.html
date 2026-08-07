@@ -21,10 +21,10 @@
       </dl>
     </mat-card-content>
     <mat-card-actions>
-      <a mat-button [routerLink]="['/patients', p.id, 'edit']">Edit patient</a>
-      <a mat-flat-button color="primary" [routerLink]="['/appointments/new']" [queryParams]="{ patientId: p.id }">
+      <button mat-button (click)="editPatient()">Edit patient</button>
+      <button mat-flat-button color="primary" class="pill-button" (click)="bookAppointment()">
         Book appointment
-      </a>
+      </button>
     </mat-card-actions>
   </mat-card>
 
@@ -32,7 +32,7 @@
   @if (appointmentsForPatient().length > 0) {
     <mat-list>
       @for (appt of appointmentsForPatient(); track appt.id) {
-        <mat-list-item [routerLink]="['/appointments', appt.id, 'edit']" class="appointment-row">
+        <mat-list-item (click)="openAppointment(appt.id)" class="appointment-row">
           <span matListItemTitle>{{ appt.start | date: 'medium' }} &middot; {{ doctorName(appt.doctorId) }}</span>
           <span matListItemLine>{{ appt.reason || 'No reason given' }} &mdash; {{ appt.status }}</span>
         </mat-list-item>

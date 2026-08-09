@@ -55,6 +55,7 @@ export class AppointmentForm {
 
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly scheduleWarning = signal<string | null>(null);
   readonly doctors = signal<StaffMember[]>([]);
   readonly patients = signal<Patient[]>([]);
 
@@ -121,6 +122,37 @@ export class AppointmentForm {
       const end = addMinutes(start, 30);
       this.form.patchValue({ endDate: end, endTime: end });
     });
+
+    // Surface working-hours/double-booking conflicts live as the doctor or date/time
+    // fields change, rather than only after the user hits submit.
+    merge(
+      this.form.controls.doctorId.valueChanges,
+      this.form.controls.startDate.valueChanges,
+      this.form.controls.startTime.valueChanges,
+      this.form.controls.endDate.valueChanges,
+      this.form.controls.endTime.valueChanges
+    ).subscribe(() => this.checkSchedule());
+    this.checkSchedule();
+  }
+
+  private checkSchedule(): void {
+    const raw = this.form.getRawValue();
+    if (!raw.doctorId) {
+      this.scheduleWarning.set(null);
+      return;
+    }
+
+    const start = DateTimeUtils.combineDateAndTime(raw.startDate, raw.startTime);
+    const end = DateTimeUtils.combineDateAndTime(raw.endDate, raw.endTime);
+    const dto: AppointmentDto = {
+      doctorId: raw.doctorId,
+      patientId: raw.patientId,
+      start: start.toISOString(),
+      end: end.toISOString(),
+      status: raw.status
+    };
+
+    this.scheduleWarning.set(this.appointmentSrv.checkAvailability(dto, this.appointmentId));
   }
 
   submit(): void {

@@ -1,0 +1,72 @@
+<div class="settings-header">
+  <h1>Settings</h1>
+</div>
+
+<section class="settings-section">
+  <h2>Clinic hours</h2>
+  <p class="section-description">
+    {{ clinicName() || 'Your clinic' }}'s default working days and hours. These apply clinic-wide and are the
+    baseline used for scheduling.
+  </p>
+
+  @if (clinicForm(); as form) {
+    <form [formGroup]="form" (ngSubmit)="saveClinicHours()">
+      <app-working-hours-editor [days]="form.controls.days" />
+
+      <div class="schedule-actions">
+        @if (clinicJustSaved()) {
+          <span class="saved-message">
+            <mat-icon>check_circle</mat-icon>
+            Saved
+          </span>
+        }
+        <button mat-flat-button color="primary" class="pill-button" type="submit" [disabled]="clinicIsSaving()">
+          Save clinic hours
+        </button>
+      </div>
+    </form>
+  }
+</section>
+
+<section class="settings-section">
+  <h2>Staff working hours</h2>
+  <p class="section-description">
+    Narrow the clinic's hours per staff member so appointments are easier to schedule around individual availability.
+    A staff member's hours must fall within the clinic's own hours above.
+  </p>
+
+  <mat-accordion>
+    @for (entry of entries(); track entry.staff.id) {
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ entry.staff.firstName }} {{ entry.staff.lastName }}</mat-panel-title>
+          <mat-panel-description>{{ entry.staff.role }}{{ entry.staff.specialty ? ' · ' + entry.staff.specialty : '' }}</mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <form [formGroup]="entry.form" (ngSubmit)="saveStaffHours(entry)">
+          <app-working-hours-editor [days]="entry.form.controls.days" />
+
+          @if (entry.errorMessage()) {
+            <p class="error-message">{{ entry.errorMessage() }}</p>
+          }
+
+          <div class="schedule-actions">
+            @if (entry.justSaved()) {
+              <span class="saved-message">
+                <mat-icon>check_circle</mat-icon>
+                Saved
+              </span>
+            }
+            <button mat-flat-button color="primary" class="pill-button" type="submit" [disabled]="entry.isSaving()">
+              Save changes
+            </button>
+          </div>
+        </form>
+      </mat-expansion-panel>
+    }
+  </mat-accordion>
+
+  @if (entries().length === 0) {
+    <p class="empty-state">No staff members found.</p>
+  }
+</section>

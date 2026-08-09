@@ -5,6 +5,7 @@ import { Clinic } from '../../shared/models/clinic.model';
 import { StaffCredentials, StaffMember, StaffRole } from '../../shared/models/staff-member.model';
 import { Gender, Patient } from '../../shared/models/patient.model';
 import { Appointment, AppointmentStatus } from '../../shared/models/appointment.model';
+import { createDefaultWorkingHours } from '../../shared/models/working-hours.model';
 
 interface MockDatabase {
   clinics: Clinic[];
@@ -25,16 +26,49 @@ const DB_KEY = 'medbook_db';
 })
 export class MockDbService {
   private readonly storage = inject(BrowserStorageService);
-  private db: MockDatabase = this.storage.getItem<MockDatabase>(DB_KEY) ?? this.seed();
+  private db: MockDatabase = this.backfillWorkingHours(this.storage.getItem<MockDatabase>(DB_KEY) ?? this.seed());
 
   private persist(): void {
     this.storage.setItem(DB_KEY, this.db);
+  }
+
+  // Data persisted before working hours existed on Clinic/StaffMember won't have the
+  // field - fill it in so scheduling validation has something to check against instead
+  // of silently skipping.
+  private backfillWorkingHours(db: MockDatabase): MockDatabase {
+    let changed = false;
+    for (const clinic of db.clinics) {
+      if (!clinic.workingHours) {
+        clinic.workingHours = createDefaultWorkingHours();
+        changed = true;
+      }
+    }
+    for (const member of db.staff) {
+      if (!member.workingHours) {
+        member.workingHours = createDefaultWorkingHours();
+        changed = true;
+      }
+    }
+    if (changed) {
+      this.storage.setItem(DB_KEY, db);
+    }
+    return db;
   }
 
   // --- clinics ---
 
   getClinic(id: string): Clinic | undefined {
     return this.db.clinics.find((c) => c.id === id);
+  }
+
+  updateClinic(id: string, changes: Partial<Clinic>): Clinic | undefined {
+    const clinic = this.getClinic(id);
+    if (!clinic) {
+      return undefined;
+    }
+    Object.assign(clinic, changes);
+    this.persist();
+    return clinic;
   }
 
   // --- staff ---
@@ -53,6 +87,16 @@ export class MockDbService {
 
   getCredentials(staffId: string): StaffCredentials | undefined {
     return this.db.credentials.find((c) => c.staffId === staffId);
+  }
+
+  updateStaffMember(id: string, changes: Partial<StaffMember>): StaffMember | undefined {
+    const staff = this.getStaffById(id);
+    if (!staff) {
+      return undefined;
+    }
+    Object.assign(staff, changes);
+    this.persist();
+    return staff;
   }
 
   // --- patients ---
@@ -195,7 +239,8 @@ export class MockDbService {
           name: 'Sunrise Family Clinic',
           address: '221B Baker Street, Springfield',
           phone: '+1 555-0142',
-          email: 'info@sunrisefamilyclinic.demo'
+          email: 'info@sunrisefamilyclinic.demo',
+          workingHours: createDefaultWorkingHours()
         }
       ],
       staff: [
@@ -207,7 +252,8 @@ export class MockDbService {
           email: 'dr.carter@medbook.demo',
           role: StaffRole.Doctor,
           specialty: 'Family Medicine',
-          color: '#3f7cac'
+          color: '#3f7cac',
+          workingHours: createDefaultWorkingHours()
         },
         {
           id: doctorLeeId,
@@ -217,7 +263,8 @@ export class MockDbService {
           email: 'dr.lee@medbook.demo',
           role: StaffRole.Doctor,
           specialty: 'Pediatrics',
-          color: '#a35d6a'
+          color: '#a35d6a',
+          workingHours: createDefaultWorkingHours()
         },
         {
           id: employeeNovakId,
@@ -226,7 +273,8 @@ export class MockDbService {
           lastName: 'Novak',
           email: 'grace.novak@medbook.demo',
           role: StaffRole.Employee,
-          color: '#6b8f71'
+          color: '#6b8f71',
+          workingHours: createDefaultWorkingHours()
         }
       ],
       credentials: [

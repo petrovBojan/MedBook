@@ -1,3 +1,5 @@
+import { WorkingHours } from './working-hours.model';
+
 export enum StaffRole {
   Doctor = 'Doctor',
   Employee = 'Employee'
@@ -12,6 +14,7 @@ export interface StaffMember {
   role: StaffRole;
   specialty?: string;
   color?: string;
+  workingHours?: WorkingHours;
 }
 
 // Only ever used inside the mock data layer to check credentials - never exposed via AuthService's public observables.

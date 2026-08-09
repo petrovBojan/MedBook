@@ -3,6 +3,18 @@ import { Observable, of, throwError } from 'rxjs';
 import { MockDbService } from './mock-db.service';
 import { AuthService } from './auth.service';
 import { Appointment, AppointmentDto, AppointmentStatus } from '../../shared/models/appointment.model';
+import { WorkingHours, Weekday } from '../../shared/models/working-hours.model';
+import { DateTimeUtils } from '../../shared/utils/date-time.utils';
+
+const WEEKDAY_BY_JS_DAY: Weekday[] = [
+  Weekday.Sunday,
+  Weekday.Monday,
+  Weekday.Tuesday,
+  Weekday.Wednesday,
+  Weekday.Thursday,
+  Weekday.Friday,
+  Weekday.Saturday
+];
 
 @Injectable({
   providedIn: 'root'
@@ -60,12 +72,56 @@ export class AppointmentService {
   }
 
   /**
-   * Returns an error message if the appointment is invalid or overlaps another
-   * active appointment for the same doctor, otherwise null.
+   * Returns an error message if the given appointment slot is invalid for the
+   * chosen doctor - outside their working hours or clashing with another active
+   * appointment - otherwise null. Exposed so the appointment form can surface the
+   * same check live, before the user submits.
    */
+  checkAvailability(dto: AppointmentDto, excludeId?: string): string | null {
+    return this.validate(this.requireClinicId(), dto, excludeId);
+  }
+
   private validate(clinicId: string, dto: AppointmentDto, excludeId?: string): string | null {
-    if (new Date(dto.end) <= new Date(dto.start)) {
+    // Cancelling shouldn't be blocked by a schedule conflict - it's the appointment
+    // being removed from the schedule, not a new slot being claimed.
+    if (dto.status === AppointmentStatus.Cancelled) {
+      return null;
+    }
+
+    const start = new Date(dto.start);
+    const end = new Date(dto.end);
+
+    if (end <= start) {
       return 'End time must be after the start time.';
+    }
+
+    if (DateTimeUtils.toLocalDateString(start) !== DateTimeUtils.toLocalDateString(end)) {
+      return 'Appointments must start and end on the same day.';
+    }
+
+    const weekday = WEEKDAY_BY_JS_DAY[start.getDay()];
+
+    const clinic = this.mockDb.getClinic(clinicId);
+    if (clinic?.workingHours) {
+      const clinicError = this.checkWithinHours(clinic.workingHours, weekday, start, end, clinic.name, 'is closed');
+      if (clinicError) {
+        return clinicError;
+      }
+    }
+
+    const doctor = this.mockDb.getStaffById(dto.doctorId);
+    if (doctor?.workingHours) {
+      const doctorError = this.checkWithinHours(
+        doctor.workingHours,
+        weekday,
+        start,
+        end,
+        `Dr. ${doctor.lastName}`,
+        "doesn't work"
+      );
+      if (doctorError) {
+        return doctorError;
+      }
     }
 
     const overlaps = this.mockDb
@@ -75,11 +131,40 @@ export class AppointmentService {
           existing.id !== excludeId &&
           existing.doctorId === dto.doctorId &&
           existing.status !== AppointmentStatus.Cancelled &&
-          new Date(dto.start) < new Date(existing.end) &&
-          new Date(dto.end) > new Date(existing.start)
+          start < new Date(existing.end) &&
+          end > new Date(existing.start)
       );
 
     return overlaps ? 'This doctor already has an appointment during that time.' : null;
+  }
+
+  /** `closedVerb` is the phrase used when the day isn't enabled at all, e.g. "is closed" / "doesn't work". */
+  private checkWithinHours(
+    workingHours: WorkingHours,
+    weekday: Weekday,
+    start: Date,
+    end: Date,
+    subject: string,
+    closedVerb: string
+  ): string | null {
+    const daySchedule = workingHours.find((d) => d.day === weekday);
+
+    if (!daySchedule?.enabled) {
+      return `${subject} ${closedVerb} on ${weekday}s.`;
+    }
+
+    const startMinutes = start.getHours() * 60 + start.getMinutes();
+    const endMinutes = end.getHours() * 60 + end.getMinutes();
+    const [workStartMinutes, workEndMinutes] = [daySchedule.start, daySchedule.end].map((time) => {
+      const [hours, minutes] = time.split(':').map(Number);
+      return hours * 60 + minutes;
+    });
+
+    if (startMinutes < workStartMinutes || endMinutes > workEndMinutes) {
+      return `${subject}'s hours on ${weekday}s are ${daySchedule.start}–${daySchedule.end}.`;
+    }
+
+    return null;
   }
 
   private requireClinicId(): string {

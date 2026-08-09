@@ -17,4 +17,17 @@ export class DateTimeUtils {
     combined.setHours(time.getHours(), time.getMinutes(), 0, 0);
     return combined;
   }
+
+  /** Parses a 24h "HH:mm" string into a Date (today's Y/M/D, for binding to matTimepicker). */
+  static timeStringToDate(time: string): Date {
+    const [hours, minutes] = time.split(':').map(Number);
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+    return date;
+  }
+
+  /** Formats a Date's H/M as a 24h "HH:mm" string, for storage independent of any date. */
+  static dateToTimeString(date: Date): string {
+    return `${this.pad(date.getHours())}:${this.pad(date.getMinutes())}`;
+  }
 }

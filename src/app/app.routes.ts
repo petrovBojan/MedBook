@@ -25,6 +25,10 @@ export const routes: Routes = [
       {
         path: 'patients/:id',
         loadComponent: () => import('./patients/patient-detail/patient-detail').then((m) => m.PatientDetail)
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./settings/settings').then((m) => m.Settings)
       }
     ]
   },

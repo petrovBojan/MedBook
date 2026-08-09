@@ -112,6 +112,10 @@
       </mat-form-field>
     }
 
+    @if (scheduleWarning()) {
+      <p class="error-message">{{ scheduleWarning() }}</p>
+    }
+
     @if (errorMessage()) {
       <p class="error-message">{{ errorMessage() }}</p>
     }
@@ -124,7 +128,13 @@
         Cancel appointment
       </button>
     }
-    <button mat-flat-button color="primary" class="pill-button" type="submit" [disabled]="isSubmitting()">
+    <button
+      mat-flat-button
+      color="primary"
+      class="pill-button"
+      type="submit"
+      [disabled]="isSubmitting() || !!scheduleWarning()"
+    >
       {{ isEditMode ? 'Save changes' : 'Book appointment' }}
     </button>
   </mat-dialog-actions>

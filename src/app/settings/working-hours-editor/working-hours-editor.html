@@ -1,0 +1,21 @@
+<div class="schedule-table">
+  @for (dayGroup of days.controls; track $index) {
+    <div class="schedule-row" [formGroup]="dayGroup">
+      <mat-checkbox formControlName="enabled" class="day-checkbox">{{ dayGroup.controls.day.value }}</mat-checkbox>
+
+      <mat-form-field appearance="outline" class="time-field">
+        <input matInput [matTimepicker]="startPicker" formControlName="start" placeholder="Start time" />
+        <mat-timepicker-toggle matIconSuffix [for]="startPicker" [disabled]="!dayGroup.controls.enabled.value" />
+        <mat-timepicker #startPicker interval="15m" />
+      </mat-form-field>
+
+      <span class="time-separator">to</span>
+
+      <mat-form-field appearance="outline" class="time-field">
+        <input matInput [matTimepicker]="endPicker" formControlName="end" placeholder="End time" />
+        <mat-timepicker-toggle matIconSuffix [for]="endPicker" [disabled]="!dayGroup.controls.enabled.value" />
+        <mat-timepicker #endPicker interval="15m" />
+      </mat-form-field>
+    </div>
+  }
+</div>

@@ -29,10 +29,11 @@
 
 .shell-content {
   padding: 1.5rem;
+  background: #f1f1f1;
 }
 
 .active-link {
   background: var(--mat-sys-secondary-container);
   color: var(--mat-sys-on-secondary-container);
-  border-radius: 999px;
+  border-radius: 0px 20px 20px 0px !important;
 }

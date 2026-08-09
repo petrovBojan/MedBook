@@ -31,14 +31,26 @@
   gap: 12px;
 }
 
-.doctor-filter {
-  width: 180px;
+.filters-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.filter-field {
+  width: 100%;
+  flex: 1 1 160px;
+  min-width: 0;
 }
 
 .calendar-body {
   background: var(--mat-sys-surface);
   border-radius: 8px;
   overflow: auto;
+  padding: 16px;
 }
 
 :host ::ng-deep .appt-cancelled {
@@ -47,7 +59,7 @@
 }
 
 .appointment-list {
-  padding: 4px 0;
+  padding: 20px;
 }
 
 .list-date-heading {
@@ -126,4 +138,8 @@
 .list-day {
   border: 1px #cacaca solid;
   border-radius: 8px;
+}
+
+.filter-field-group {
+  width: 100%;
 }

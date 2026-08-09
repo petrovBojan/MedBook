@@ -33,7 +33,7 @@
     <mat-list>
       @for (appt of appointmentsForPatient(); track appt.id) {
         <mat-list-item (click)="openAppointment(appt.id)" class="appointment-row">
-          <span matListItemTitle>{{ appt.start | date: 'medium' }} &middot; {{ doctorName(appt.doctorId) }}</span>
+          <span matListItemTitle>{{ appt.start | date: 'MMM d, y, HH:mm' }} &middot; {{ doctorName(appt.doctorId) }}</span>
           <span matListItemLine>{{ appt.reason || 'No reason given' }} &mdash; {{ appt.status }}</span>
         </mat-list-item>
       }

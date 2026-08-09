@@ -162,8 +162,9 @@ body {
   align-items: center;
   gap: 0.85rem;
   padding: 1rem 1.25rem;
-  background: var(--mat-sys-surface-container-low);
+  background: #0077b6;
   border-radius: 16px;
+  color: #fff
 }
 
 .stat-tile-icon {
@@ -186,5 +187,5 @@ body {
 
 .stat-tile-label {
   font-size: 0.8rem;
-  color: var(--mat-sys-on-surface-variant);
+  color: #fff;
 }

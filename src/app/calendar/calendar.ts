@@ -1,6 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import {
+  CalendarAngularDateFormatter,
+  CalendarDateFormatter,
   CalendarDatePipe,
   CalendarDayViewComponent,
   CalendarEvent,
@@ -11,15 +13,18 @@ import {
   CalendarView,
   CalendarWeekViewComponent,
   DateAdapter,
+  DateFormatterParams,
   provideCalendar
 } from 'angular-calendar';
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
-import { DatePipe } from '@angular/common';
+import { DatePipe, formatDate } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
@@ -45,6 +50,17 @@ interface AppointmentListGroup {
   items: Appointment[];
 }
 
+// Overrides the hour gutter labels in the week/day views to 24h ("14:00" instead of "2 PM").
+class TwentyFourHourDateFormatter extends CalendarAngularDateFormatter {
+  override weekViewHour({ date, locale }: DateFormatterParams): string {
+    return formatDate(date, 'HH:mm', locale ?? 'en-US');
+  }
+
+  override dayViewHour({ date, locale }: DateFormatterParams): string {
+    return formatDate(date, 'HH:mm', locale ?? 'en-US');
+  }
+}
+
 @Component({
   selector: 'app-calendar',
   templateUrl: './calendar.html',
@@ -62,7 +78,9 @@ interface AppointmentListGroup {
     MatButtonToggleModule,
     MatIconModule,
     MatFormFieldModule,
+    MatInputModule,
     MatSelectModule,
+    MatDatepickerModule,
     MatCardModule,
     MatListModule,
     MatDividerModule,
@@ -72,7 +90,8 @@ interface AppointmentListGroup {
     provideCalendar({
       provide: DateAdapter,
       useFactory: adapterFactory
-    })
+    }),
+    { provide: CalendarDateFormatter, useClass: TwentyFourHourDateFormatter }
   ]
 })
 export class Calendar {
@@ -82,9 +101,18 @@ export class Calendar {
   private readonly dialog = inject(MatDialog);
 
   readonly CalendarView = CalendarView;
+  readonly statusOptions = [
+    AppointmentStatus.Scheduled,
+    AppointmentStatus.Completed,
+    AppointmentStatus.NoShow,
+    AppointmentStatus.Cancelled
+  ];
+
   view: CalendarPageView = 'list';
   viewDate: Date = new Date();
   selectedDoctorId: string | null = null;
+  selectedDate: Date | null = null;
+  selectedStatuses: AppointmentStatus[] = [];
 
   doctors: StaffMember[] = [];
   private appointments: Appointment[] = [];
@@ -112,14 +140,16 @@ export class Calendar {
     const patientsById = new Map(this.patients.map((p) => [p.id, p]));
 
     return this.appointments
-      .filter((appt) => !this.selectedDoctorId || appt.doctorId === this.selectedDoctorId)
+      .filter((appt) => this.matchesFilters(appt))
       .map((appt) => this.toCalendarEvent(appt, doctorsById, patientsById));
   }
 
   get listAppointments(): AppointmentListGroup[] {
     const filtered = this.appointments
-      .filter((appt) => appt.status !== AppointmentStatus.Cancelled)
-      .filter((appt) => !this.selectedDoctorId || appt.doctorId === this.selectedDoctorId)
+      // Cancelled appointments stay hidden by default, unless the user explicitly
+      // filters for them via the status filter.
+      .filter((appt) => this.selectedStatuses.length > 0 || appt.status !== AppointmentStatus.Cancelled)
+      .filter((appt) => this.matchesFilters(appt))
       .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 
     const groups = new Map<string, Appointment[]>();
@@ -146,6 +176,19 @@ export class Calendar {
         items
       };
     });
+  }
+
+  private matchesFilters(appt: Appointment): boolean {
+    if (this.selectedDoctorId && appt.doctorId !== this.selectedDoctorId) {
+      return false;
+    }
+    if (this.selectedDate && new Date(appt.start).toDateString() !== this.selectedDate.toDateString()) {
+      return false;
+    }
+    if (this.selectedStatuses.length > 0 && !this.selectedStatuses.includes(appt.status)) {
+      return false;
+    }
+    return true;
   }
 
   doctorName(doctorId: string): string {

@@ -39,20 +39,6 @@
   }
 
   <div class="right-controls">
-    <div class="doctor-filter-group">
-      @if (selectedDoctorId) {
-        <label class="field-label">Doctor</label>
-      }
-      <mat-form-field appearance="outline" class="doctor-filter">
-        <mat-select [(ngModel)]="selectedDoctorId" placeholder="Doctor">
-          <mat-option [value]="null">All doctors</mat-option>
-          @for (doctor of doctors; track doctor.id) {
-            <mat-option [value]="doctor.id">Dr. {{ doctor.lastName }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-    </div>
-
     <mat-button-toggle-group [value]="view" (change)="setView($event.value)">
       <mat-button-toggle [value]="CalendarView.Day">Day</mat-button-toggle>
       <mat-button-toggle [value]="CalendarView.Week">Week</mat-button-toggle>
@@ -66,6 +52,53 @@
     </button>
   </div>
 </div>
+
+@if (view === 'list') {
+  <div class="filters-row">
+    <div class="filter-field-group">
+      @if (selectedDoctorId) {
+        <label class="field-label">Doctor</label>
+      }
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-select [(ngModel)]="selectedDoctorId" placeholder="Doctor">
+          <mat-option [value]="null">All doctors</mat-option>
+          @for (doctor of doctors; track doctor.id) {
+            <mat-option [value]="doctor.id">Dr. {{ doctor.lastName }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="filter-field-group">
+      @if (selectedDate) {
+        <label class="field-label">Day</label>
+      }
+      <mat-form-field appearance="outline" class="filter-field">
+        <input matInput [matDatepicker]="dayPicker" [(ngModel)]="selectedDate" placeholder="Day" />
+        @if (selectedDate) {
+          <button matSuffix mat-icon-button type="button" aria-label="Clear day filter" (click)="selectedDate = null">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+        <mat-datepicker-toggle matIconSuffix [for]="dayPicker" />
+        <mat-datepicker #dayPicker />
+      </mat-form-field>
+    </div>
+
+    <div class="filter-field-group">
+      @if (selectedStatuses.length) {
+        <label class="field-label">Status</label>
+      }
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-select [(ngModel)]="selectedStatuses" placeholder="Status" multiple>
+          @for (status of statusOptions; track status) {
+            <mat-option [value]="status">{{ status }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+}
 
 <div class="calendar-body">
   @switch (view) {
@@ -95,7 +128,7 @@
               @for (appt of group.items; track appt.id; let last = $last) {
                 <mat-list-item class="list-appt-row" (click)="goToAppointment(appt.id)">
                   <span matListItemTitle>
-                    <span class="list-appt-time">{{ appt.start | date: 'shortTime' }}</span>
+                    <span class="list-appt-time">{{ appt.start | date: 'HH:mm' }}</span>
                     {{ patientName(appt.patientId) }}
                   </span>
                   <span matListItemLine>

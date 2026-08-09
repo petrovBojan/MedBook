@@ -82,7 +82,7 @@ export class Calendar {
   private readonly dialog = inject(MatDialog);
 
   readonly CalendarView = CalendarView;
-  view: CalendarPageView = CalendarView.Week;
+  view: CalendarPageView = 'list';
   viewDate: Date = new Date();
   selectedDoctorId: string | null = null;
 

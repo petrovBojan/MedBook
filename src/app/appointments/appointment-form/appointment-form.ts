@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatTimepickerModule } from '@angular/material/timepicker';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { merge } from 'rxjs';
 import { addMinutes } from 'date-fns';
 import { AppointmentService } from '../../core/services/appointment.service';
 import { StaffService } from '../../core/services/staff.service';
@@ -81,17 +82,22 @@ export class AppointmentForm {
         }
         const start = new Date(appointment.start);
         const end = new Date(appointment.end);
-        this.form.patchValue({
-          doctorId: appointment.doctorId,
-          patientId: appointment.patientId,
-          startDate: start,
-          startTime: start,
-          endDate: end,
-          endTime: end,
-          reason: appointment.reason ?? '',
-          notes: appointment.notes ?? '',
-          status: appointment.status
-        });
+        // emitEvent: false - this is us prefilling the real end time, not the
+        // auto-set-end-30-minutes-after-start behavior below reacting to it.
+        this.form.patchValue(
+          {
+            doctorId: appointment.doctorId,
+            patientId: appointment.patientId,
+            startDate: start,
+            startTime: start,
+            endDate: end,
+            endTime: end,
+            reason: appointment.reason ?? '',
+            notes: appointment.notes ?? '',
+            status: appointment.status
+          },
+          { emitEvent: false }
+        );
       });
     } else {
       if (this.data.patientId) {
@@ -101,14 +107,20 @@ export class AppointmentForm {
       if (this.data.date) {
         const start = new Date(`${this.data.date}T09:00`);
         const end = addMinutes(start, 30);
-        this.form.patchValue({
-          startDate: start,
-          startTime: start,
-          endDate: end,
-          endTime: end
-        });
+        this.form.patchValue({ startDate: start, startTime: start, endDate: end, endTime: end }, { emitEvent: false });
       }
     }
+
+    // Whenever the start date or time changes, push the end date/time to 30 minutes
+    // later - a reasonable default duration the user can still override afterwards.
+    merge(this.form.controls.startDate.valueChanges, this.form.controls.startTime.valueChanges).subscribe(() => {
+      const start = DateTimeUtils.combineDateAndTime(
+        this.form.controls.startDate.value,
+        this.form.controls.startTime.value
+      );
+      const end = addMinutes(start, 30);
+      this.form.patchValue({ endDate: end, endTime: end });
+    });
   }
 
   submit(): void {

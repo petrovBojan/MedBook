@@ -96,7 +96,7 @@
 }
 
 .status-chip {
-  align-self: center;
+  align-self: center !important;
   padding: 2.4px 9.6px;
   border-radius: 999px;
   font-size: 12px;

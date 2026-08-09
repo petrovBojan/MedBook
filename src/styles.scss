@@ -14,6 +14,23 @@ html {
     )
   );
   @include mat.core();
+
+  // Brand palette - overrides the generated M3 tokens above with exact requested hex
+  // values. Every Material component (buttons, toggles, focus rings, etc.) already
+  // reads color from these same --mat-sys-* custom properties, so this repaints the
+  // whole app without needing to touch each component individually.
+  //   primary            #34D399 - primary actions (pill buttons, toolbar, links)
+  //   secondary          #6EE7B7 - menu/nav and other lower-emphasis UI
+  //   primary/secondary-container  #D1FAE5 - background tint for small but important widgets
+  //   on-*               #1F2937 - complementary dark text/icon color on all of the above
+  --mat-sys-primary: #34d399;
+  --mat-sys-on-primary: #1f2937;
+  --mat-sys-primary-container: #d1fae5;
+  --mat-sys-on-primary-container: #1f2937;
+  --mat-sys-secondary: #6ee7b7;
+  --mat-sys-on-secondary: #1f2937;
+  --mat-sys-secondary-container: #d1fae5;
+  --mat-sys-on-secondary-container: #1f2937;
 }
 
 html,
@@ -121,6 +138,14 @@ body {
   font-size: 13px;
   font-weight: 500;
   color: var(--mat-sys-on-surface-variant);
+}
+
+// Dismiss/cancel actions (close a dialog without saving) - the dark complementary
+// brand color, deliberately not the primary green since these aren't the call to
+// action. Destructive actions (e.g. "Cancel appointment") stay on color="warn"
+// instead - they're not what this class is for.
+.cancel-button {
+  color: #1f2937;
 }
 
 // Rounded, pill-shaped call-to-action buttons - applied selectively to primary

@@ -5,6 +5,8 @@ import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { MAT_NATIVE_DATE_FORMATS, provideNativeDateAdapter } from '@angular/material/core';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { apiInterceptor } from './core/http/api.interceptor';
 
 // Force 24h time (no AM/PM) everywhere the native date adapter formats a time -
 // timepicker inputs and their dropdown options - regardless of the browser locale.
@@ -21,6 +23,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
+    provideHttpClient(withFetch(), withInterceptors([apiInterceptor])),
     provideClientHydration(withEventReplay()),
     provideAnimationsAsync(),
     provideNativeDateAdapter(DATE_FORMATS)

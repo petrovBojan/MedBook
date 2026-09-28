@@ -13,6 +13,10 @@
     <form [formGroup]="form" (ngSubmit)="saveClinicHours()">
       <app-working-hours-editor [days]="form.controls.days" />
 
+      @if (clinicErrorMessage()) {
+        <p class="error-message">{{ clinicErrorMessage() }}</p>
+      }
+
       <div class="schedule-actions">
         @if (clinicJustSaved()) {
           <span class="saved-message">

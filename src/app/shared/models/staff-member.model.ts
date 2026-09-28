@@ -16,9 +16,3 @@ export interface StaffMember {
   color?: string;
   workingHours?: WorkingHours;
 }
-
-// Only ever used inside the mock data layer to check credentials - never exposed via AuthService's public observables.
-export interface StaffCredentials {
-  staffId: string;
-  password: string;
-}

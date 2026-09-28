@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import {
   CalendarAngularDateFormatter,
@@ -114,38 +114,40 @@ export class Calendar {
   selectedDate: Date | null = null;
   selectedStatuses: AppointmentStatus[] = [];
 
-  doctors: StaffMember[] = [];
-  private appointments: Appointment[] = [];
-  private patients: Patient[] = [];
+  // Signals rather than plain fields: the app is zoneless, so data arriving from the API
+  // only re-renders the view (including the getters below that read these) via signals.
+  readonly doctors = signal<StaffMember[]>([]);
+  private readonly appointments = signal<Appointment[]>([]);
+  private readonly patients = signal<Patient[]>([]);
 
   constructor() {
-    this.staffSrv.getDoctors().subscribe((doctors) => (this.doctors = doctors));
-    this.patientSrv.getPatients().subscribe((patients) => (this.patients = patients));
-    this.appointmentSrv.getAppointments().subscribe((appointments) => (this.appointments = appointments));
+    this.staffSrv.getDoctors().subscribe((doctors) => this.doctors.set(doctors));
+    this.patientSrv.getPatients().subscribe((patients) => this.patients.set(patients));
+    this.loadAppointments();
   }
 
   get todaysAppointmentsCount(): number {
     const today = new Date().toDateString();
-    return this.appointments.filter(
+    return this.appointments().filter(
       (appt) => appt.status !== AppointmentStatus.Cancelled && new Date(appt.start).toDateString() === today
     ).length;
   }
 
   get totalPatientsCount(): number {
-    return this.patients.length;
+    return this.patients().length;
   }
 
   get events(): CalendarEvent<AppointmentEventMeta>[] {
-    const doctorsById = new Map(this.doctors.map((d) => [d.id, d]));
-    const patientsById = new Map(this.patients.map((p) => [p.id, p]));
+    const doctorsById = new Map(this.doctors().map((d) => [d.id, d]));
+    const patientsById = new Map(this.patients().map((p) => [p.id, p]));
 
-    return this.appointments
+    return this.appointments()
       .filter((appt) => this.matchesFilters(appt))
       .map((appt) => this.toCalendarEvent(appt, doctorsById, patientsById));
   }
 
   get listAppointments(): AppointmentListGroup[] {
-    const filtered = this.appointments
+    const filtered = this.appointments()
       // Cancelled appointments stay hidden by default, unless the user explicitly
       // filters for them via the status filter.
       .filter((appt) => this.selectedStatuses.length > 0 || appt.status !== AppointmentStatus.Cancelled)
@@ -192,12 +194,12 @@ export class Calendar {
   }
 
   doctorName(doctorId: string): string {
-    const doctor = this.doctors.find((d) => d.id === doctorId);
+    const doctor = this.doctors().find((d) => d.id === doctorId);
     return doctor ? `Dr. ${doctor.firstName} ${doctor.lastName}` : 'Unknown doctor';
   }
 
   patientName(patientId: string): string {
-    const patient = this.patients.find((p) => p.id === patientId);
+    const patient = this.patients().find((p) => p.id === patientId);
     return patient ? `${patient.firstName} ${patient.lastName}` : 'Unknown patient';
   }
 
@@ -238,9 +240,13 @@ export class Calendar {
 
     dialogRef.afterClosed().subscribe((saved) => {
       if (saved) {
-        this.appointmentSrv.getAppointments().subscribe((appointments) => (this.appointments = appointments));
+        this.loadAppointments();
       }
     });
+  }
+
+  private loadAppointments(): void {
+    this.appointmentSrv.getAppointments().subscribe((appointments) => this.appointments.set(appointments));
   }
 
   private toCalendarEvent(

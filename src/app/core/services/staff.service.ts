@@ -1,37 +1,31 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
-import { MockDbService } from './mock-db.service';
-import { AuthService } from './auth.service';
-import { StaffMember, StaffRole } from '../../shared/models/staff-member.model';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { StaffMember } from '../../shared/models/staff-member.model';
 import { WorkingHours } from '../../shared/models/working-hours.model';
+import { environment } from '../../../environments/environment';
+import { undefinedIfNotFound } from '../http/api-error';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StaffService {
-  private readonly mockDb = inject(MockDbService);
-  private readonly authSrv = inject(AuthService);
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = `${environment.apiUrl}/staff`;
 
   getClinicStaff(): Observable<StaffMember[]> {
-    const clinicId = this.authSrv.getCurrentClinicId();
-    return of(clinicId ? this.mockDb.getStaffByClinic(clinicId) : []);
+    return this.http.get<StaffMember[]>(this.baseUrl);
   }
 
   getDoctors(): Observable<StaffMember[]> {
-    const clinicId = this.authSrv.getCurrentClinicId();
-    const staff = clinicId ? this.mockDb.getStaffByClinic(clinicId) : [];
-    return of(staff.filter((s) => s.role === StaffRole.Doctor));
+    return this.http.get<StaffMember[]>(`${this.baseUrl}/doctors`);
   }
 
   getStaffById(id: string): Observable<StaffMember | undefined> {
-    return of(this.mockDb.getStaffById(id));
+    return this.http.get<StaffMember>(`${this.baseUrl}/${encodeURIComponent(id)}`).pipe(undefinedIfNotFound());
   }
 
   updateWorkingHours(staffId: string, workingHours: WorkingHours): Observable<StaffMember> {
-    const updated = this.mockDb.updateStaffMember(staffId, { workingHours });
-    if (!updated) {
-      return throwError(() => new Error('Staff member not found.'));
-    }
-    return of(updated);
+    return this.http.put<StaffMember>(`${this.baseUrl}/${encodeURIComponent(staffId)}/working-hours`, workingHours);
   }
 }

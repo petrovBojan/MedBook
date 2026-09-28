@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  useMockApi: true,
+  // Same-origin in production: serve the API (or a reverse proxy to it) under /api.
   apiUrl: '/api'
 };

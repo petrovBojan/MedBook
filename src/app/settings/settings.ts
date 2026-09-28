@@ -41,6 +41,7 @@ export class Settings {
   readonly clinicForm = signal<ScheduleForm | null>(null);
   readonly clinicIsSaving = signal(false);
   readonly clinicJustSaved = signal(false);
+  readonly clinicErrorMessage = signal<string | null>(null);
 
   readonly entries = signal<StaffScheduleEntry[]>([]);
 
@@ -76,6 +77,7 @@ export class Settings {
 
     this.clinicIsSaving.set(true);
     this.clinicJustSaved.set(false);
+    this.clinicErrorMessage.set(null);
 
     const workingHours = this.extractWorkingHours(form);
     this.clinicSrv.updateWorkingHours(this.clinicId, workingHours).subscribe({
@@ -84,8 +86,9 @@ export class Settings {
         this.clinicIsSaving.set(false);
         this.clinicJustSaved.set(true);
       },
-      error: () => {
+      error: (err: Error) => {
         this.clinicIsSaving.set(false);
+        this.clinicErrorMessage.set(err.message);
       }
     });
   }
@@ -107,8 +110,9 @@ export class Settings {
         entry.isSaving.set(false);
         entry.justSaved.set(true);
       },
-      error: () => {
+      error: (err: Error) => {
         entry.isSaving.set(false);
+        entry.errorMessage.set(err.message);
       }
     });
   }

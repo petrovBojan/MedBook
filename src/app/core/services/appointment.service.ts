@@ -1,185 +1,51 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
-import { MockDbService } from './mock-db.service';
-import { AuthService } from './auth.service';
-import { Appointment, AppointmentDto, AppointmentStatus } from '../../shared/models/appointment.model';
-import { WorkingHours, Weekday } from '../../shared/models/working-hours.model';
-import { DateTimeUtils } from '../../shared/utils/date-time.utils';
+import { HttpClient } from '@angular/common/http';
+import { Observable, map } from 'rxjs';
+import { Appointment, AppointmentDto } from '../../shared/models/appointment.model';
+import { environment } from '../../../environments/environment';
+import { undefinedIfNotFound } from '../http/api-error';
 
-const WEEKDAY_BY_JS_DAY: Weekday[] = [
-  Weekday.Sunday,
-  Weekday.Monday,
-  Weekday.Tuesday,
-  Weekday.Wednesday,
-  Weekday.Thursday,
-  Weekday.Friday,
-  Weekday.Saturday
-];
+export type AvailabilityCheckDto = Pick<AppointmentDto, 'doctorId' | 'start' | 'end' | 'status'>;
 
+interface AvailabilityResponse {
+  available: boolean;
+  message?: string;
+}
+
+// Scheduling rules (working hours, same-day, no double-booking) are enforced by the API
+// on create/update; a violation comes back as an ApiError carrying the reason.
 @Injectable({
   providedIn: 'root'
 })
 export class AppointmentService {
-  private readonly mockDb = inject(MockDbService);
-  private readonly authSrv = inject(AuthService);
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = `${environment.apiUrl}/appointments`;
 
   getAppointments(): Observable<Appointment[]> {
-    const clinicId = this.requireClinicId();
-    return of(this.mockDb.getAppointments(clinicId));
+    return this.http.get<Appointment[]>(this.baseUrl);
   }
 
   getAppointment(id: string): Observable<Appointment | undefined> {
-    return of(this.mockDb.getAppointment(id));
+    return this.http.get<Appointment>(`${this.baseUrl}/${encodeURIComponent(id)}`).pipe(undefinedIfNotFound());
   }
 
   createAppointment(dto: AppointmentDto): Observable<Appointment> {
-    const clinicId = this.requireClinicId();
-    const staffId = this.requireStaffId();
-    const validationError = this.validate(clinicId, dto);
-    if (validationError) {
-      return throwError(() => new Error(validationError));
-    }
-
-    const now = new Date().toISOString();
-    const appointment: Appointment = {
-      ...dto,
-      id: crypto.randomUUID(),
-      clinicId,
-      createdBy: staffId,
-      createdAt: now,
-      updatedAt: now
-    };
-    return of(this.mockDb.createAppointment(appointment));
+    return this.http.post<Appointment>(this.baseUrl, dto);
   }
 
   updateAppointment(id: string, dto: AppointmentDto): Observable<Appointment> {
-    const clinicId = this.requireClinicId();
-    const staffId = this.requireStaffId();
-    const validationError = this.validate(clinicId, dto, id);
-    if (validationError) {
-      return throwError(() => new Error(validationError));
-    }
-
-    const updated = this.mockDb.updateAppointment(id, {
-      ...dto,
-      updatedBy: staffId,
-      updatedAt: new Date().toISOString()
-    });
-    if (!updated) {
-      return throwError(() => new Error('Appointment not found.'));
-    }
-    return of(updated);
+    return this.http.put<Appointment>(`${this.baseUrl}/${encodeURIComponent(id)}`, dto);
   }
 
   /**
-   * Returns an error message if the given appointment slot is invalid for the
-   * chosen doctor - outside their working hours or clashing with another active
-   * appointment - otherwise null. Exposed so the appointment form can surface the
-   * same check live, before the user submits.
+   * Emits an error message if the given slot is invalid for the chosen doctor - outside
+   * their working hours or clashing with another active appointment - otherwise null.
+   * Runs the same rules as create/update without saving, so the appointment form can
+   * surface them live, before the user submits.
    */
-  checkAvailability(dto: AppointmentDto, excludeId?: string): string | null {
-    return this.validate(this.requireClinicId(), dto, excludeId);
-  }
-
-  private validate(clinicId: string, dto: AppointmentDto, excludeId?: string): string | null {
-    // Cancelling shouldn't be blocked by a schedule conflict - it's the appointment
-    // being removed from the schedule, not a new slot being claimed.
-    if (dto.status === AppointmentStatus.Cancelled) {
-      return null;
-    }
-
-    const start = new Date(dto.start);
-    const end = new Date(dto.end);
-
-    if (end <= start) {
-      return 'End time must be after the start time.';
-    }
-
-    if (DateTimeUtils.toLocalDateString(start) !== DateTimeUtils.toLocalDateString(end)) {
-      return 'Appointments must start and end on the same day.';
-    }
-
-    const weekday = WEEKDAY_BY_JS_DAY[start.getDay()];
-
-    const clinic = this.mockDb.getClinic(clinicId);
-    if (clinic?.workingHours) {
-      const clinicError = this.checkWithinHours(clinic.workingHours, weekday, start, end, clinic.name, 'is closed');
-      if (clinicError) {
-        return clinicError;
-      }
-    }
-
-    const doctor = this.mockDb.getStaffById(dto.doctorId);
-    if (doctor?.workingHours) {
-      const doctorError = this.checkWithinHours(
-        doctor.workingHours,
-        weekday,
-        start,
-        end,
-        `Dr. ${doctor.lastName}`,
-        "doesn't work"
-      );
-      if (doctorError) {
-        return doctorError;
-      }
-    }
-
-    const overlaps = this.mockDb
-      .getAppointments(clinicId)
-      .some(
-        (existing) =>
-          existing.id !== excludeId &&
-          existing.doctorId === dto.doctorId &&
-          existing.status !== AppointmentStatus.Cancelled &&
-          start < new Date(existing.end) &&
-          end > new Date(existing.start)
-      );
-
-    return overlaps ? 'This doctor already has an appointment during that time.' : null;
-  }
-
-  /** `closedVerb` is the phrase used when the day isn't enabled at all, e.g. "is closed" / "doesn't work". */
-  private checkWithinHours(
-    workingHours: WorkingHours,
-    weekday: Weekday,
-    start: Date,
-    end: Date,
-    subject: string,
-    closedVerb: string
-  ): string | null {
-    const daySchedule = workingHours.find((d) => d.day === weekday);
-
-    if (!daySchedule?.enabled) {
-      return `${subject} ${closedVerb} on ${weekday}s.`;
-    }
-
-    const startMinutes = start.getHours() * 60 + start.getMinutes();
-    const endMinutes = end.getHours() * 60 + end.getMinutes();
-    const [workStartMinutes, workEndMinutes] = [daySchedule.start, daySchedule.end].map((time) => {
-      const [hours, minutes] = time.split(':').map(Number);
-      return hours * 60 + minutes;
-    });
-
-    if (startMinutes < workStartMinutes || endMinutes > workEndMinutes) {
-      return `${subject}'s hours on ${weekday}s are ${daySchedule.start}–${daySchedule.end}.`;
-    }
-
-    return null;
-  }
-
-  private requireClinicId(): string {
-    const clinicId = this.authSrv.getCurrentClinicId();
-    if (!clinicId) {
-      throw new Error('No clinic in session.');
-    }
-    return clinicId;
-  }
-
-  private requireStaffId(): string {
-    const staffId = this.authSrv.getCurrentUser()?.id;
-    if (!staffId) {
-      throw new Error('No staff member in session.');
-    }
-    return staffId;
+  checkAvailability(dto: AvailabilityCheckDto, excludeId?: string): Observable<string | null> {
+    return this.http
+      .post<AvailabilityResponse>(`${this.baseUrl}/check-availability`, { ...dto, excludeId })
+      .pipe(map((res) => (res.available ? null : (res.message ?? 'This time slot is not available.'))));
   }
 }

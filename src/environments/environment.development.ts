@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  useMockApi: true,
-  apiUrl: 'http://localhost:3000/api'
+  // MedBook.Api's "http" launch profile (../MedBook.Api).
+  apiUrl: 'http://localhost:5262/api'
 };

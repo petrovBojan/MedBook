@@ -6,5 +6,7 @@ export interface Clinic {
   address?: string;
   phone?: string;
   email?: string;
+  /** Time zone the clinic's working hours are expressed in (IANA or Windows id). */
+  timeZone?: string;
   workingHours?: WorkingHours;
 }

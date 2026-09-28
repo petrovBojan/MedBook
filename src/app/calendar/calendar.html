@@ -9,7 +9,7 @@
   <div class="stat-tile">
     <span class="stat-tile-icon"><mat-icon>medical_services</mat-icon></span>
     <div>
-      <div class="stat-tile-value">{{ doctors.length }}</div>
+      <div class="stat-tile-value">{{ doctors().length }}</div>
       <div class="stat-tile-label">Doctors</div>
     </div>
   </div>
@@ -62,7 +62,7 @@
       <mat-form-field appearance="outline" class="filter-field">
         <mat-select [(ngModel)]="selectedDoctorId" placeholder="Doctor">
           <mat-option [value]="null">All doctors</mat-option>
-          @for (doctor of doctors; track doctor.id) {
+          @for (doctor of doctors(); track doctor.id) {
             <mat-option [value]="doctor.id">Dr. {{ doctor.lastName }}</mat-option>
           }
         </mat-select>

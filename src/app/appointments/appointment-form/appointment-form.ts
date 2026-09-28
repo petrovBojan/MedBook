@@ -7,7 +7,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatTimepickerModule } from '@angular/material/timepicker';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { merge } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable, Subject, catchError, debounceTime, merge, of, switchMap } from 'rxjs';
 import { addMinutes } from 'date-fns';
 import { AppointmentService } from '../../core/services/appointment.service';
 import { StaffService } from '../../core/services/staff.service';
@@ -59,6 +60,8 @@ export class AppointmentForm {
   readonly doctors = signal<StaffMember[]>([]);
   readonly patients = signal<Patient[]>([]);
 
+  private readonly scheduleChecks = new Subject<void>();
+
   readonly form = this.fb.nonNullable.group({
     doctorId: ['', Validators.required],
     patientId: ['', Validators.required],
@@ -99,6 +102,7 @@ export class AppointmentForm {
           },
           { emitEvent: false }
         );
+        this.scheduleChecks.next();
       });
     } else {
       if (this.data.patientId) {
@@ -124,35 +128,44 @@ export class AppointmentForm {
     });
 
     // Surface working-hours/double-booking conflicts live as the doctor or date/time
-    // fields change, rather than only after the user hits submit.
+    // fields change, rather than only after the user hits submit. Debounced because
+    // changing the start also moves the end (several changes in a row), and switchMap
+    // drops responses for a slot the user has already moved away from.
+    this.scheduleChecks
+      .pipe(
+        debounceTime(250),
+        switchMap(() => this.checkSchedule()),
+        takeUntilDestroyed()
+      )
+      .subscribe((warning) => this.scheduleWarning.set(warning));
+
     merge(
       this.form.controls.doctorId.valueChanges,
       this.form.controls.startDate.valueChanges,
       this.form.controls.startTime.valueChanges,
       this.form.controls.endDate.valueChanges,
       this.form.controls.endTime.valueChanges
-    ).subscribe(() => this.checkSchedule());
-    this.checkSchedule();
+    ).subscribe(() => this.scheduleChecks.next());
+    this.scheduleChecks.next();
   }
 
-  private checkSchedule(): void {
+  private checkSchedule(): Observable<string | null> {
     const raw = this.form.getRawValue();
     if (!raw.doctorId) {
-      this.scheduleWarning.set(null);
-      return;
+      return of(null);
     }
 
     const start = DateTimeUtils.combineDateAndTime(raw.startDate, raw.startTime);
     const end = DateTimeUtils.combineDateAndTime(raw.endDate, raw.endTime);
-    const dto: AppointmentDto = {
-      doctorId: raw.doctorId,
-      patientId: raw.patientId,
-      start: start.toISOString(),
-      end: end.toISOString(),
-      status: raw.status
-    };
 
-    this.scheduleWarning.set(this.appointmentSrv.checkAvailability(dto, this.appointmentId));
+    // If the check itself fails (e.g. network), don't block booking over it - the API
+    // re-runs the same rules on submit and will report any conflict then.
+    return this.appointmentSrv
+      .checkAvailability(
+        { doctorId: raw.doctorId, start: start.toISOString(), end: end.toISOString(), status: raw.status },
+        this.appointmentId
+      )
+      .pipe(catchError(() => of(null)));
   }
 
   submit(): void {

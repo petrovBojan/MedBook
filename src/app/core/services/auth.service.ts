@@ -1,66 +1,47 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { delay, map } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { BrowserStorageService } from './browser-storage.service';
-import { MockDbService } from './mock-db.service';
 import { StaffMember } from '../../shared/models/staff-member.model';
+import { environment } from '../../../environments/environment';
 
-const TOKEN_KEY = 'medbook_token';
+const SESSION_KEY = 'medbook_session';
 const USER_KEY = 'medbook_current_user';
-const TOKEN_TTL_MS = 8 * 60 * 60 * 1000; // 8 hour session, matches a typical clinic shift
 
-interface MockTokenPayload {
-  sub: string;
-  clinicId: string;
-  exp: number;
+// Left behind by the pre-API mock backend. medbook_db held a full copy of the demo
+// clinic's patient data, so it's cleared rather than left sitting in localStorage.
+const LEGACY_KEYS = ['medbook_token', 'medbook_db'];
+
+interface LoginResponse {
+  token: string;
+  expiresAt: string;
+  user: StaffMember;
 }
 
-// Stand-in for a backend-issued JWT. It has the same 3-part shape (header.payload.signature)
-// and an `exp` claim, but the "signature" is not cryptographically real - once there's a real
-// API, swap issueToken/decodeToken for the token it returns and everything else here is unchanged.
-function issueToken(payload: MockTokenPayload): string {
-  const header = btoa(JSON.stringify({ alg: 'mock', typ: 'JWT' }));
-  const body = btoa(JSON.stringify(payload));
-  return `${header}.${body}.mocksignature`;
-}
-
-function decodeToken(token: string): MockTokenPayload | null {
-  try {
-    const [, body] = token.split('.');
-    return JSON.parse(atob(body)) as MockTokenPayload;
-  } catch {
-    return null;
-  }
+interface StoredSession {
+  token: string;
+  expiresAt: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  private readonly http = inject(HttpClient);
   private readonly storage = inject(BrowserStorageService);
-  private readonly mockDb = inject(MockDbService);
 
   private readonly currentUser = new BehaviorSubject<StaffMember | null>(this.restoreUser());
   readonly currentUser$ = this.currentUser.asObservable();
 
+  constructor() {
+    LEGACY_KEYS.forEach((key) => this.storage.removeItem(key));
+  }
+
   login(email: string, password: string): Observable<StaffMember> {
-    const staff = this.mockDb.getStaffByEmail(email);
-    const credentials = staff ? this.mockDb.getCredentials(staff.id) : undefined;
-
-    if (!staff || !credentials || credentials.password !== password) {
-      return throwError(() => new Error('Invalid email or password.')).pipe(delay(300));
-    }
-
-    const token = issueToken({
-      sub: staff.id,
-      clinicId: staff.clinicId,
-      exp: Date.now() + TOKEN_TTL_MS
-    });
-
-    return of(staff).pipe(
-      delay(300),
-      map((user) => {
-        this.storage.setItem(TOKEN_KEY, token);
+    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, { email, password }).pipe(
+      map(({ token, expiresAt, user }) => {
+        this.storage.setItem(SESSION_KEY, { token, expiresAt } satisfies StoredSession);
         this.storage.setItem(USER_KEY, user);
         this.currentUser.next(user);
         return user;
@@ -69,23 +50,27 @@ export class AuthService {
   }
 
   logout(): void {
-    this.storage.removeItem(TOKEN_KEY);
+    this.storage.removeItem(SESSION_KEY);
     this.storage.removeItem(USER_KEY);
     this.currentUser.next(null);
   }
 
   isLoggedIn(): boolean {
-    const token = this.storage.getItem<string>(TOKEN_KEY);
-    const payload = token ? decodeToken(token) : null;
-    return !!payload && payload.exp > Date.now();
+    return this.getSession() !== null;
+  }
+
+  /** The bearer token for API calls, or null if there's no unexpired session. */
+  getToken(): string | null {
+    return this.getSession()?.token ?? null;
   }
 
   getCurrentUser(): StaffMember | null {
     return this.currentUser.value;
   }
 
-  getCurrentClinicId(): string | null {
-    return this.currentUser.value?.clinicId ?? null;
+  private getSession(): StoredSession | null {
+    const session = this.storage.getItem<StoredSession>(SESSION_KEY);
+    return session && Date.parse(session.expiresAt) > Date.now() ? session : null;
   }
 
   private restoreUser(): StaffMember | null {

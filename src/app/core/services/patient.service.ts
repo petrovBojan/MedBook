@@ -1,56 +1,31 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
-import { MockDbService } from './mock-db.service';
-import { AuthService } from './auth.service';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { Patient, PatientDto } from '../../shared/models/patient.model';
+import { environment } from '../../../environments/environment';
+import { undefinedIfNotFound } from '../http/api-error';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PatientService {
-  private readonly mockDb = inject(MockDbService);
-  private readonly authSrv = inject(AuthService);
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = `${environment.apiUrl}/patients`;
 
+  /** Sorted by last name, then first name (server-side). */
   getPatients(): Observable<Patient[]> {
-    const clinicId = this.requireClinicId();
-    return of(
-      this.mockDb
-        .getPatients(clinicId)
-        .slice()
-        .sort((a, b) => `${a.lastName}${a.firstName}`.localeCompare(`${b.lastName}${b.firstName}`))
-    );
+    return this.http.get<Patient[]>(this.baseUrl);
   }
 
   getPatient(id: string): Observable<Patient | undefined> {
-    return of(this.mockDb.getPatient(id));
+    return this.http.get<Patient>(`${this.baseUrl}/${encodeURIComponent(id)}`).pipe(undefinedIfNotFound());
   }
 
   createPatient(dto: PatientDto): Observable<Patient> {
-    const clinicId = this.requireClinicId();
-    const now = new Date().toISOString();
-    const patient: Patient = {
-      ...dto,
-      id: crypto.randomUUID(),
-      clinicId,
-      createdAt: now,
-      updatedAt: now
-    };
-    return of(this.mockDb.createPatient(patient));
+    return this.http.post<Patient>(this.baseUrl, dto);
   }
 
   updatePatient(id: string, dto: PatientDto): Observable<Patient> {
-    const updated = this.mockDb.updatePatient(id, { ...dto, updatedAt: new Date().toISOString() });
-    if (!updated) {
-      return throwError(() => new Error('Patient not found.'));
-    }
-    return of(updated);
-  }
-
-  private requireClinicId(): string {
-    const clinicId = this.authSrv.getCurrentClinicId();
-    if (!clinicId) {
-      throw new Error('No clinic in session.');
-    }
-    return clinicId;
+    return this.http.put<Patient>(`${this.baseUrl}/${encodeURIComponent(id)}`, dto);
   }
 }

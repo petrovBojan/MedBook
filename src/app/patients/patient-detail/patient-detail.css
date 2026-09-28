@@ -29,3 +29,51 @@
 .empty-state {
   color: var(--mat-sys-on-surface-variant);
 }
+
+.back-link {
+  margin: -0.5rem 0 0.5rem -0.75rem;
+}
+
+.history-list {
+  background: var(--mat-sys-surface);
+  border-radius: 8px;
+}
+
+@media (max-width: 767px) {
+  .patient-summary {
+    max-width: none;
+  }
+
+  /* Label above value instead of a two-column grid, so long emails/addresses get
+     the full width. */
+  .patient-facts {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .patient-facts dd {
+    margin-bottom: 0.6rem;
+  }
+
+  /* Both actions full-width and thumb-sized. */
+  .patient-summary mat-card-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .patient-summary mat-card-actions button {
+    flex: 1 1 100%;
+    min-height: 44px;
+  }
+
+  /* Let long "date · doctor" titles wrap instead of being cut off. */
+  .appointment-row .mdc-list-item__primary-text,
+  .appointment-row .mdc-list-item__secondary-text {
+    white-space: normal;
+  }
+
+  .appointment-row {
+    height: auto !important;
+    padding-block: 10px;
+  }
+}

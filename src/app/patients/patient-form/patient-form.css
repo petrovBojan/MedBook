@@ -31,3 +31,11 @@ mat-dialog-content mat-form-field {
   color: var(--mat-sys-error);
   margin: 0;
 }
+
+/* Phones: one field per row - side-by-side pairs are too cramped to tap reliably. */
+@media (max-width: 767px) {
+  .field-row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}

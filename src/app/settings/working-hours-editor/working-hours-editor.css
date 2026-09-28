@@ -22,3 +22,32 @@
 .time-separator {
   color: var(--mat-sys-on-surface-variant);
 }
+
+/* Phones: the checkbox + two 140px fields don't fit in one row. Day on its own line,
+   the two times sharing the next one, and a divider so each day reads as a group. */
+@media (max-width: 767px) {
+  .schedule-table {
+    gap: 0;
+  }
+
+  .schedule-row {
+    flex-wrap: wrap;
+    gap: 0 0.5rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  .schedule-row:last-child {
+    border-bottom: none;
+  }
+
+  .day-checkbox {
+    width: 100%;
+  }
+
+  .time-field {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+  }
+}

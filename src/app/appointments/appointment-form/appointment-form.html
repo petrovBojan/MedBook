@@ -45,7 +45,7 @@
         <mat-form-field appearance="outline">
           <input matInput [matDatepicker]="startDatePicker" formControlName="startDate" placeholder="Start date" />
           <mat-datepicker-toggle matIconSuffix [for]="startDatePicker" />
-          <mat-datepicker #startDatePicker />
+          <mat-datepicker #startDatePicker [touchUi]="layout.isHandset()" />
         </mat-form-field>
       </div>
 
@@ -69,7 +69,7 @@
         <mat-form-field appearance="outline">
           <input matInput [matDatepicker]="endDatePicker" formControlName="endDate" placeholder="End date" />
           <mat-datepicker-toggle matIconSuffix [for]="endDatePicker" />
-          <mat-datepicker #endDatePicker />
+          <mat-datepicker #endDatePicker [touchUi]="layout.isHandset()" />
         </mat-form-field>
       </div>
 

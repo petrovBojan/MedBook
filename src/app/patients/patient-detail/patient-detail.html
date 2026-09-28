@@ -1,3 +1,8 @@
+<a mat-button routerLink="/patients" class="back-link">
+  <mat-icon>arrow_back</mat-icon>
+  Patients
+</a>
+
 @if (patient(); as p) {
   <mat-card class="patient-summary">
     <mat-card-header>
@@ -30,9 +35,9 @@
 
   <h3 class="section-title">Appointment history</h3>
   @if (appointmentsForPatient().length > 0) {
-    <mat-list>
+    <mat-list class="history-list">
       @for (appt of appointmentsForPatient(); track appt.id) {
-        <mat-list-item (click)="openAppointment(appt.id)" class="appointment-row">
+        <mat-list-item (click)="openAppointment(appt.id)" class="appointment-row" lines="2">
           <span matListItemTitle>{{ appt.start | date: 'MMM d, y, HH:mm' }} &middot; {{ doctorName(appt.doctorId) }}</span>
           <span matListItemLine>{{ appt.reason || 'No reason given' }} &mdash; {{ appt.status }}</span>
         </mat-list-item>

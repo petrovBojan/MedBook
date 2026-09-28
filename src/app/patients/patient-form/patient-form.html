@@ -36,7 +36,7 @@
         <mat-form-field appearance="outline">
           <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth" placeholder="Date of birth" />
           <mat-datepicker-toggle matIconSuffix [for]="dobPicker" />
-          <mat-datepicker #dobPicker startView="multi-year" [startAt]="dobPickerStartDate" />
+          <mat-datepicker #dobPicker startView="multi-year" [startAt]="dobPickerStartDate" [touchUi]="layout.isHandset()" />
         </mat-form-field>
       </div>
 
@@ -61,7 +61,7 @@
           <label class="field-label">Phone</label>
         }
         <mat-form-field appearance="outline">
-          <input matInput formControlName="phone" placeholder="Phone" />
+          <input matInput type="tel" formControlName="phone" autocomplete="off" placeholder="Phone" />
         </mat-form-field>
       </div>
 

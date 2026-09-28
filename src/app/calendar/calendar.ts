@@ -37,6 +37,8 @@ import { StaffMember } from '../shared/models/staff-member.model';
 import { Patient } from '../shared/models/patient.model';
 import { AppointmentForm, AppointmentFormDialogData } from '../appointments/appointment-form/appointment-form';
 import { DateTimeUtils } from '../shared/utils/date-time.utils';
+import { formDialogConfig } from '../shared/utils/dialog.utils';
+import { LayoutService } from '../core/services/layout.service';
 
 interface AppointmentEventMeta {
   appointmentId: string;
@@ -99,6 +101,7 @@ export class Calendar {
   private readonly staffSrv = inject(StaffService);
   private readonly patientSrv = inject(PatientService);
   private readonly dialog = inject(MatDialog);
+  readonly layout = inject(LayoutService);
 
   readonly CalendarView = CalendarView;
   readonly statusOptions = [
@@ -231,12 +234,7 @@ export class Calendar {
   }
 
   private openAppointmentDialog(data: AppointmentFormDialogData = {}): void {
-    const dialogRef = this.dialog.open(AppointmentForm, {
-      width: '640px',
-      maxWidth: '95vw',
-      autoFocus: false,
-      data
-    });
+    const dialogRef = this.dialog.open(AppointmentForm, formDialogConfig(data));
 
     dialogRef.afterClosed().subscribe((saved) => {
       if (saved) {

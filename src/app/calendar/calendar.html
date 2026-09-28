@@ -39,19 +39,27 @@
   }
 
   <div class="right-controls">
-    <mat-button-toggle-group [value]="view" (change)="setView($event.value)">
+    <mat-button-toggle-group class="view-toggle" [value]="view" (change)="setView($event.value)">
       <mat-button-toggle [value]="CalendarView.Day">Day</mat-button-toggle>
       <mat-button-toggle [value]="CalendarView.Week">Week</mat-button-toggle>
       <mat-button-toggle [value]="CalendarView.Month">Month</mat-button-toggle>
       <mat-button-toggle value="list">List</mat-button-toggle>
     </mat-button-toggle-group>
 
-    <button mat-flat-button color="primary" class="pill-button" (click)="createAppointment()">
-      <mat-icon>add</mat-icon>
-      New appointment
-    </button>
+    @if (!layout.isHandset()) {
+      <button mat-flat-button color="primary" class="pill-button" (click)="createAppointment()">
+        <mat-icon>add</mat-icon>
+        New appointment
+      </button>
+    }
   </div>
 </div>
+
+@if (layout.isHandset()) {
+  <button mat-fab color="primary" class="page-fab" aria-label="New appointment" (click)="createAppointment()">
+    <mat-icon>add</mat-icon>
+  </button>
+}
 
 @if (view === 'list') {
   <div class="filters-row">
@@ -59,7 +67,7 @@
       @if (selectedDoctorId) {
         <label class="field-label">Doctor</label>
       }
-      <mat-form-field appearance="outline" class="filter-field">
+      <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
         <mat-select [(ngModel)]="selectedDoctorId" placeholder="Doctor">
           <mat-option [value]="null">All doctors</mat-option>
           @for (doctor of doctors(); track doctor.id) {
@@ -73,7 +81,7 @@
       @if (selectedDate) {
         <label class="field-label">Day</label>
       }
-      <mat-form-field appearance="outline" class="filter-field">
+      <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
         <input matInput [matDatepicker]="dayPicker" [(ngModel)]="selectedDate" placeholder="Day" />
         @if (selectedDate) {
           <button matSuffix mat-icon-button type="button" aria-label="Clear day filter" (click)="selectedDate = null">
@@ -81,7 +89,7 @@
           </button>
         }
         <mat-datepicker-toggle matIconSuffix [for]="dayPicker" />
-        <mat-datepicker #dayPicker />
+        <mat-datepicker #dayPicker [touchUi]="layout.isHandset()" />
       </mat-form-field>
     </div>
 
@@ -89,7 +97,7 @@
       @if (selectedStatuses.length) {
         <label class="field-label">Status</label>
       }
-      <mat-form-field appearance="outline" class="filter-field">
+      <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
         <mat-select [(ngModel)]="selectedStatuses" placeholder="Status" multiple>
           @for (status of statusOptions; track status) {
             <mat-option [value]="status">{{ status }}</mat-option>

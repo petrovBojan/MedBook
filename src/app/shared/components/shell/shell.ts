@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../../core/services/auth.service';
 import { ClinicService } from '../../../core/services/clinic.service';
+import { LayoutService } from '../../../core/services/layout.service';
 
 @Component({
   selector: 'app-shell',
@@ -29,6 +30,13 @@ export class Shell {
   private readonly authSrv = inject(AuthService);
   private readonly clinicSrv = inject(ClinicService);
   private readonly router = inject(Router);
+  readonly layout = inject(LayoutService);
+
+  readonly navItems = [
+    { path: '/calendar', icon: 'calendar_month', label: 'Calendar' },
+    { path: '/patients', icon: 'people', label: 'Patients' },
+    { path: '/settings', icon: 'settings_heart', label: 'Settings' }
+  ];
 
   readonly currentUser$ = this.authSrv.currentUser$;
   readonly clinic$ = this.clinicSrv.getCurrentClinic();

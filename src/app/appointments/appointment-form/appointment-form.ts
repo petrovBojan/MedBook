@@ -19,6 +19,8 @@ import { Patient } from '../../shared/models/patient.model';
 import { DateTimeUtils } from '../../shared/utils/date-time.utils';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { PatientForm } from '../../patients/patient-form/patient-form';
+import { LayoutService } from '../../core/services/layout.service';
+import { formDialogConfig } from '../../shared/utils/dialog.utils';
 
 export interface AppointmentFormDialogData {
   appointmentId?: string;
@@ -49,6 +51,7 @@ export class AppointmentForm {
   private readonly dialog = inject(MatDialog);
   private readonly dialogRef = inject(MatDialogRef<AppointmentForm, boolean>);
   private readonly data = inject<AppointmentFormDialogData>(MAT_DIALOG_DATA, { optional: true }) ?? {};
+  readonly layout = inject(LayoutService);
 
   readonly AppointmentStatus = AppointmentStatus;
   readonly appointmentId = this.data.appointmentId;
@@ -228,10 +231,7 @@ export class AppointmentForm {
   }
 
   openAddPatient(): void {
-    const dialogRef = this.dialog.open<PatientForm, unknown, Patient | undefined>(PatientForm, {
-      width: '640px',
-      autoFocus: false
-    });
+    const dialogRef = this.dialog.open<PatientForm, unknown, Patient | undefined>(PatientForm, formDialogConfig());
 
     dialogRef.afterClosed().subscribe((patient) => {
       if (!patient) {

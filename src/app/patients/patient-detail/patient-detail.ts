@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 import { DatePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,12 +15,13 @@ import { Appointment } from '../../shared/models/appointment.model';
 import { StaffMember } from '../../shared/models/staff-member.model';
 import { PatientForm } from '../patient-form/patient-form';
 import { AppointmentForm, AppointmentFormDialogData } from '../../appointments/appointment-form/appointment-form';
+import { formDialogConfig } from '../../shared/utils/dialog.utils';
 
 @Component({
   selector: 'app-patient-detail',
   templateUrl: './patient-detail.html',
   styleUrl: './patient-detail.css',
-  imports: [DatePipe, MatCardModule, MatButtonModule, MatListModule, MatChipsModule]
+  imports: [DatePipe, RouterLink, MatIconModule, MatCardModule, MatButtonModule, MatListModule, MatChipsModule]
 })
 export class PatientDetail {
   private readonly route = inject(ActivatedRoute);
@@ -52,12 +54,10 @@ export class PatientDetail {
   }
 
   editPatient(): void {
-    const dialogRef = this.dialog.open<PatientForm, unknown, Patient | undefined>(PatientForm, {
-      width: '640px',
-      maxWidth: '95vw',
-      autoFocus: false,
-      data: { patientId: this.patientId }
-    });
+    const dialogRef = this.dialog.open<PatientForm, unknown, Patient | undefined>(
+      PatientForm,
+      formDialogConfig({ patientId: this.patientId })
+    );
 
     dialogRef.afterClosed().subscribe((patient) => {
       if (patient) {
@@ -75,12 +75,7 @@ export class PatientDetail {
   }
 
   private openAppointmentDialog(data: AppointmentFormDialogData): void {
-    const dialogRef = this.dialog.open(AppointmentForm, {
-      width: '640px',
-      maxWidth: '95vw',
-      autoFocus: false,
-      data
-    });
+    const dialogRef = this.dialog.open(AppointmentForm, formDialogConfig(data));
 
     dialogRef.afterClosed().subscribe((saved) => {
       if (saved) {

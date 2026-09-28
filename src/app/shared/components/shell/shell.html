@@ -10,23 +10,38 @@
 </mat-toolbar>
 
 <mat-sidenav-container class="shell-container">
-  <mat-sidenav mode="side" opened class="shell-sidenav">
-    <mat-nav-list>
-      <a mat-list-item routerLink="/calendar" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>calendar_month</mat-icon>
-        <span matListItemTitle>Calendar</span>
-      </a>
-      <a mat-list-item routerLink="/patients" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>people</mat-icon>
-        <span matListItemTitle>Patients</span>
-      </a>
-      <a mat-list-item routerLink="/settings" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>settings_heart</mat-icon>
-        <span matListItemTitle>Settings</span>
-      </a>
-    </mat-nav-list>
-  </mat-sidenav>
+  @if (!layout.isCompact()) {
+    <mat-sidenav mode="side" opened class="shell-sidenav">
+      <mat-nav-list>
+        @for (item of navItems; track item.path) {
+          <a mat-list-item [routerLink]="item.path" routerLinkActive="active-link">
+            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.label }}</span>
+          </a>
+        }
+      </mat-nav-list>
+    </mat-sidenav>
+  }
   <mat-sidenav-content class="shell-content">
     <router-outlet />
   </mat-sidenav-content>
 </mat-sidenav-container>
+
+<!-- Phones and tablets: the same destinations as a bottom tab bar, in thumb reach
+     (the pattern expostudio-app uses for its sidebar on small screens). -->
+@if (layout.isCompact()) {
+  <nav class="bottom-nav" aria-label="Main">
+    @for (item of navItems; track item.path) {
+      <a
+        class="bottom-nav-item"
+        [routerLink]="item.path"
+        routerLinkActive="active"
+        #rla="routerLinkActive"
+        [attr.aria-current]="rla.isActive ? 'page' : null"
+      >
+        <span class="bottom-nav-icon"><mat-icon>{{ item.icon }}</mat-icon></span>
+        <span class="bottom-nav-label">{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+}

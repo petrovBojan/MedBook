@@ -9,6 +9,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { PatientService } from '../../core/services/patient.service';
 import { Gender, Patient, PatientDto } from '../../shared/models/patient.model';
 import { DateTimeUtils } from '../../shared/utils/date-time.utils';
+import { LayoutService } from '../../core/services/layout.service';
 
 export interface PatientFormDialogData {
   patientId?: string;
@@ -33,6 +34,7 @@ export class PatientForm {
   private readonly patientSrv = inject(PatientService);
   private readonly dialogRef = inject(MatDialogRef<PatientForm, Patient | undefined>);
   private readonly data = inject<PatientFormDialogData>(MAT_DIALOG_DATA, { optional: true }) ?? {};
+  readonly layout = inject(LayoutService);
 
   readonly Gender = Gender;
   readonly patientId = this.data.patientId;

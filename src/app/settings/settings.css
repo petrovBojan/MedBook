@@ -49,3 +49,38 @@
   margin: 1rem 0 0;
   color: var(--mat-sys-error);
 }
+
+@media (max-width: 767px) {
+  .settings-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .settings-section h2 {
+    font-size: 1.2rem;
+  }
+
+  .schedule-actions {
+    flex-wrap: wrap;
+  }
+
+  /* Save as a full-width, thumb-sized button; the "Saved" note sits above it. */
+  .schedule-actions button {
+    flex: 1 1 100%;
+    min-height: 44px;
+  }
+
+  /* The staff panels' header: name over role, instead of both squeezed on one line. */
+  :host ::ng-deep .mat-expansion-panel-header {
+    height: auto !important;
+    padding-block: 12px;
+  }
+
+  :host ::ng-deep .mat-expansion-panel-header .mat-content {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  :host ::ng-deep .mat-expansion-panel-body {
+    padding: 0 12px 12px;
+  }
+}

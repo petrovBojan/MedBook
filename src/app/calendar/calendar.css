@@ -33,7 +33,7 @@
 
 .filters-row {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
@@ -141,5 +141,127 @@
 }
 
 .filter-field-group {
-  width: 100%;
+  flex: 1 1 160px;
+  min-width: 0;
+}
+/* --- tablets and phones --- */
+
+@media (max-width: 1024px) {
+  .calendar-body {
+    padding: 8px;
+  }
+
+  .appointment-list {
+    padding: 8px;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Three compact tiles side by side instead of a tall stack of full-width ones -
+     the numbers are the point, the icons are decoration. */
+  .stats-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .stat-tile {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+
+  .stat-tile-icon {
+    display: none;
+  }
+
+  .stat-tile-value {
+    font-size: 1.25rem;
+  }
+
+  .stat-tile-label {
+    font-size: 0.7rem;
+    line-height: 1.2;
+  }
+
+  /* View switcher on its own full-width row, date navigation below it. */
+  .calendar-toolbar {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .right-controls {
+    display: block;
+  }
+
+  .view-toggle {
+    display: flex;
+    width: 100%;
+  }
+
+  .view-toggle .mat-button-toggle {
+    flex: 1;
+  }
+
+  .nav-controls {
+    min-width: 0;
+  }
+
+  /* flex + min-width: 0 so a long title ("Wednesday, September 30") shrinks and
+     ellipsizes instead of pushing the whole toolbar wider than the screen. */
+  .view-title {
+    flex: 1;
+    min-width: 0;
+    margin-left: 4px;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .filters-row {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .calendar-body {
+    padding: 4px;
+  }
+
+  .list-appt-time {
+    min-width: 52px;
+  }
+
+  .status-chip {
+    font-size: 11px;
+    padding: 2px 8px;
+  }
+
+  /* 28px is too small a tap target on touch screens. */
+  .add-day-appointment {
+    --mdc-outlined-button-container-height: 36px;
+  }
+
+  /* Seven day columns don't fit on a phone - let the week scroll sideways inside
+     the card instead of squashing every event to an unreadable sliver. */
+  :host ::ng-deep .cal-week-view {
+    min-width: 720px;
+  }
+
+  :host ::ng-deep .cal-month-view .cal-day-cell {
+    min-height: 64px;
+  }
+
+  :host ::ng-deep .cal-month-view .cal-day-number {
+    font-size: 1em;
+    margin: 8px 6px 4px 0;
+  }
+
+  :host ::ng-deep .cal-month-view .cal-header .cal-cell {
+    font-size: 12px;
+  }
 }

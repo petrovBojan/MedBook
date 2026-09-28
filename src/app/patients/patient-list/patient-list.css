@@ -15,7 +15,54 @@
   background: var(--mat-sys-surface);
 }
 
+/* The whole row opens the patient - a much bigger target than the name link alone. */
+.patient-row {
+  cursor: pointer;
+}
+
+.patient-row:hover {
+  background: var(--mat-sys-surface-container-low);
+}
+
 .empty-state {
   padding: 1rem;
   color: var(--mat-sys-on-surface-variant);
+}
+
+@media (max-width: 767px) {
+  .list-toolbar {
+    margin-bottom: 0.5rem;
+  }
+
+  .search-field-group {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .search-field {
+    width: 100%;
+  }
+
+  /* A single-column list: no header row, taller rows with the name plus a subline. */
+  .patients-table .mat-mdc-header-row {
+    display: none;
+  }
+
+  .patients-table .mat-mdc-cell {
+    padding: 12px 16px;
+  }
+
+  .patient-name {
+    display: block;
+    font-weight: 600;
+    color: var(--mat-sys-on-surface);
+    text-decoration: none;
+  }
+
+  .patient-subline {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.85rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
 }

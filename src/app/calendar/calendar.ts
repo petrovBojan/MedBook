@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, Injectable, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import {
   CalendarAngularDateFormatter,
@@ -53,6 +53,7 @@ interface AppointmentListGroup {
 }
 
 // Overrides the hour gutter labels in the week/day views to 24h ("14:00" instead of "2 PM").
+@Injectable()
 class TwentyFourHourDateFormatter extends CalendarAngularDateFormatter {
   override weekViewHour({ date, locale }: DateFormatterParams): string {
     return formatDate(date, 'HH:mm', locale ?? 'en-US');

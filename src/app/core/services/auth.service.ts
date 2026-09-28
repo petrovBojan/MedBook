@@ -6,22 +6,22 @@ import { BrowserStorageService } from './browser-storage.service';
 import { StaffMember } from '../../shared/models/staff-member.model';
 import { environment } from '../../../environments/environment';
 
-const SESSION_KEY = 'medbook_session';
+// The session token itself lives in an HttpOnly cookie set by the API - no script in the
+// page, ours included, can read it. What's kept here is only non-secret state: who is
+// logged in and until when, so a reload can go straight to the app without asking the
+// server first. If the cookie turns out to be invalid, the first API call gets a 401 and
+// the interceptor ends the session.
+const EXPIRES_AT_KEY = 'medbook_session_expires_at';
 const USER_KEY = 'medbook_current_user';
 
-// Left behind by the pre-API mock backend. medbook_db held a full copy of the demo
-// clinic's patient data, so it's cleared rather than left sitting in localStorage.
-const LEGACY_KEYS = ['medbook_token', 'medbook_db'];
+// Left behind by earlier versions: medbook_db was the pre-API mock's full copy of the demo
+// patient data; medbook_token / medbook_session held the bearer token in plain
+// localStorage. Cleared on startup so none of it lingers.
+const LEGACY_KEYS = ['medbook_token', 'medbook_db', 'medbook_session'];
 
-interface LoginResponse {
-  token: string;
+interface SessionResponse {
   expiresAt: string;
   user: StaffMember;
-}
-
-interface StoredSession {
-  token: string;
-  expiresAt: string;
 }
 
 @Injectable({
@@ -39,9 +39,9 @@ export class AuthService {
   }
 
   login(email: string, password: string): Observable<StaffMember> {
-    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, { email, password }).pipe(
-      map(({ token, expiresAt, user }) => {
-        this.storage.setItem(SESSION_KEY, { token, expiresAt } satisfies StoredSession);
+    return this.http.post<SessionResponse>(`${environment.apiUrl}/auth/login`, { email, password }).pipe(
+      map(({ expiresAt, user }) => {
+        this.storage.setItem(EXPIRES_AT_KEY, expiresAt);
         this.storage.setItem(USER_KEY, user);
         this.currentUser.next(user);
         return user;
@@ -49,28 +49,26 @@ export class AuthService {
     );
   }
 
+  /** Ends the session here and asks the API to clear the (HttpOnly) session cookie. */
   logout(): void {
-    this.storage.removeItem(SESSION_KEY);
-    this.storage.removeItem(USER_KEY);
-    this.currentUser.next(null);
+    this.clearLocalSession();
+    // Best effort: the local session is already gone, and the cookie expires on its own.
+    this.http.post(`${environment.apiUrl}/auth/logout`, null).subscribe({ error: () => undefined });
   }
 
   isLoggedIn(): boolean {
-    return this.getSession() !== null;
-  }
-
-  /** The bearer token for API calls, or null if there's no unexpired session. */
-  getToken(): string | null {
-    return this.getSession()?.token ?? null;
+    const expiresAt = this.storage.getItem<string>(EXPIRES_AT_KEY);
+    return !!expiresAt && Date.parse(expiresAt) > Date.now();
   }
 
   getCurrentUser(): StaffMember | null {
     return this.currentUser.value;
   }
 
-  private getSession(): StoredSession | null {
-    const session = this.storage.getItem<StoredSession>(SESSION_KEY);
-    return session && Date.parse(session.expiresAt) > Date.now() ? session : null;
+  private clearLocalSession(): void {
+    this.storage.removeItem(EXPIRES_AT_KEY);
+    this.storage.removeItem(USER_KEY);
+    this.currentUser.next(null);
   }
 
   private restoreUser(): StaffMember | null {

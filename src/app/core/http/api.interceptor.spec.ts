@@ -30,20 +30,19 @@ describe('apiInterceptor', () => {
   async function logIn(): Promise<void> {
     const result = firstValueFrom(authSrv.login('dr.carter@medbook.demo', 'Doctor123!'));
     httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush({
-      token: 'jwt-token',
       expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
       user: { id: 'staff-carter', clinicId: 'clinic-sunrise', firstName: 'Emily', lastName: 'Carter', email: 'dr.carter@medbook.demo', role: StaffRole.Doctor }
     });
     await result;
   }
 
-  it('attaches the bearer token to API calls once logged in', async () => {
-    await logIn();
-
-    const result = firstValueFrom(http.get(patientsUrl));
+  it('sends the session cookie and the CSRF header on API calls', async () => {
+    const result = firstValueFrom(http.post(patientsUrl, {}));
     const req = httpMock.expectOne(patientsUrl);
-    expect(req.request.headers.get('Authorization')).toBe('Bearer jwt-token');
-    req.flush([]);
+    expect(req.request.withCredentials).toBe(true);
+    expect(req.request.headers.get('X-Requested-With')).toBe('XMLHttpRequest');
+    expect(req.request.headers.has('Authorization')).toBe(false);
+    req.flush({});
     await result;
   });
 
@@ -52,7 +51,8 @@ describe('apiInterceptor', () => {
 
     const result = firstValueFrom(http.get('https://example.com/data'));
     const req = httpMock.expectOne('https://example.com/data');
-    expect(req.request.headers.has('Authorization')).toBe(false);
+    expect(req.request.withCredentials).toBe(false);
+    expect(req.request.headers.has('X-Requested-With')).toBe(false);
     req.flush({});
     await result;
   });
@@ -67,6 +67,19 @@ describe('apiInterceptor', () => {
     await expect(result).rejects.toBeInstanceOf(ApiError);
     expect(authSrv.isLoggedIn()).toBe(false);
     expect(navigate).toHaveBeenCalledWith(['/login'], expect.anything());
+    httpMock.expectOne(`${environment.apiUrl}/auth/logout`).flush(null, { status: 204, statusText: 'No Content' });
+  });
+
+  it('does not treat a failed login (401) as an expired session', async () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate');
+
+    const result = firstValueFrom(authSrv.login('dr.carter@medbook.demo', 'wrong'));
+    httpMock
+      .expectOne(`${environment.apiUrl}/auth/login`)
+      .flush({ detail: 'Invalid email or password.' }, { status: 401, statusText: 'Unauthorized' });
+
+    await expect(result).rejects.toThrow('Invalid email or password.');
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it("uses a ProblemDetails 'detail' as the error message", async () => {

@@ -6,8 +6,13 @@ import { environment } from '../../../environments/environment';
 import { AuthService } from '../services/auth.service';
 import { ApiError } from './api-error';
 
-// For calls to our own API: attaches the session's bearer token, and turns failures into
-// ApiError so components can show `err.message` directly.
+/** Required by the API on state-changing requests (its CSRF protection). */
+export const CSRF_HEADER = 'X-Requested-With';
+export const CSRF_HEADER_VALUE = 'XMLHttpRequest';
+
+// For calls to our own API: sends the HttpOnly session cookie along (withCredentials) plus
+// the CSRF header, and turns failures into ApiError so components can show `err.message`
+// directly.
 export const apiInterceptor: HttpInterceptorFn = (req, next) => {
   if (!req.url.startsWith(environment.apiUrl)) {
     return next(req);
@@ -15,8 +20,8 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
 
   const authSrv = inject(AuthService);
   const router = inject(Router);
-  const token = authSrv.getToken();
-  const request = token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req;
+  const request = req.clone({ withCredentials: true, setHeaders: { [CSRF_HEADER]: CSRF_HEADER_VALUE } });
+  const isAuthCall = req.url.startsWith(`${environment.apiUrl}/auth/`);
 
   return next(request).pipe(
     catchError((err: unknown) => {
@@ -24,9 +29,10 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => err);
       }
 
-      // A 401 while we hold a token means the session expired or was rejected - drop it
-      // and send the user back to log in. (Without a token, it's just a failed login.)
-      if (err.status === 401 && token) {
+      // A 401 during a session means the cookie expired or was rejected - end the session
+      // and send the user back to log in. (On the login call itself it's just a wrong
+      // password.)
+      if (err.status === 401 && !isAuthCall && authSrv.isLoggedIn()) {
         authSrv.logout();
         router.navigate(['/login'], { queryParams: { returnUrl: router.url } });
       }

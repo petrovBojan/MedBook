@@ -6,11 +6,54 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
+import { environment } from './environments/environment';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
+
+// True when this file runs as the production server (`node dist/.../server.mjs` or PM2),
+// false when the Angular CLI dev server loads it - the headers below are only applied in
+// production, so they can't interfere with the dev server's live reload.
+const isProductionServer = isMainModule(import.meta.url) || !!process.env['pm_id'];
+
+/**
+ * Browser security headers. The Content Security Policy is the main defence against XSS:
+ * scripts may only come from our own origin (no inline scripts, no eval), and the page may
+ * only talk to itself and the API.
+ * - style-src needs 'unsafe-inline': Angular injects component styles as <style> tags.
+ * - Critical-CSS inlining is turned off in angular.json, because it relies on an inline
+ *   onload handler this policy would block.
+ */
+if (isProductionServer) {
+  const apiOrigin = new URL(environment.apiUrl, 'http://same-origin.invalid').origin;
+  const connectSrc = apiOrigin === 'http://same-origin.invalid' ? "'self'" : `'self' ${apiOrigin}`;
+  const contentSecurityPolicy = [
+    "default-src 'self'",
+    "script-src 'self'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data:",
+    `connect-src ${connectSrc}`,
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'"
+  ].join('; ');
+
+  app.disable('x-powered-by');
+  app.use((_req, res, next) => {
+    res.setHeader('Content-Security-Policy', contentSecurityPolicy);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+    // Ignored by browsers over plain http; enforces https once served over TLS.
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    next();
+  });
+}
 
 /**
  * Example Express Rest API endpoints can be defined here.

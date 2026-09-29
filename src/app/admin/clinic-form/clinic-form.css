@@ -1,0 +1,48 @@
+.clinic-form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Same column layout as the patient/appointment forms. */
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+mat-dialog-content mat-form-field {
+  width: 100%;
+}
+
+.section-title {
+  margin: 0.5rem 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.section-hint {
+  margin: -0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.field-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.field-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.error-message {
+  color: var(--mat-sys-error);
+  margin: 0;
+}
+
+@media (max-width: 767px) {
+  .field-row {
+    flex-direction: column;
+  }
+}

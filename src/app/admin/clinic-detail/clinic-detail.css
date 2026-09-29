@@ -1,0 +1,68 @@
+.back-link {
+  margin: -0.5rem 0 0.5rem -0.75rem;
+}
+
+.clinic-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 1.5rem;
+  margin: 0 0 1.5rem;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+}
+
+.clinic-facts dt {
+  font-weight: 600;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.clinic-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.section-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.invite-button {
+  --mdc-outlined-button-container-height: 32px;
+  font-size: 13px;
+}
+
+.error-message {
+  color: var(--mat-sys-error);
+}
+
+.empty-state {
+  margin: 0;
+  padding: 1rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+@media (max-width: 767px) {
+  .page-header {
+    flex-wrap: wrap;
+  }
+
+  .status-button {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .clinic-facts {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .clinic-facts dd {
+    margin-bottom: 0.5rem;
+  }
+
+  .invite-button {
+    --mdc-outlined-button-container-height: 40px;
+  }
+}

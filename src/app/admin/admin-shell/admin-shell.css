@@ -1,0 +1,60 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: #f1f1f1;
+}
+
+/* Dark bar, so the owner's panel is never mistaken for a clinic's app. */
+.admin-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: auto;
+  min-height: 64px;
+  padding-top: env(safe-area-inset-top);
+  padding-left: calc(16px + env(safe-area-inset-left));
+  padding-right: calc(16px + env(safe-area-inset-right));
+  background: #1f2937;
+  color: #fff;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.admin-name {
+  margin-right: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.admin-content {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+@media (max-width: 767px) {
+  .admin-toolbar {
+    min-height: 56px;
+  }
+
+  .admin-name {
+    display: none;
+  }
+
+  .admin-content {
+    padding: 12px 12px calc(env(safe-area-inset-bottom) + 88px);
+  }
+}

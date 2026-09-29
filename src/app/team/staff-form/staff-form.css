@@ -1,0 +1,78 @@
+.staff-form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Same column layout as the patient/appointment forms. */
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+mat-dialog-content mat-form-field {
+  width: 100%;
+}
+
+.intro {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.field-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.field-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.color-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.color-swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 3px solid transparent;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.1);
+  cursor: pointer;
+}
+
+.color-swatch.selected {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px var(--mat-sys-on-surface);
+}
+
+.color-swatch:focus-visible {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+}
+
+.checkbox-hint {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.error-message {
+  color: var(--mat-sys-error);
+  margin: 0;
+}
+
+@media (max-width: 767px) {
+  .field-row {
+    flex-direction: column;
+  }
+
+  /* 44px tap targets on touch screens. */
+  .color-swatch {
+    width: 44px;
+    height: 44px;
+  }
+}

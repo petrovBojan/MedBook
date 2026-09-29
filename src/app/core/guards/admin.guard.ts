@@ -2,16 +2,16 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
-/** The clinic app (calendar, patients, ...): clinic staff only. The platform owner goes to /admin. */
-export const authGuard: CanActivateFn = (_route, state) => {
+/** The platform owner's panel. Clinic staff are sent back to the clinic app. */
+export const adminGuard: CanActivateFn = (_route, state) => {
   const authSrv = inject(AuthService);
   const router = inject(Router);
 
-  if (authSrv.isClinicStaff()) {
+  if (authSrv.isPlatformAdmin()) {
     return true;
   }
-  if (authSrv.isPlatformAdmin()) {
-    return router.createUrlTree(['/admin']);
+  if (authSrv.isClinicStaff()) {
+    return router.createUrlTree(['/calendar']);
   }
   return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
 };

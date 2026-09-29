@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AsyncPipe } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -32,13 +33,16 @@ export class Shell {
   private readonly router = inject(Router);
   readonly layout = inject(LayoutService);
 
-  readonly navItems = [
+  readonly currentUser$ = this.authSrv.currentUser$;
+  private readonly currentUser = toSignal(this.currentUser$, { initialValue: this.authSrv.getCurrentUser() });
+
+  // "Team" only for clinic admins - the only ones who can add staff or send invitations.
+  readonly navItems = computed(() => [
     { path: '/calendar', icon: 'calendar_month', label: 'Calendar' },
     { path: '/patients', icon: 'people', label: 'Patients' },
+    ...(this.currentUser()?.isClinicAdmin ? [{ path: '/team', icon: 'group', label: 'Team' }] : []),
     { path: '/settings', icon: 'settings_heart', label: 'Settings' }
-  ];
-
-  readonly currentUser$ = this.authSrv.currentUser$;
+  ]);
   readonly clinic$ = this.clinicSrv.getCurrentClinic();
 
   logout(): void {

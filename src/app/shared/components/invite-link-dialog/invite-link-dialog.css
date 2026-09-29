@@ -1,0 +1,53 @@
+.invite-content p {
+  margin: 0 0 0.75rem;
+}
+
+.intro {
+  font-weight: 600;
+}
+
+.link-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.link-input {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 12px;
+  background: #f1f1f1;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface);
+}
+
+.notice {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.notice mat-icon {
+  flex-shrink: 0;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 767px) {
+  .link-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .link-row button {
+    min-height: 44px;
+  }
+}

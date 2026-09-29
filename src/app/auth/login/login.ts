@@ -48,10 +48,15 @@ export class Login {
 
     const { email, password } = this.form.getRawValue();
     this.authSrv.login(email, password).subscribe({
-      next: () => {
+      next: (session) => {
         this.isSubmitting.set(false);
-        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/calendar';
-        this.router.navigateByUrl(returnUrl);
+        // Only follow returnUrl into the part of the app this account can use: the admin
+        // panel for the platform owner, the clinic app for staff.
+        const isAdmin = !!session.platformAdmin;
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+        const returnsToAdmin = !!returnUrl?.startsWith('/admin');
+        const target = returnUrl && returnsToAdmin === isAdmin ? returnUrl : this.authSrv.homeUrl();
+        this.router.navigateByUrl(target);
       },
       error: (err: Error) => {
         this.isSubmitting.set(false);

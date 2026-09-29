@@ -1,0 +1,52 @@
+<div class="page-header">
+  <div>
+    <h1>Team</h1>
+    <p>Everyone with access to your clinic. New people get an invitation link to set their own password.</p>
+  </div>
+  @if (!layout.isHandset()) {
+    <button mat-flat-button color="primary" class="pill-button" (click)="addStaff()">
+      <mat-icon>person_add</mat-icon>
+      Add staff member
+    </button>
+  }
+</div>
+
+@if (layout.isHandset()) {
+  <button mat-fab color="primary" class="page-fab" aria-label="Add staff member" (click)="addStaff()">
+    <mat-icon>person_add</mat-icon>
+  </button>
+}
+
+@if (errorMessage()) {
+  <p class="error-message">{{ errorMessage() }}</p>
+}
+
+<div class="entity-list">
+  @for (member of staff(); track member.id) {
+    <div class="entity-row">
+      <span class="color-dot" [style.background]="member.color || '#607d8b'"></span>
+      <div class="entity-main">
+        <div class="entity-title">{{ member.firstName }} {{ member.lastName }}</div>
+        <div class="entity-subtitle">
+          {{ member.role }}{{ member.specialty ? ' · ' + member.specialty : '' }} · {{ member.email }}
+        </div>
+      </div>
+      <div class="entity-meta">
+        @if (member.isClinicAdmin) {
+          <span class="status-pill">Admin</span>
+        }
+        @if (member.hasAccount) {
+          <span class="status-pill status-pill--success">Active</span>
+        } @else {
+          <span class="status-pill status-pill--warning">Invitation pending</span>
+          <button mat-stroked-button class="invite-button" (click)="newInvitation(member)">
+            <mat-icon>link</mat-icon>
+            New invite link
+          </button>
+        }
+      </div>
+    </div>
+  } @empty {
+    <p class="empty-state">No staff members yet.</p>
+  }
+</div>

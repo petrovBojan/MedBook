@@ -35,10 +35,10 @@ describe('AuthService', () => {
 
   afterEach(() => httpMock.verify());
 
-  async function logIn(expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString()): Promise<StaffMember> {
+  async function logIn(): Promise<void> {
     const result = firstValueFrom(service.login('dr.carter@medbook.demo', 'Doctor123!'));
-    httpMock.expectOne(loginUrl).flush({ expiresAt, user: carter });
-    return result;
+    httpMock.expectOne(loginUrl).flush({ expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(), user: carter });
+    await result;
   }
 
   it('posts the credentials and exposes the returned user', async () => {
@@ -50,9 +50,38 @@ describe('AuthService', () => {
     expect(req.request.withCredentials).toBe(true);
     req.flush({ expiresAt: new Date(Date.now() + 60_000).toISOString(), user: carter });
 
-    expect((await result).email).toBe('dr.carter@medbook.demo');
+    expect((await result).user?.email).toBe('dr.carter@medbook.demo');
     expect(service.isLoggedIn()).toBe(true);
+    expect(service.isClinicStaff()).toBe(true);
+    expect(service.isPlatformAdmin()).toBe(false);
     expect(service.getCurrentUser()?.id).toBe('staff-carter');
+    expect(service.homeUrl()).toBe('/calendar');
+  });
+
+  it('recognises the platform owner and sends them to the admin panel', async () => {
+    const result = firstValueFrom(service.login('owner@medbook.test', 'Owner-Password-1'));
+    httpMock.expectOne(loginUrl).flush({
+      expiresAt: new Date(Date.now() + 60_000).toISOString(),
+      platformAdmin: { id: 'admin-1', firstName: 'Platform', lastName: 'Owner', email: 'owner@medbook.test' }
+    });
+    await result;
+
+    expect(service.isPlatformAdmin()).toBe(true);
+    expect(service.isClinicStaff()).toBe(false);
+    expect(service.getCurrentUser()).toBeNull();
+    expect(service.homeUrl()).toBe('/admin');
+  });
+
+  it('switching accounts replaces the previous session entirely', async () => {
+    await logIn();
+
+    service.applySession({
+      expiresAt: new Date(Date.now() + 60_000).toISOString(),
+      platformAdmin: { id: 'admin-1', firstName: 'Platform', lastName: 'Owner', email: 'owner@medbook.test' }
+    });
+
+    expect(service.getCurrentUser()).toBeNull();
+    expect(localStorage.getItem('medbook_current_user')).toBeNull();
   });
 
   it('never stores anything token-like in localStorage', async () => {

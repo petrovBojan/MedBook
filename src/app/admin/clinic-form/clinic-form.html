@@ -1,0 +1,137 @@
+<h2 mat-dialog-title>New clinic</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()" class="clinic-form">
+  <mat-dialog-content>
+    <h3 class="section-title">Clinic</h3>
+
+    @if (form.controls.name.value) {
+      <label class="field-label">Clinic name</label>
+    }
+    <mat-form-field appearance="outline">
+      <input matInput formControlName="name" placeholder="Clinic name" />
+      @if (form.controls.name.hasError('required') && form.controls.name.touched) {
+        <mat-error>Clinic name is required.</mat-error>
+      }
+    </mat-form-field>
+
+    @if (form.controls.address.value) {
+      <label class="field-label">Address</label>
+    }
+    <mat-form-field appearance="outline">
+      <input matInput formControlName="address" placeholder="Address (optional)" />
+    </mat-form-field>
+
+    <div class="field-row">
+      <div class="field-col">
+        @if (form.controls.phone.value) {
+          <label class="field-label">Phone</label>
+        }
+        <mat-form-field appearance="outline">
+          <input matInput type="tel" formControlName="phone" placeholder="Phone (optional)" />
+        </mat-form-field>
+      </div>
+      <div class="field-col">
+        @if (form.controls.email.value) {
+          <label class="field-label">Clinic email</label>
+        }
+        <mat-form-field appearance="outline">
+          <input matInput type="email" formControlName="email" placeholder="Clinic email (optional)" />
+          @if (form.controls.email.hasError('email') && form.controls.email.touched) {
+            <mat-error>Enter a valid email address.</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </div>
+
+    <label class="field-label">Time zone (working hours are in this zone)</label>
+    <mat-form-field appearance="outline">
+      <input matInput formControlName="timeZone" [matAutocomplete]="timeZoneList" placeholder="e.g. Europe/Belgrade" />
+      <mat-autocomplete #timeZoneList>
+        @for (zone of timeZoneOptions(); track zone) {
+          <mat-option [value]="zone">{{ zone }}</mat-option>
+        }
+      </mat-autocomplete>
+      @if (form.controls.timeZone.hasError('unknownTimeZone') && form.controls.timeZone.touched) {
+        <mat-error>Pick a time zone from the list.</mat-error>
+      }
+    </mat-form-field>
+
+    <h3 class="section-title">First administrator</h3>
+    <p class="section-hint">
+      They manage the clinic's team. You'll get an invitation link to send them - they choose their own password.
+    </p>
+
+    <ng-container formGroupName="admin">
+      <div class="field-row">
+        <div class="field-col">
+          @if (form.controls.admin.controls.firstName.value) {
+            <label class="field-label">First name</label>
+          }
+          <mat-form-field appearance="outline">
+            <input matInput formControlName="firstName" autocomplete="off" placeholder="First name" />
+            @if (form.controls.admin.controls.firstName.hasError('required') && form.controls.admin.controls.firstName.touched) {
+              <mat-error>First name is required.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+        <div class="field-col">
+          @if (form.controls.admin.controls.lastName.value) {
+            <label class="field-label">Last name</label>
+          }
+          <mat-form-field appearance="outline">
+            <input matInput formControlName="lastName" autocomplete="off" placeholder="Last name" />
+            @if (form.controls.admin.controls.lastName.hasError('required') && form.controls.admin.controls.lastName.touched) {
+              <mat-error>Last name is required.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+
+      @if (form.controls.admin.controls.email.value) {
+        <label class="field-label">Email (their login)</label>
+      }
+      <mat-form-field appearance="outline">
+        <input matInput type="email" formControlName="email" autocomplete="off" placeholder="Email (their login)" />
+        @if (form.controls.admin.controls.email.hasError('required') && form.controls.admin.controls.email.touched) {
+          <mat-error>Email is required.</mat-error>
+        }
+        @if (form.controls.admin.controls.email.hasError('email') && form.controls.admin.controls.email.touched) {
+          <mat-error>Enter a valid email address.</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="field-row">
+        <div class="field-col">
+          <label class="field-label">Role</label>
+          <mat-form-field appearance="outline">
+            <mat-select formControlName="role">
+              <mat-option [value]="StaffRole.Doctor">Doctor</mat-option>
+              <mat-option [value]="StaffRole.Employee">Employee</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="field-col">
+          @if (form.controls.admin.controls.role.value === StaffRole.Doctor) {
+            @if (form.controls.admin.controls.specialty.value) {
+              <label class="field-label">Specialty</label>
+            }
+            <mat-form-field appearance="outline">
+              <input matInput formControlName="specialty" placeholder="Specialty (optional)" />
+            </mat-form-field>
+          }
+        </div>
+      </div>
+    </ng-container>
+
+    @if (errorMessage()) {
+      <p class="error-message">{{ errorMessage() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" class="cancel-button" (click)="close()">Cancel</button>
+    <button mat-flat-button color="primary" class="pill-button" type="submit" [disabled]="isSubmitting()">
+      Create clinic
+    </button>
+  </mat-dialog-actions>
+</form>

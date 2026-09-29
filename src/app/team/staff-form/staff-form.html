@@ -1,0 +1,103 @@
+<h2 mat-dialog-title>Add staff member</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()" class="staff-form">
+  <mat-dialog-content>
+    <p class="intro">
+      You'll get an invitation link to send them - they choose their own password when they open it.
+    </p>
+
+    <div class="field-row">
+      <div class="field-col">
+        @if (form.controls.firstName.value) {
+          <label class="field-label">First name</label>
+        }
+        <mat-form-field appearance="outline">
+          <input matInput formControlName="firstName" autocomplete="off" placeholder="First name" />
+          @if (form.controls.firstName.hasError('required') && form.controls.firstName.touched) {
+            <mat-error>First name is required.</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="field-col">
+        @if (form.controls.lastName.value) {
+          <label class="field-label">Last name</label>
+        }
+        <mat-form-field appearance="outline">
+          <input matInput formControlName="lastName" autocomplete="off" placeholder="Last name" />
+          @if (form.controls.lastName.hasError('required') && form.controls.lastName.touched) {
+            <mat-error>Last name is required.</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </div>
+
+    @if (form.controls.email.value) {
+      <label class="field-label">Email (their login)</label>
+    }
+    <mat-form-field appearance="outline">
+      <input matInput type="email" formControlName="email" autocomplete="off" placeholder="Email (their login)" />
+      @if (form.controls.email.hasError('required') && form.controls.email.touched) {
+        <mat-error>Email is required.</mat-error>
+      }
+      @if (form.controls.email.hasError('email') && form.controls.email.touched) {
+        <mat-error>Enter a valid email address.</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="field-row">
+      <div class="field-col">
+        <label class="field-label">Role</label>
+        <mat-form-field appearance="outline">
+          <mat-select formControlName="role">
+            <mat-option [value]="StaffRole.Doctor">Doctor</mat-option>
+            <mat-option [value]="StaffRole.Employee">Employee</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="field-col">
+        @if (form.controls.role.value === StaffRole.Doctor) {
+          @if (form.controls.specialty.value) {
+            <label class="field-label">Specialty</label>
+          }
+          <mat-form-field appearance="outline">
+            <input matInput formControlName="specialty" placeholder="Specialty (optional)" />
+          </mat-form-field>
+        }
+      </div>
+    </div>
+
+    <label class="field-label">Calendar color</label>
+    <div class="color-options" role="radiogroup" aria-label="Calendar color">
+      @for (color of colors; track color) {
+        <button
+          type="button"
+          class="color-swatch"
+          role="radio"
+          [style.background]="color"
+          [class.selected]="form.controls.color.value === color"
+          [attr.aria-checked]="form.controls.color.value === color"
+          [attr.aria-label]="color"
+          (click)="form.controls.color.setValue(color)"
+        ></button>
+      }
+    </div>
+
+    <mat-checkbox formControlName="isClinicAdmin" class="admin-checkbox">
+      Clinic administrator
+      <span class="checkbox-hint">Can add staff members and send invitations.</span>
+    </mat-checkbox>
+
+    @if (errorMessage()) {
+      <p class="error-message">{{ errorMessage() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" class="cancel-button" (click)="close()">Cancel</button>
+    <button mat-flat-button color="primary" class="pill-button" type="submit" [disabled]="isSubmitting()">
+      Add and get invite link
+    </button>
+  </mat-dialog-actions>
+</form>

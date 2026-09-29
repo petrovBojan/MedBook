@@ -1,0 +1,27 @@
+.color-dot {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+}
+
+.invite-button {
+  --mdc-outlined-button-container-height: 32px;
+  font-size: 13px;
+}
+
+.error-message {
+  color: var(--mat-sys-error);
+}
+
+.empty-state {
+  margin: 0;
+  padding: 1rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+@media (max-width: 767px) {
+  .invite-button {
+    --mdc-outlined-button-container-height: 40px;
+  }
+}

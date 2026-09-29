@@ -8,5 +8,6 @@ export interface Clinic {
   email?: string;
   /** Time zone the clinic's working hours are expressed in (IANA or Windows id). */
   timeZone?: string;
+  isActive?: boolean;
   workingHours?: WorkingHours;
 }

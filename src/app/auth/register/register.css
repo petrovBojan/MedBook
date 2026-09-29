@@ -1,0 +1,85 @@
+.register-page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: calc(env(safe-area-inset-top) + 2rem) 1rem calc(env(safe-area-inset-bottom) + 2rem);
+  box-sizing: border-box;
+  background: linear-gradient(160deg, var(--mat-sys-primary-container), var(--mat-sys-surface));
+}
+
+.brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--mat-sys-primary);
+}
+
+.register-card {
+  width: 100%;
+  max-width: 440px;
+}
+
+.centered {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.account-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 1rem;
+  margin: 1rem 0 1.25rem;
+}
+
+.account-facts dt {
+  font-weight: 600;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.account-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.hint {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.submit-button {
+  margin-top: 0.5rem;
+  height: 44px;
+}
+
+.error-message {
+  color: var(--mat-sys-error);
+  margin: 0 0 0.75rem;
+}
+
+@media (max-width: 767px) {
+  .register-page {
+    justify-content: flex-start;
+  }
+
+  .account-facts {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .account-facts dd {
+    margin-bottom: 0.5rem;
+  }
+}

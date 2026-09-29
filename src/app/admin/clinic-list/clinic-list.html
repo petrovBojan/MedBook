@@ -1,0 +1,54 @@
+<div class="page-header">
+  <div>
+    <h1>Clinics</h1>
+    <p>Every clinic using MedBook. A new clinic gets its first administrator, who then builds their own team.</p>
+  </div>
+  @if (!layout.isHandset()) {
+    <button mat-flat-button color="primary" class="pill-button" (click)="createClinic()">
+      <mat-icon>add_business</mat-icon>
+      New clinic
+    </button>
+  }
+</div>
+
+@if (layout.isHandset()) {
+  <button mat-fab color="primary" class="page-fab" aria-label="New clinic" (click)="createClinic()">
+    <mat-icon>add_business</mat-icon>
+  </button>
+}
+
+@if (errorMessage()) {
+  <p class="error-message">{{ errorMessage() }}</p>
+}
+
+<div class="entity-list">
+  @for (clinic of clinics(); track clinic.id) {
+    <div
+      class="entity-row entity-row--link"
+      role="link"
+      tabindex="0"
+      (click)="openClinic(clinic)"
+      (keydown.enter)="openClinic(clinic)"
+    >
+      <div class="entity-main">
+        <div class="entity-title">{{ clinic.name }}</div>
+        <div class="entity-subtitle">
+          {{ clinic.staffCount }} {{ clinic.staffCount === 1 ? 'staff member' : 'staff members' }} · {{ clinic.timeZone }}
+          @if (clinic.createdAt) {
+            · created {{ clinic.createdAt | date: 'mediumDate' }}
+          }
+        </div>
+      </div>
+      <div class="entity-meta">
+        @if (clinic.isActive) {
+          <span class="status-pill status-pill--success">Active</span>
+        } @else {
+          <span class="status-pill status-pill--danger">Deactivated</span>
+        }
+        <mat-icon aria-hidden="true">chevron_right</mat-icon>
+      </div>
+    </div>
+  } @empty {
+    <p class="empty-state">No clinics yet - create the first one.</p>
+  }
+</div>

@@ -1,0 +1,32 @@
+<h2 mat-dialog-title>Invitation link</h2>
+
+<mat-dialog-content class="invite-content">
+  @if (data.intro) {
+    <p class="intro">{{ data.intro }}</p>
+  }
+
+  <p>
+    Send this link to <strong>{{ data.personName }}</strong> ({{ data.email }}). They'll use it to set their own
+    password and can then log in.
+  </p>
+
+  <div class="link-row">
+    <input #linkInput class="link-input" type="text" readonly [value]="link" aria-label="Invitation link" (focus)="linkInput.select()" />
+    <button mat-flat-button color="primary" class="pill-button" type="button" (click)="copy(linkInput)">
+      <mat-icon>{{ copied() ? 'check' : 'content_copy' }}</mat-icon>
+      {{ copied() ? 'Copied' : 'Copy link' }}
+    </button>
+  </div>
+
+  <p class="notice">
+    <mat-icon>info</mat-icon>
+    <span>
+      This link works once and expires on {{ data.invitation.expiresAt | date: 'MMM d, y, HH:mm' }}. It won't be shown
+      again - if it gets lost, generate a new one.
+    </span>
+  </p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close class="cancel-button">Done</button>
+</mat-dialog-actions>

@@ -1,0 +1,17 @@
+<mat-toolbar class="admin-toolbar">
+  <a routerLink="/admin" class="brand">
+    <mat-icon>admin_panel_settings</mat-icon>
+    <span>MedBook Admin</span>
+  </a>
+  <span class="spacer"></span>
+  @if (admin$ | async; as admin) {
+    <span class="admin-name">{{ admin.firstName }} {{ admin.lastName }}</span>
+  }
+  <button mat-icon-button (click)="logout()" aria-label="Log out" title="Log out">
+    <mat-icon>logout</mat-icon>
+  </button>
+</mat-toolbar>
+
+<main class="admin-content">
+  <router-outlet />
+</main>

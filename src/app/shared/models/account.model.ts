@@ -35,6 +35,21 @@ export interface InvitationDetails {
   expiresAt: string;
 }
 
+/** A one-time password reset link's token. Returned once, when an admin creates it. */
+export interface PasswordResetLink {
+  token: string;
+  expiresAt: string;
+}
+
+/** What the reset page shows before the new password is set. */
+export interface PasswordResetDetails {
+  firstName: string;
+  lastName: string;
+  email: string;
+  clinicName: string;
+  expiresAt: string;
+}
+
 export interface ClinicSummary {
   id: string;
   name: string;

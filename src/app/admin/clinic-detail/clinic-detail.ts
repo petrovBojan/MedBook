@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { AdminService } from '../../core/services/admin.service';
-import { ClinicSummary } from '../../shared/models/account.model';
+import { ClinicSummary, Invitation, PasswordResetLink } from '../../shared/models/account.model';
 import { StaffMember } from '../../shared/models/staff-member.model';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { InviteLinkDialog, InviteLinkDialogData } from '../../shared/components/invite-link-dialog/invite-link-dialog';
@@ -74,14 +74,29 @@ export class ClinicDetail {
   newInvitation(member: StaffMember): void {
     this.errorMessage.set(null);
     this.adminSrv.regenerateInvitation(this.clinicId, member.id).subscribe({
-      next: (invitation) =>
-        this.dialog.open<InviteLinkDialog, InviteLinkDialogData>(InviteLinkDialog, {
-          width: '560px',
-          maxWidth: '95vw',
-          autoFocus: false,
-          data: { personName: `${member.firstName} ${member.lastName}`, email: member.email, invitation }
-        }),
+      next: (invitation) => this.showLink(member, invitation, 'invitation'),
       error: (err: Error) => this.errorMessage.set(err.message)
+    });
+  }
+
+  passwordReset(member: StaffMember): void {
+    this.errorMessage.set(null);
+    this.adminSrv.createPasswordReset(this.clinicId, member.id).subscribe({
+      next: (link) => this.showLink(member, link, 'passwordReset'),
+      error: (err: Error) => this.errorMessage.set(err.message)
+    });
+  }
+
+  private showLink(
+    member: StaffMember,
+    invitation: Invitation | PasswordResetLink,
+    purpose: InviteLinkDialogData['purpose']
+  ): void {
+    this.dialog.open<InviteLinkDialog, InviteLinkDialogData>(InviteLinkDialog, {
+      width: '560px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      data: { personName: `${member.firstName} ${member.lastName}`, email: member.email, invitation, purpose }
     });
   }
 

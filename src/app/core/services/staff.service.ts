@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CreateStaffDto, StaffMember } from '../../shared/models/staff-member.model';
-import { Invitation, StaffInvitation } from '../../shared/models/account.model';
+import { Invitation, PasswordResetLink, StaffInvitation } from '../../shared/models/account.model';
 import { WorkingHours } from '../../shared/models/working-hours.model';
 import { environment } from '../../../environments/environment';
 import { undefinedIfNotFound } from '../http/api-error';
@@ -38,5 +38,10 @@ export class StaffService {
   /** Clinic admins: a new invitation link for someone who hasn't registered (the old link stops working). */
   regenerateInvitation(staffId: string): Observable<Invitation> {
     return this.http.post<Invitation>(`${this.baseUrl}/${encodeURIComponent(staffId)}/invitation`, null);
+  }
+
+  /** Clinic admins: a password reset link for a registered staff member (their previous reset link stops working). */
+  createPasswordReset(staffId: string): Observable<PasswordResetLink> {
+    return this.http.post<PasswordResetLink>(`${this.baseUrl}/${encodeURIComponent(staffId)}/password-reset`, null);
   }
 }

@@ -37,6 +37,10 @@
         }
         @if (member.hasAccount) {
           <span class="status-pill status-pill--success">Active</span>
+          <button mat-stroked-button class="invite-button" (click)="passwordReset(member)">
+            <mat-icon>lock_reset</mat-icon>
+            Reset password
+          </button>
         } @else {
           <span class="status-pill status-pill--warning">Invitation pending</span>
           <button mat-stroked-button class="invite-button" (click)="newInvitation(member)">

@@ -7,6 +7,9 @@
   @if (admin$ | async; as admin) {
     <span class="admin-name">{{ admin.firstName }} {{ admin.lastName }}</span>
   }
+  <button mat-icon-button (click)="changePassword()" aria-label="Change password" title="Change password">
+    <mat-icon>key</mat-icon>
+  </button>
   <button mat-icon-button (click)="logout()" aria-label="Log out" title="Log out">
     <mat-icon>logout</mat-icon>
   </button>

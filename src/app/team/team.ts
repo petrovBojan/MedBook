@@ -5,12 +5,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { StaffService } from '../core/services/staff.service';
 import { LayoutService } from '../core/services/layout.service';
 import { StaffMember } from '../shared/models/staff-member.model';
-import { Invitation, StaffInvitation } from '../shared/models/account.model';
+import { Invitation, PasswordResetLink, StaffInvitation } from '../shared/models/account.model';
 import { formDialogConfig } from '../shared/utils/dialog.utils';
 import { InviteLinkDialog, InviteLinkDialogData } from '../shared/components/invite-link-dialog/invite-link-dialog';
 import { StaffForm } from './staff-form/staff-form';
 
-/** Clinic admins: who has access to the clinic, adding people, and invitation links. */
+/** Clinic admins: who has access to the clinic, adding people, invitation and password reset links. */
 @Component({
   selector: 'app-team',
   templateUrl: './team.html',
@@ -50,12 +50,25 @@ export class Team {
     });
   }
 
-  private showInvitation(member: StaffMember, invitation: Invitation, intro?: string): void {
+  passwordReset(member: StaffMember): void {
+    this.errorMessage.set(null);
+    this.staffSrv.createPasswordReset(member.id).subscribe({
+      next: (link) => this.showInvitation(member, link, undefined, 'passwordReset'),
+      error: (err: Error) => this.errorMessage.set(err.message)
+    });
+  }
+
+  private showInvitation(
+    member: StaffMember,
+    invitation: Invitation | PasswordResetLink,
+    intro?: string,
+    purpose: InviteLinkDialogData['purpose'] = 'invitation'
+  ): void {
     this.dialog.open<InviteLinkDialog, InviteLinkDialogData>(InviteLinkDialog, {
       width: '560px',
       maxWidth: '95vw',
       autoFocus: false,
-      data: { personName: `${member.firstName} ${member.lastName}`, email: member.email, invitation, intro }
+      data: { personName: `${member.firstName} ${member.lastName}`, email: member.email, invitation, intro, purpose }
     });
   }
 

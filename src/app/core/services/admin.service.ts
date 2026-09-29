@@ -1,7 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ClinicSummary, CreateClinicDto, CreatedClinic, Invitation } from '../../shared/models/account.model';
+import {
+  ClinicSummary,
+  CreateClinicDto,
+  CreatedClinic,
+  Invitation,
+  PasswordResetLink
+} from '../../shared/models/account.model';
 import { StaffMember } from '../../shared/models/staff-member.model';
 import { environment } from '../../../environments/environment';
 
@@ -36,6 +42,13 @@ export class AdminService {
   regenerateInvitation(clinicId: string, staffId: string): Observable<Invitation> {
     return this.http.post<Invitation>(
       `${this.baseUrl}/${encodeURIComponent(clinicId)}/staff/${encodeURIComponent(staffId)}/invitation`,
+      null
+    );
+  }
+
+  createPasswordReset(clinicId: string, staffId: string): Observable<PasswordResetLink> {
+    return this.http.post<PasswordResetLink>(
+      `${this.baseUrl}/${encodeURIComponent(clinicId)}/staff/${encodeURIComponent(staffId)}/password-reset`,
       null
     );
   }

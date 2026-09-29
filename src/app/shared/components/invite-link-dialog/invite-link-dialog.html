@@ -1,17 +1,32 @@
-<h2 mat-dialog-title>Invitation link</h2>
+<h2 mat-dialog-title>{{ isPasswordReset ? 'Password reset link' : 'Invitation link' }}</h2>
 
 <mat-dialog-content class="invite-content">
   @if (data.intro) {
     <p class="intro">{{ data.intro }}</p>
   }
 
-  <p>
-    Send this link to <strong>{{ data.personName }}</strong> ({{ data.email }}). They'll use it to set their own
-    password and can then log in.
-  </p>
+  @if (isPasswordReset) {
+    <p>
+      Send this link to <strong>{{ data.personName }}</strong> ({{ data.email }}). They'll use it to choose a new
+      password. Their current password keeps working until they do.
+    </p>
+  } @else {
+    <p>
+      Send this link to <strong>{{ data.personName }}</strong> ({{ data.email }}). They'll use it to set their own
+      password and can then log in.
+    </p>
+  }
 
   <div class="link-row">
-    <input #linkInput class="link-input" type="text" readonly [value]="link" aria-label="Invitation link" (focus)="linkInput.select()" />
+    <input
+      #linkInput
+      class="link-input"
+      type="text"
+      readonly
+      [value]="link"
+      [attr.aria-label]="isPasswordReset ? 'Password reset link' : 'Invitation link'"
+      (focus)="linkInput.select()"
+    />
     <button mat-flat-button color="primary" class="pill-button" type="button" (click)="copy(linkInput)">
       <mat-icon>{{ copied() ? 'check' : 'content_copy' }}</mat-icon>
       {{ copied() ? 'Copied' : 'Copy link' }}

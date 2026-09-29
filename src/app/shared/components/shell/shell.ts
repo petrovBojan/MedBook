@@ -7,9 +7,11 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '../../../core/services/auth.service';
 import { ClinicService } from '../../../core/services/clinic.service';
 import { LayoutService } from '../../../core/services/layout.service';
+import { ChangePasswordDialog } from '../change-password-dialog/change-password-dialog';
 
 @Component({
   selector: 'app-shell',
@@ -44,6 +46,11 @@ export class Shell {
     { path: '/settings', icon: 'settings_heart', label: 'Settings' }
   ]);
   readonly clinic$ = this.clinicSrv.getCurrentClinic();
+  private readonly dialog = inject(MatDialog);
+
+  changePassword(): void {
+    this.dialog.open(ChangePasswordDialog, { width: '440px', maxWidth: '95vw', autoFocus: false });
+  }
 
   logout(): void {
     this.authSrv.logout();

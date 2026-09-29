@@ -16,6 +16,16 @@ export const routes: Routes = [
     loadComponent: () => import('./auth/register/register').then((m) => m.Register)
   },
   {
+    path: 'forgot-password',
+    canActivate: [noAuthGuard],
+    loadComponent: () => import('./auth/forgot-password/forgot-password').then((m) => m.ForgotPassword)
+  },
+  {
+    // Public: reached from a password reset link an admin created. The link itself is the credential.
+    path: 'reset-password',
+    loadComponent: () => import('./auth/reset-password/reset-password').then((m) => m.ResetPassword)
+  },
+  {
     // The platform owner's panel - its own layout, no clinic navigation.
     path: 'admin',
     canActivate: [adminGuard],

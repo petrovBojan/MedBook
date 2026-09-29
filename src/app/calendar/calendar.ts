@@ -126,7 +126,7 @@ export class Calendar {
 
   constructor() {
     this.staffSrv.getDoctors().subscribe((doctors) => this.doctors.set(doctors));
-    this.patientSrv.getPatients().subscribe((patients) => this.patients.set(patients));
+    this.loadPatients();
     this.loadAppointments();
   }
 
@@ -239,9 +239,16 @@ export class Calendar {
 
     dialogRef.afterClosed().subscribe((saved) => {
       if (saved) {
+        // Reload patients too - the dialog may have created a new patient inline,
+        // and without it here the new appointment would render as "Unknown patient".
+        this.loadPatients();
         this.loadAppointments();
       }
     });
+  }
+
+  private loadPatients(): void {
+    this.patientSrv.getPatients().subscribe((patients) => this.patients.set(patients));
   }
 
   private loadAppointments(): void {

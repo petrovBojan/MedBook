@@ -3,21 +3,23 @@ import { DOCUMENT, DatePipe } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Invitation } from '../../models/account.model';
+import { Invitation, PasswordResetLink } from '../../models/account.model';
 
 export interface InviteLinkDialogData {
   /** Who the link is for, e.g. "Dr. Ana Kovac". */
   personName: string;
   email: string;
-  invitation: Invitation;
+  invitation: Invitation | PasswordResetLink;
+  /** What the link does: set a first password (/register, the default) or a new one (/reset-password). */
+  purpose?: 'invitation' | 'passwordReset';
   /** Optional line above the link, e.g. "Riverside Clinic has been created." */
   intro?: string;
 }
 
 /**
- * Shows a freshly created invitation as a copyable /register link. The API returns the
- * token only once (it stores just a hash), so this is the one chance to copy it - there's
- * no email sending; the admin passes the link on however suits them.
+ * Shows a freshly created invitation or password reset link as a copyable link. The API
+ * returns the token only once (it stores just a hash), so this is the one chance to copy it -
+ * there's no email sending; the admin passes the link on however suits them.
  */
 @Component({
   selector: 'app-invite-link-dialog',
@@ -29,7 +31,8 @@ export class InviteLinkDialog {
   readonly data = inject<InviteLinkDialogData>(MAT_DIALOG_DATA);
   private readonly document = inject(DOCUMENT);
 
-  readonly link = `${this.document.location.origin}/register?token=${encodeURIComponent(this.data.invitation.token)}`;
+  readonly isPasswordReset = this.data.purpose === 'passwordReset';
+  readonly link = `${this.document.location.origin}/${this.isPasswordReset ? 'reset-password' : 'register'}?token=${encodeURIComponent(this.data.invitation.token)}`;
   readonly copied = signal(false);
 
   async copy(input: HTMLInputElement): Promise<void> {

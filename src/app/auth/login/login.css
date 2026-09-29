@@ -82,6 +82,18 @@
   height: 44px;
 }
 
+.forgot-link {
+  align-self: flex-end;
+  margin: -0.25rem 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--mat-sys-primary);
+  text-decoration: none;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
 .error-message {
   color: var(--mat-sys-error);
   margin: 0 0 0.5rem;

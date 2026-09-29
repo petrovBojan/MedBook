@@ -59,6 +59,18 @@ export class AuthService {
     }
   }
 
+  /**
+   * Replaces the stored staff member after they edit their own profile or photo, so the
+   * toolbar avatar and name update everywhere. The session itself doesn't change.
+   */
+  updateCurrentUser(user: StaffMember): void {
+    if (!this.isClinicStaff()) {
+      return;
+    }
+    this.storage.setItem(USER_KEY, user);
+    this.currentUser.next(user);
+  }
+
   /** Ends the session here and asks the API to clear the (HttpOnly) session cookie. */
   logout(): void {
     this.clearLocalSession();

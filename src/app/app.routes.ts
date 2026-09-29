@@ -64,6 +64,11 @@ export const routes: Routes = [
         path: 'team',
         canActivate: [clinicAdminGuard],
         loadComponent: () => import('./team/team').then((m) => m.Team)
+      },
+      {
+        // Reached from the account menu (the avatar, top right) - not in the main navigation.
+        path: 'profile',
+        loadComponent: () => import('./profile/profile').then((m) => m.Profile)
       }
     ]
   },

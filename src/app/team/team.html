@@ -24,7 +24,7 @@
 <div class="entity-list">
   @for (member of staff(); track member.id) {
     <div class="entity-row">
-      <span class="color-dot" [style.background]="member.color || '#607d8b'"></span>
+      <app-avatar [person]="member" [size]="40" />
       <div class="entity-main">
         <div class="entity-title">{{ member.firstName }} {{ member.lastName }}</div>
         <div class="entity-subtitle">

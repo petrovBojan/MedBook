@@ -9,9 +9,7 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { StaffService } from '../../core/services/staff.service';
 import { StaffRole } from '../../shared/models/staff-member.model';
 import { StaffInvitation } from '../../shared/models/account.model';
-
-/** Calendar colors to pick from - distinct enough to tell doctors apart at a glance. */
-const COLORS = ['#3f7cac', '#a35d6a', '#6b8f71', '#c77d2e', '#7b61a8', '#2e8b8b', '#b5485d', '#5a6b7b'];
+import { STAFF_COLORS as COLORS } from '../../shared/utils/staff-colors';
 
 /** A clinic admin adding a staff member. Closes with the created member and their invitation. */
 @Component({

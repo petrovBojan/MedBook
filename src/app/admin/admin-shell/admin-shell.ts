@@ -5,8 +5,11 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../core/services/auth.service';
 import { ChangePasswordDialog } from '../../shared/components/change-password-dialog/change-password-dialog';
+import { Avatar } from '../../shared/components/avatar/avatar';
 
 /**
  * Layout for the platform owner's panel. Separate from the clinic app's shell: the owner
@@ -16,7 +19,17 @@ import { ChangePasswordDialog } from '../../shared/components/change-password-di
   selector: 'app-admin-shell',
   templateUrl: './admin-shell.html',
   styleUrl: './admin-shell.css',
-  imports: [AsyncPipe, RouterLink, RouterOutlet, MatToolbarModule, MatButtonModule, MatIconModule]
+  imports: [
+    AsyncPipe,
+    RouterLink,
+    RouterOutlet,
+    MatToolbarModule,
+    MatButtonModule,
+    MatIconModule,
+    MatMenuModule,
+    MatDividerModule,
+    Avatar
+  ]
 })
 export class AdminShell {
   private readonly authSrv = inject(AuthService);

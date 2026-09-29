@@ -8,10 +8,13 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../../core/services/auth.service';
 import { ClinicService } from '../../../core/services/clinic.service';
 import { LayoutService } from '../../../core/services/layout.service';
 import { ChangePasswordDialog } from '../change-password-dialog/change-password-dialog';
+import { Avatar } from '../avatar/avatar';
 
 @Component({
   selector: 'app-shell',
@@ -26,7 +29,10 @@ import { ChangePasswordDialog } from '../change-password-dialog/change-password-
     MatSidenavModule,
     MatListModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    MatMenuModule,
+    MatDividerModule,
+    Avatar
   ]
 })
 export class Shell {

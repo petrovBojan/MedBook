@@ -5,14 +5,31 @@
   </a>
   <span class="spacer"></span>
   @if (admin$ | async; as admin) {
-    <span class="admin-name">{{ admin.firstName }} {{ admin.lastName }}</span>
+    <button type="button" class="avatar-trigger" [matMenuTriggerFor]="accountMenu" aria-label="Account menu">
+      <span class="admin-name">{{ admin.firstName }} {{ admin.lastName }}</span>
+      <app-avatar [person]="admin" [size]="36" />
+    </button>
+
+    <!-- The platform owner has no staff profile - just their password and logging out. -->
+    <mat-menu #accountMenu="matMenu" xPosition="before" class="account-menu">
+      <div class="account-menu-header" (click)="$event.stopPropagation()">
+        <app-avatar [person]="admin" [size]="44" />
+        <div class="account-menu-who">
+          <div class="account-menu-name">{{ admin.firstName }} {{ admin.lastName }}</div>
+          <div class="account-menu-email">{{ admin.email }}</div>
+        </div>
+      </div>
+      <mat-divider />
+      <button mat-menu-item (click)="changePassword()">
+        <mat-icon>key</mat-icon>
+        <span>Change password</span>
+      </button>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Log out</span>
+      </button>
+    </mat-menu>
   }
-  <button mat-icon-button (click)="changePassword()" aria-label="Change password" title="Change password">
-    <mat-icon>key</mat-icon>
-  </button>
-  <button mat-icon-button (click)="logout()" aria-label="Log out" title="Log out">
-    <mat-icon>logout</mat-icon>
-  </button>
 </mat-toolbar>
 
 <main class="admin-content">

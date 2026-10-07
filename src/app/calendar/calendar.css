@@ -5,11 +5,13 @@
   margin-bottom: 20px;
 }
 
-/* The "To confirm" tile is clickable: reset the button look so it matches the other tiles. */
+/* Every tile is clickable - a button (changes the view here) or a link (another page).
+   Reset both looks so they match the plain tile design. */
 .stat-tile-button {
   border: none;
   font: inherit;
   text-align: left;
+  text-decoration: none;
   cursor: pointer;
 }
 

@@ -38,9 +38,7 @@
             </dl>
 
             <form [formGroup]="form" (ngSubmit)="submit()" class="register-form">
-              @if (form.controls.password.value) {
-                <label class="field-label">Password</label>
-              }
+              <label class="field-label" [class.field-label--empty]="!form.controls.password.value">Password</label>
               <mat-form-field appearance="outline">
                 <input
                   matInput
@@ -66,9 +64,7 @@
                 }
               </mat-form-field>
 
-              @if (form.controls.confirmPassword.value) {
-                <label class="field-label">Repeat password</label>
-              }
+              <label class="field-label" [class.field-label--empty]="!form.controls.confirmPassword.value">Repeat password</label>
               <mat-form-field appearance="outline">
                 <input
                   matInput

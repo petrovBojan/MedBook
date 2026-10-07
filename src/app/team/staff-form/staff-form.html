@@ -8,9 +8,7 @@
 
     <div class="field-row">
       <div class="field-col">
-        @if (form.controls.firstName.value) {
-          <label class="field-label">First name</label>
-        }
+        <label class="field-label" [class.field-label--empty]="!form.controls.firstName.value">First name</label>
         <mat-form-field appearance="outline">
           <input matInput formControlName="firstName" autocomplete="off" placeholder="First name" />
           @if (form.controls.firstName.hasError('required') && form.controls.firstName.touched) {
@@ -20,9 +18,7 @@
       </div>
 
       <div class="field-col">
-        @if (form.controls.lastName.value) {
-          <label class="field-label">Last name</label>
-        }
+        <label class="field-label" [class.field-label--empty]="!form.controls.lastName.value">Last name</label>
         <mat-form-field appearance="outline">
           <input matInput formControlName="lastName" autocomplete="off" placeholder="Last name" />
           @if (form.controls.lastName.hasError('required') && form.controls.lastName.touched) {
@@ -32,9 +28,7 @@
       </div>
     </div>
 
-    @if (form.controls.email.value) {
-      <label class="field-label">Email (their login)</label>
-    }
+    <label class="field-label" [class.field-label--empty]="!form.controls.email.value">Email (their login)</label>
     <mat-form-field appearance="outline">
       <input matInput type="email" formControlName="email" autocomplete="off" placeholder="Email (their login)" />
       @if (form.controls.email.hasError('required') && form.controls.email.touched) {
@@ -58,9 +52,7 @@
 
       <div class="field-col">
         @if (form.controls.role.value === StaffRole.Doctor) {
-          @if (form.controls.specialty.value) {
-            <label class="field-label">Specialty</label>
-          }
+          <label class="field-label" [class.field-label--empty]="!form.controls.specialty.value">Specialty</label>
           <mat-form-field appearance="outline">
             <input matInput formControlName="specialty" placeholder="Specialty (optional)" />
           </mat-form-field>

@@ -4,9 +4,7 @@
   <mat-dialog-content>
     <div class="field-row">
       <div class="field-col">
-        @if (form.controls.firstName.value) {
-          <label class="field-label">First name</label>
-        }
+        <label class="field-label" [class.field-label--empty]="!form.controls.firstName.value">First name</label>
         <mat-form-field appearance="outline">
           <input matInput formControlName="firstName" placeholder="First name" />
           @if (form.controls.firstName.hasError('required') && form.controls.firstName.touched) {
@@ -16,9 +14,7 @@
       </div>
 
       <div class="field-col">
-        @if (form.controls.lastName.value) {
-          <label class="field-label">Last name</label>
-        }
+        <label class="field-label" [class.field-label--empty]="!form.controls.lastName.value">Last name</label>
         <mat-form-field appearance="outline">
           <input matInput formControlName="lastName" placeholder="Last name" />
           @if (form.controls.lastName.hasError('required') && form.controls.lastName.touched) {
@@ -30,9 +26,7 @@
 
     <div class="field-row">
       <div class="field-col">
-        @if (form.controls.dateOfBirth.value) {
-          <label class="field-label">Date of birth</label>
-        }
+        <label class="field-label" [class.field-label--empty]="!form.controls.dateOfBirth.value">Date of birth</label>
         <mat-form-field appearance="outline">
           <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth" placeholder="Date of birth" />
           <mat-datepicker-toggle matIconSuffix [for]="dobPicker" />
@@ -41,9 +35,7 @@
       </div>
 
       <div class="field-col">
-        @if (form.controls.gender.value) {
-          <label class="field-label">Gender</label>
-        }
+        <label class="field-label" [class.field-label--empty]="!form.controls.gender.value">Gender</label>
         <mat-form-field appearance="outline">
           <mat-select formControlName="gender" placeholder="Gender">
             <mat-option [value]="null">Not specified</mat-option>
@@ -57,18 +49,14 @@
 
     <div class="field-row">
       <div class="field-col">
-        @if (form.controls.phone.value) {
-          <label class="field-label">Phone</label>
-        }
+        <label class="field-label" [class.field-label--empty]="!form.controls.phone.value">Phone</label>
         <mat-form-field appearance="outline">
           <input matInput type="tel" formControlName="phone" autocomplete="off" placeholder="Phone" />
         </mat-form-field>
       </div>
 
       <div class="field-col">
-        @if (form.controls.email.value) {
-          <label class="field-label">Email</label>
-        }
+        <label class="field-label" [class.field-label--empty]="!form.controls.email.value">Email</label>
         <mat-form-field appearance="outline">
           <input matInput type="email" formControlName="email" placeholder="Email" />
           @if (form.controls.email.hasError('email') && form.controls.email.touched) {
@@ -78,16 +66,12 @@
       </div>
     </div>
 
-    @if (form.controls.address.value) {
-      <label class="field-label">Address</label>
-    }
+    <label class="field-label" [class.field-label--empty]="!form.controls.address.value">Address</label>
     <mat-form-field appearance="outline">
       <input matInput formControlName="address" placeholder="Address" />
     </mat-form-field>
 
-    @if (form.controls.notes.value) {
-      <label class="field-label">Notes (allergies, conditions, etc.)</label>
-    }
+    <label class="field-label" [class.field-label--empty]="!form.controls.notes.value">Notes (allergies, conditions, etc.)</label>
     <mat-form-field appearance="outline">
       <textarea matInput formControlName="notes" rows="3" placeholder="Notes (allergies, conditions, etc.)"></textarea>
     </mat-form-field>

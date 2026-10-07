@@ -39,6 +39,8 @@ import { AppointmentForm, AppointmentFormDialogData } from '../appointments/appo
 import { DateTimeUtils } from '../shared/utils/date-time.utils';
 import { formDialogConfig } from '../shared/utils/dialog.utils';
 import { LayoutService } from '../core/services/layout.service';
+import { AuthService } from '../core/services/auth.service';
+import { RouterLink } from '@angular/router';
 
 interface AppointmentEventMeta {
   appointmentId: string;
@@ -87,7 +89,8 @@ class TwentyFourHourDateFormatter extends CalendarAngularDateFormatter {
     MatCardModule,
     MatListModule,
     MatDividerModule,
-    DatePipe
+    DatePipe,
+    RouterLink
   ],
   providers: [
     provideCalendar({
@@ -102,6 +105,7 @@ export class Calendar {
   private readonly staffSrv = inject(StaffService);
   private readonly patientSrv = inject(PatientService);
   private readonly dialog = inject(MatDialog);
+  private readonly authSrv = inject(AuthService);
   readonly layout = inject(LayoutService);
 
   readonly CalendarView = CalendarView;
@@ -147,6 +151,21 @@ export class Calendar {
     return this.appointments().filter(
       (appt) => appt.status === AppointmentStatus.Unconfirmed && new Date(appt.start).getTime() > now
     ).length;
+  }
+
+  /**
+   * Where the "Doctors" tile leads: the Team page for clinic admins, otherwise Settings
+   * (everyone's working hours) - only admins can open Team.
+   */
+  readonly doctorsLink = this.authSrv.getCurrentUser()?.isClinicAdmin ? '/team' : '/settings';
+
+  /** Today's appointments: the day view on today, with no filters hiding any of them. */
+  showToday(): void {
+    this.view = CalendarView.Day;
+    this.viewDate = new Date();
+    this.selectedDoctorId = null;
+    this.selectedDate = null;
+    this.selectedStatuses = [];
   }
 
   /** The list view, filtered down to the unconfirmed appointments - the call list. */

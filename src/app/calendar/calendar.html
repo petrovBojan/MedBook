@@ -1,11 +1,11 @@
 <div class="stats-row">
-  <div class="stat-tile">
+  <button type="button" class="stat-tile stat-tile-button" aria-label="Show today's appointments" (click)="showToday()">
     <span class="stat-tile-icon"><mat-icon>today</mat-icon></span>
     <div>
       <div class="stat-tile-value">{{ todaysAppointmentsCount }}</div>
       <div class="stat-tile-label">Appointments today</div>
     </div>
-  </div>
+  </button>
   <button
     type="button"
     class="stat-tile stat-tile-button"
@@ -19,20 +19,20 @@
       <div class="stat-tile-label">To confirm</div>
     </div>
   </button>
-  <div class="stat-tile">
+  <a class="stat-tile stat-tile-button" [routerLink]="doctorsLink">
     <span class="stat-tile-icon"><mat-icon>medical_services</mat-icon></span>
     <div>
       <div class="stat-tile-value">{{ doctors().length }}</div>
       <div class="stat-tile-label">Doctors</div>
     </div>
-  </div>
-  <div class="stat-tile">
+  </a>
+  <a class="stat-tile stat-tile-button" routerLink="/patients">
     <span class="stat-tile-icon"><mat-icon>groups</mat-icon></span>
     <div>
       <div class="stat-tile-value">{{ totalPatientsCount }}</div>
       <div class="stat-tile-label">Patients on file</div>
     </div>
-  </div>
+  </a>
 </div>
 
 <div class="calendar-toolbar">
@@ -77,10 +77,8 @@
 @if (view === 'list') {
   <div class="filters-row">
     <div class="filter-field-group">
-      @if (selectedDoctorId) {
-        <label class="field-label">Doctor</label>
-      }
-      <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+      <label class="field-label" [class.field-label--empty]="!selectedDoctorId">Doctor</label>
+      <mat-form-field appearance="outline" class="filter-field">
         <mat-select [(ngModel)]="selectedDoctorId" placeholder="Doctor">
           <mat-option [value]="null">All doctors</mat-option>
           @for (doctor of doctors(); track doctor.id) {
@@ -91,10 +89,8 @@
     </div>
 
     <div class="filter-field-group">
-      @if (selectedDate) {
-        <label class="field-label">Day</label>
-      }
-      <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+      <label class="field-label" [class.field-label--empty]="!selectedDate">Day</label>
+      <mat-form-field appearance="outline" class="filter-field">
         <input matInput [matDatepicker]="dayPicker" [(ngModel)]="selectedDate" placeholder="Day" />
         @if (selectedDate) {
           <button matSuffix mat-icon-button type="button" aria-label="Clear day filter" (click)="selectedDate = null">
@@ -107,10 +103,8 @@
     </div>
 
     <div class="filter-field-group">
-      @if (selectedStatuses.length) {
-        <label class="field-label">Status</label>
-      }
-      <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+      <label class="field-label" [class.field-label--empty]="!selectedStatuses.length">Status</label>
+      <mat-form-field appearance="outline" class="filter-field">
         <mat-select [(ngModel)]="selectedStatuses" placeholder="Status" multiple>
           @for (status of statusOptions; track status) {
             <mat-option [value]="status">{{ status }}</mat-option>

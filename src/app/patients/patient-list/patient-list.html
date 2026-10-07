@@ -1,8 +1,6 @@
 <div class="list-toolbar">
   <div class="search-field-group">
-    @if (searchTerm()) {
-      <label class="field-label">Search patients</label>
-    }
+    <label class="field-label" [class.field-label--empty]="!searchTerm()">Search patients</label>
     <mat-form-field appearance="outline" class="search-field">
       <input matInput type="search" [(ngModel)]="searchTerm" placeholder="Search patients" />
       <mat-icon matSuffix>search</mat-icon>

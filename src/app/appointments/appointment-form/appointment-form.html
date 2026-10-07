@@ -4,9 +4,7 @@
   <mat-dialog-content>
     <div class="field-row">
       <div class="field-col">
-        @if (form.controls.doctorId.value) {
-          <label class="field-label">Doctor</label>
-        }
+        <label class="field-label" [class.field-label--empty]="!form.controls.doctorId.value">Doctor</label>
         <mat-form-field appearance="outline">
           <mat-select formControlName="doctorId" placeholder="Doctor">
             @for (doctor of doctors(); track doctor.id) {
@@ -20,9 +18,7 @@
       </div>
 
       <div class="field-col">
-        @if (form.controls.patientId.value) {
-          <label class="field-label">Patient</label>
-        }
+        <label class="field-label" [class.field-label--empty]="!form.controls.patientId.value">Patient</label>
         <mat-form-field appearance="outline">
           <mat-select formControlName="patientId" placeholder="Patient">
             @for (patient of patients(); track patient.id) {
@@ -39,9 +35,7 @@
 
     <div class="field-row">
       <div class="field-col">
-        @if (form.controls.startDate.value) {
-          <label class="field-label">Start date</label>
-        }
+        <label class="field-label" [class.field-label--empty]="!form.controls.startDate.value">Start date</label>
         <mat-form-field appearance="outline">
           <input
             matInput
@@ -59,9 +53,7 @@
       </div>
 
       <div class="field-col">
-        @if (form.controls.startTime.value) {
-          <label class="field-label">Start time</label>
-        }
+        <label class="field-label" [class.field-label--empty]="!form.controls.startTime.value">Start time</label>
         <mat-form-field appearance="outline">
           <input
             matInput
@@ -82,9 +74,7 @@
 
     <div class="field-row">
       <div class="field-col">
-        @if (form.controls.endDate.value) {
-          <label class="field-label">End date</label>
-        }
+        <label class="field-label" [class.field-label--empty]="!form.controls.endDate.value">End date</label>
         <mat-form-field appearance="outline">
           <input
             matInput
@@ -102,9 +92,7 @@
       </div>
 
       <div class="field-col">
-        @if (form.controls.endTime.value) {
-          <label class="field-label">End time</label>
-        }
+        <label class="field-label" [class.field-label--empty]="!form.controls.endTime.value">End time</label>
         <mat-form-field appearance="outline">
           <input
             matInput
@@ -123,23 +111,17 @@
       </div>
     </div>
 
-    @if (form.controls.reason.value) {
-      <label class="field-label">Reason for visit</label>
-    }
+    <label class="field-label" [class.field-label--empty]="!form.controls.reason.value">Reason for visit</label>
     <mat-form-field appearance="outline">
       <input matInput formControlName="reason" placeholder="Reason for visit" />
     </mat-form-field>
 
-    @if (form.controls.notes.value) {
-      <label class="field-label">Notes</label>
-    }
+    <label class="field-label" [class.field-label--empty]="!form.controls.notes.value">Notes</label>
     <mat-form-field appearance="outline">
       <textarea matInput formControlName="notes" rows="3" placeholder="Notes"></textarea>
     </mat-form-field>
 
-    @if (form.controls.status.value) {
-      <label class="field-label">Status</label>
-    }
+    <label class="field-label" [class.field-label--empty]="!form.controls.status.value">Status</label>
     <mat-form-field appearance="outline">
       <mat-select formControlName="status" placeholder="Status">
         @for (status of statusOptions; track status) {

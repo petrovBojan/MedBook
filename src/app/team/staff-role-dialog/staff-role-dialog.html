@@ -17,9 +17,7 @@
 
       <div class="field-col">
         @if (form.controls.role.value === StaffRole.Doctor) {
-          @if (form.controls.specialty.value) {
-            <label class="field-label">Specialty</label>
-          }
+          <label class="field-label" [class.field-label--empty]="!form.controls.specialty.value">Specialty</label>
           <mat-form-field appearance="outline">
             <input matInput formControlName="specialty" placeholder="Specialty (optional)" />
           </mat-form-field>

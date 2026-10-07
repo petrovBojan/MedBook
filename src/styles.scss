@@ -78,7 +78,8 @@ body {
 // positioning entirely: instead of an internal <mat-label> (which MDC absolutely
 // positions and animates between a "resting" and "floated" state - the source of every
 // misalignment we kept hitting), it renders a plain <label> *outside* the
-// mat-form-field, shown only once the control has a value, and relies on the native
+// mat-form-field, visible only once the control has a value (hidden but still taking up
+// its space before that - .field-label--empty), and relies on the native
 // <input>/<mat-select> placeholder for the empty state. See the .field-label rule below
 // and its usage in each form template - no <mat-label> is used inside mat-form-field
 // anywhere in this app anymore.
@@ -138,6 +139,13 @@ body {
   font-size: 13px;
   font-weight: 500;
   color: var(--mat-sys-on-surface-variant);
+
+  // While the field is empty the label is hidden but still takes up its space, so a
+  // field never jumps down when it gets a value and fields side by side stay aligned.
+  // (visibility: hidden also hides it from screen readers - the placeholder covers that.)
+  &.field-label--empty {
+    visibility: hidden;
+  }
 }
 
 // Dismiss/cancel actions (close a dialog without saving) - the dark complementary

@@ -107,6 +107,7 @@ export class Calendar {
   readonly CalendarView = CalendarView;
   readonly statusOptions = [
     AppointmentStatus.Scheduled,
+    AppointmentStatus.Unconfirmed,
     AppointmentStatus.Completed,
     AppointmentStatus.NoShow,
     AppointmentStatus.Cancelled
@@ -135,6 +136,22 @@ export class Calendar {
     return this.appointments().filter(
       (appt) => appt.status !== AppointmentStatus.Cancelled && new Date(appt.start).toDateString() === today
     ).length;
+  }
+
+  /** Upcoming appointments still waiting for a call to confirm them with the patient. */
+  get toConfirmCount(): number {
+    const now = Date.now();
+    return this.appointments().filter(
+      (appt) => appt.status === AppointmentStatus.Unconfirmed && new Date(appt.start).getTime() > now
+    ).length;
+  }
+
+  /** The list view, filtered down to the unconfirmed appointments - the call list. */
+  showUnconfirmed(): void {
+    this.view = 'list';
+    this.selectedDoctorId = null;
+    this.selectedDate = null;
+    this.selectedStatuses = [AppointmentStatus.Unconfirmed];
   }
 
   get totalPatientsCount(): number {
@@ -265,14 +282,16 @@ export class Calendar {
     const patientName = patient ? `${patient.firstName} ${patient.lastName}` : 'Unknown patient';
     const doctorName = doctor ? `Dr. ${doctor.lastName}` : '';
     const color = doctor?.color ?? '#607d8b';
+    const isUnconfirmed = appointment.status === AppointmentStatus.Unconfirmed;
 
     return {
       id: appointment.id,
       start: new Date(appointment.start),
       end: new Date(appointment.end),
-      title: `${patientName}${doctorName ? ' · ' + doctorName : ''}${appointment.reason ? ' — ' + appointment.reason : ''}`,
+      title: `${isUnconfirmed ? '(Unconfirmed) ' : ''}${patientName}${doctorName ? ' · ' + doctorName : ''}${appointment.reason ? ' — ' + appointment.reason : ''}`,
       color: { primary: color, secondary: color + '22' },
-      cssClass: appointment.status === AppointmentStatus.Cancelled ? 'appt-cancelled' : '',
+      cssClass:
+        appointment.status === AppointmentStatus.Cancelled ? 'appt-cancelled' : isUnconfirmed ? 'appt-unconfirmed' : '',
       meta: { appointmentId: appointment.id }
     };
   }

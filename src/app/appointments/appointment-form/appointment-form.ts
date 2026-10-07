@@ -56,6 +56,17 @@ export class AppointmentForm {
   readonly AppointmentStatus = AppointmentStatus;
   readonly appointmentId = this.data.appointmentId;
   readonly isEditMode = !!this.appointmentId;
+  // A new booking is either confirmed or still to be confirmed with the patient; the
+  // outcome statuses only make sense for an appointment that already exists.
+  readonly statusOptions = this.isEditMode
+    ? [
+        AppointmentStatus.Scheduled,
+        AppointmentStatus.Unconfirmed,
+        AppointmentStatus.Completed,
+        AppointmentStatus.Cancelled,
+        AppointmentStatus.NoShow
+      ]
+    : [AppointmentStatus.Scheduled, AppointmentStatus.Unconfirmed];
 
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal<string | null>(null);

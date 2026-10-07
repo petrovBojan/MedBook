@@ -2,7 +2,9 @@ export enum AppointmentStatus {
   Scheduled = 'Scheduled',
   Completed = 'Completed',
   Cancelled = 'Cancelled',
-  NoShow = 'NoShow'
+  NoShow = 'NoShow',
+  /** Still to be confirmed with the patient - holds the slot like Scheduled. */
+  Unconfirmed = 'Unconfirmed'
 }
 
 export interface Appointment {

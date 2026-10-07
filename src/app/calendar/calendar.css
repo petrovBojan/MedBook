@@ -5,6 +5,29 @@
   margin-bottom: 20px;
 }
 
+/* The "To confirm" tile is clickable: reset the button look so it matches the other tiles. */
+.stat-tile-button {
+  border: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.stat-tile-button:hover {
+  filter: brightness(1.08);
+}
+
+.stat-tile-button:focus-visible {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+}
+
+/* Calls are waiting: amber icon, matching the "Unconfirmed" status chip. */
+.stat-tile--attention .stat-tile-icon {
+  background: #fef3c7;
+  color: #78350f;
+}
+
 .calendar-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -56,6 +79,13 @@
 :host ::ng-deep .appt-cancelled {
   opacity: 0.5;
   text-decoration: line-through;
+}
+
+/* Not yet confirmed with the patient: a dashed outline and italics, so it reads as pencilled in. */
+:host ::ng-deep .appt-unconfirmed {
+  font-style: italic;
+  outline: 1.5px dashed currentColor;
+  outline-offset: -1.5px;
 }
 
 .appointment-list {
@@ -125,6 +155,12 @@
   color: var(--mat-sys-on-tertiary-container);
 }
 
+/* Same amber as the global .status-pill--warning. */
+.status-chip.status-unconfirmed {
+  background: #fef3c7;
+  color: #78350f;
+}
+
 .status-chip.status-noshow {
   background: var(--mat-sys-error-container);
   color: var(--mat-sys-on-error-container);
@@ -157,24 +193,29 @@
 }
 
 @media (max-width: 767px) {
-  /* Three compact tiles side by side instead of a tall stack of full-width ones -
-     the numbers are the point, the icons are decoration. */
+  /* Compact tiles in a 2x2 grid instead of a tall stack of full-width ones,
+     each with a smaller icon beside the number. */
   .stats-row {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
     margin-bottom: 12px;
   }
 
   .stat-tile {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
+    gap: 10px;
     padding: 10px 12px;
     border-radius: 12px;
   }
 
   .stat-tile-icon {
-    display: none;
+    width: 34px;
+    height: 34px;
+  }
+
+  .stat-tile-icon mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
   }
 
   .stat-tile-value {

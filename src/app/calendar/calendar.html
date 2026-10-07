@@ -6,6 +6,19 @@
       <div class="stat-tile-label">Appointments today</div>
     </div>
   </div>
+  <button
+    type="button"
+    class="stat-tile stat-tile-button"
+    [class.stat-tile--attention]="toConfirmCount > 0"
+    aria-label="Show unconfirmed appointments"
+    (click)="showUnconfirmed()"
+  >
+    <span class="stat-tile-icon"><mat-icon>phone_callback</mat-icon></span>
+    <div>
+      <div class="stat-tile-value">{{ toConfirmCount }}</div>
+      <div class="stat-tile-label">To confirm</div>
+    </div>
+  </button>
   <div class="stat-tile">
     <span class="stat-tile-icon"><mat-icon>medical_services</mat-icon></span>
     <div>

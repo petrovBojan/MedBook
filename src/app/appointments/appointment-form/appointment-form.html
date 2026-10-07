@@ -99,18 +99,19 @@
       <textarea matInput formControlName="notes" rows="3" placeholder="Notes"></textarea>
     </mat-form-field>
 
-    @if (isEditMode) {
-      @if (form.controls.status.value) {
-        <label class="field-label">Status</label>
-      }
-      <mat-form-field appearance="outline">
-        <mat-select formControlName="status" placeholder="Status">
-          @for (status of [AppointmentStatus.Scheduled, AppointmentStatus.Completed, AppointmentStatus.Cancelled, AppointmentStatus.NoShow]; track status) {
-            <mat-option [value]="status">{{ status }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+    @if (form.controls.status.value) {
+      <label class="field-label">Status</label>
     }
+    <mat-form-field appearance="outline">
+      <mat-select formControlName="status" placeholder="Status">
+        @for (status of statusOptions; track status) {
+          <mat-option [value]="status">{{ status }}</mat-option>
+        }
+      </mat-select>
+      @if (form.controls.status.value === AppointmentStatus.Unconfirmed) {
+        <mat-hint>Holds the slot until you've confirmed with the patient.</mat-hint>
+      }
+    </mat-form-field>
 
     @if (scheduleWarning()) {
       <p class="error-message">{{ scheduleWarning() }}</p>

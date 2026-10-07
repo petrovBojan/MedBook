@@ -1,0 +1,46 @@
+<h2 mat-dialog-title>Edit role</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()" class="role-form">
+  <mat-dialog-content>
+    <p class="intro">{{ member.firstName }} {{ member.lastName }} · {{ member.email }}</p>
+
+    <div class="field-row">
+      <div class="field-col">
+        <label class="field-label">Role</label>
+        <mat-form-field appearance="outline">
+          <mat-select formControlName="role">
+            <mat-option [value]="StaffRole.Doctor">Doctor</mat-option>
+            <mat-option [value]="StaffRole.Employee">Employee</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="field-col">
+        @if (form.controls.role.value === StaffRole.Doctor) {
+          @if (form.controls.specialty.value) {
+            <label class="field-label">Specialty</label>
+          }
+          <mat-form-field appearance="outline">
+            <input matInput formControlName="specialty" placeholder="Specialty (optional)" />
+          </mat-form-field>
+        }
+      </div>
+    </div>
+
+    @if (member.role === StaffRole.Doctor && form.controls.role.value === StaffRole.Employee) {
+      <p class="hint">
+        Employees can't be booked for appointments. If {{ member.firstName }} still has upcoming appointments, move
+        them to another doctor or cancel them first.
+      </p>
+    }
+
+    @if (errorMessage()) {
+      <p class="error-message">{{ errorMessage() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" class="cancel-button" (click)="close()">Cancel</button>
+    <button mat-flat-button color="primary" class="pill-button" type="submit" [disabled]="isSubmitting()">Save</button>
+  </mat-dialog-actions>
+</form>

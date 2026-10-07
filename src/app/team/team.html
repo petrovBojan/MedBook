@@ -35,6 +35,10 @@
         @if (member.isClinicAdmin) {
           <span class="status-pill">Admin</span>
         }
+        <button mat-stroked-button class="invite-button" (click)="editRole(member)">
+          <mat-icon>badge</mat-icon>
+          Edit role
+        </button>
         @if (member.hasAccount) {
           <span class="status-pill status-pill--success">Active</span>
           <button mat-stroked-button class="invite-button" (click)="passwordReset(member)">

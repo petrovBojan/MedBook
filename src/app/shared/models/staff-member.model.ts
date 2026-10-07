@@ -40,3 +40,10 @@ export interface CreateStaffDto {
   color?: string;
   isClinicAdmin: boolean;
 }
+
+/** What a clinic admin can change about a staff member's role. */
+export interface UpdateStaffRoleDto {
+  role: StaffRole;
+  /** Doctors only; ignored for employees. */
+  specialty?: string;
+}

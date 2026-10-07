@@ -9,6 +9,8 @@ import { Invitation, PasswordResetLink, StaffInvitation } from '../shared/models
 import { formDialogConfig } from '../shared/utils/dialog.utils';
 import { InviteLinkDialog, InviteLinkDialogData } from '../shared/components/invite-link-dialog/invite-link-dialog';
 import { StaffForm } from './staff-form/staff-form';
+import { StaffRoleDialog } from './staff-role-dialog/staff-role-dialog';
+import { AuthService } from '../core/services/auth.service';
 import { Avatar } from '../shared/components/avatar/avatar';
 
 /** Clinic admins: who has access to the clinic, adding people, invitation and password reset links. */
@@ -21,6 +23,7 @@ import { Avatar } from '../shared/components/avatar/avatar';
 export class Team {
   private readonly staffSrv = inject(StaffService);
   private readonly dialog = inject(MatDialog);
+  private readonly authSrv = inject(AuthService);
   readonly layout = inject(LayoutService);
 
   readonly staff = signal<StaffMember[]>([]);
@@ -40,6 +43,22 @@ export class Team {
         }
         this.load();
         this.showInvitation(result.staff, result.invitation, `${result.staff.firstName} has been added.`);
+      });
+  }
+
+  editRole(member: StaffMember): void {
+    this.dialog
+      .open<StaffRoleDialog, StaffMember, StaffMember | undefined>(StaffRoleDialog, formDialogConfig(member))
+      .afterClosed()
+      .subscribe((updated) => {
+        if (!updated) {
+          return;
+        }
+        // Admins can change their own role too - keep the profile and toolbar in step.
+        if (updated.id === this.authSrv.getCurrentUser()?.id) {
+          this.authSrv.updateCurrentUser(updated);
+        }
+        this.load();
       });
   }
 

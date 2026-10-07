@@ -1,0 +1,20 @@
+# Single public entry point for the demo: one origin, so the SameSite=Strict session
+# cookie and environment.apiUrl = '/api' work exactly as in production.
+# Plain http on :8080 - the Cloudflare tunnel in front of it provides the https.
+{
+	admin off
+}
+
+:8080 {
+	handle /api/* {
+		reverse_proxy localhost:5262
+	}
+
+	handle {
+		# Angular SSR only trusts known hosts; present the request as localhost so the
+		# public tunnel hostname doesn't need to be allow-listed.
+		reverse_proxy localhost:4000 {
+			header_up Host localhost:4000
+		}
+	}
+}

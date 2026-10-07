@@ -42,3 +42,6 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Local demo build output, database and secrets (demo/start-demo.ps1)
+/demo/.out

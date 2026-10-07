@@ -1,0 +1,46 @@
+.role-form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Same column layout as the staff form. */
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+mat-dialog-content mat-form-field {
+  width: 100%;
+}
+
+.intro,
+.hint {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.hint {
+  font-size: 0.875rem;
+}
+
+.field-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.field-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.error-message {
+  color: var(--mat-sys-error);
+  margin: 0;
+}
+
+@media (max-width: 767px) {
+  .field-row {
+    flex-direction: column;
+  }
+}

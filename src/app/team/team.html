@@ -52,6 +52,12 @@
             New invite link
           </button>
         }
+        @if (member.id !== currentUserId) {
+          <button mat-stroked-button color="warn" class="invite-button" (click)="removeStaff(member)">
+            <mat-icon>person_remove</mat-icon>
+            Remove
+          </button>
+        }
       </div>
     </div>
   } @empty {

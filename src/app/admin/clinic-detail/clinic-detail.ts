@@ -71,6 +71,36 @@ export class ClinicDetail {
       });
   }
 
+  toggleClinicAdmin(member: StaffMember): void {
+    const makeAdmin = !member.isClinicAdmin;
+    const name = `${member.firstName} ${member.lastName}`;
+    const data: ConfirmDialogData = makeAdmin
+      ? {
+          title: 'Make clinic admin',
+          message: `${name} will be able to add and remove staff and send invitations. They'll be logged out and get the new rights when they log in again.`,
+          confirmLabel: 'Make admin'
+        }
+      : {
+          title: 'Remove admin rights',
+          message: `${name} will no longer be able to manage staff. They'll be logged out and can log in again as regular staff.`,
+          confirmLabel: 'Remove admin rights'
+        };
+
+    this.dialog
+      .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, { data, maxWidth: '95vw' })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        if (!confirmed) {
+          return;
+        }
+        this.errorMessage.set(null);
+        this.adminSrv.setClinicAdmin(this.clinicId, member.id, makeAdmin).subscribe({
+          next: () => this.loadStaff(),
+          error: (err: Error) => this.errorMessage.set(err.message)
+        });
+      });
+  }
+
   newInvitation(member: StaffMember): void {
     this.errorMessage.set(null);
     this.adminSrv.regenerateInvitation(this.clinicId, member.id).subscribe({

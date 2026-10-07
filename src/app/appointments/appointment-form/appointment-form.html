@@ -43,9 +43,18 @@
           <label class="field-label">Start date</label>
         }
         <mat-form-field appearance="outline">
-          <input matInput [matDatepicker]="startDatePicker" formControlName="startDate" placeholder="Start date" />
+          <input
+            matInput
+            [matDatepicker]="startDatePicker"
+            [matDatepickerFilter]="isOpenDay"
+            formControlName="startDate"
+            placeholder="Start date"
+          />
           <mat-datepicker-toggle matIconSuffix [for]="startDatePicker" />
           <mat-datepicker #startDatePicker [touchUi]="layout.isHandset()" />
+          @if (form.controls.startDate.hasError('matDatepickerFilter')) {
+            <mat-error>{{ closedDayMessage(form.controls.startDate.value) }}</mat-error>
+          }
         </mat-form-field>
       </div>
 
@@ -54,9 +63,19 @@
           <label class="field-label">Start time</label>
         }
         <mat-form-field appearance="outline">
-          <input matInput [matTimepicker]="startTimePicker" formControlName="startTime" placeholder="Start time" />
+          <input
+            matInput
+            [matTimepicker]="startTimePicker"
+            [matTimepickerMin]="startTimeMin()"
+            [matTimepickerMax]="startTimeMax()"
+            formControlName="startTime"
+            placeholder="Start time"
+          />
           <mat-timepicker-toggle matIconSuffix [for]="startTimePicker" />
           <mat-timepicker #startTimePicker interval="15m" />
+          @if (form.controls.startTime.hasError('matTimepickerMin') || form.controls.startTime.hasError('matTimepickerMax')) {
+            <mat-error>{{ openHoursHint() }}</mat-error>
+          }
         </mat-form-field>
       </div>
     </div>
@@ -67,9 +86,18 @@
           <label class="field-label">End date</label>
         }
         <mat-form-field appearance="outline">
-          <input matInput [matDatepicker]="endDatePicker" formControlName="endDate" placeholder="End date" />
+          <input
+            matInput
+            [matDatepicker]="endDatePicker"
+            [matDatepickerFilter]="isOpenDay"
+            formControlName="endDate"
+            placeholder="End date"
+          />
           <mat-datepicker-toggle matIconSuffix [for]="endDatePicker" />
           <mat-datepicker #endDatePicker [touchUi]="layout.isHandset()" />
+          @if (form.controls.endDate.hasError('matDatepickerFilter')) {
+            <mat-error>{{ closedDayMessage(form.controls.endDate.value) }}</mat-error>
+          }
         </mat-form-field>
       </div>
 
@@ -78,9 +106,19 @@
           <label class="field-label">End time</label>
         }
         <mat-form-field appearance="outline">
-          <input matInput [matTimepicker]="endTimePicker" formControlName="endTime" placeholder="End time" />
+          <input
+            matInput
+            [matTimepicker]="endTimePicker"
+            [matTimepickerMin]="endTimeMin()"
+            [matTimepickerMax]="endTimeMax()"
+            formControlName="endTime"
+            placeholder="End time"
+          />
           <mat-timepicker-toggle matIconSuffix [for]="endTimePicker" />
           <mat-timepicker #endTimePicker interval="15m" />
+          @if (form.controls.endTime.hasError('matTimepickerMin') || form.controls.endTime.hasError('matTimepickerMax')) {
+            <mat-error>{{ openHoursHint() }}</mat-error>
+          }
         </mat-form-field>
       </div>
     </div>

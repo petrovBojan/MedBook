@@ -57,6 +57,10 @@
         @if (member.isClinicAdmin) {
           <span class="status-pill">Admin</span>
         }
+        <button mat-stroked-button class="invite-button" (click)="toggleClinicAdmin(member)">
+          <mat-icon>{{ member.isClinicAdmin ? 'remove_moderator' : 'add_moderator' }}</mat-icon>
+          {{ member.isClinicAdmin ? 'Remove admin' : 'Make admin' }}
+        </button>
         @if (member.hasAccount) {
           <span class="status-pill status-pill--success">Active</span>
           <button mat-stroked-button class="invite-button" (click)="passwordReset(member)">

@@ -58,7 +58,7 @@ export class Settings {
 
     this.staffSrv.getClinicStaff().subscribe((staff) => {
       this.entries.set(
-        staff.map((member) => ({
+        staff.filter((member) => !member.removedAt).map((member) => ({
           staff: member,
           form: this.buildForm(member.workingHours ?? createDefaultWorkingHours()),
           isSaving: signal(false),

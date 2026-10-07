@@ -1,4 +1,4 @@
-import { Component, Injectable, inject, signal } from '@angular/core';
+import { Component, Injectable, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import {
   CalendarAngularDateFormatter,
@@ -33,7 +33,7 @@ import { AppointmentService } from '../core/services/appointment.service';
 import { StaffService } from '../core/services/staff.service';
 import { PatientService } from '../core/services/patient.service';
 import { Appointment, AppointmentStatus } from '../shared/models/appointment.model';
-import { StaffMember } from '../shared/models/staff-member.model';
+import { StaffMember, StaffRole } from '../shared/models/staff-member.model';
 import { Patient } from '../shared/models/patient.model';
 import { AppointmentForm, AppointmentFormDialogData } from '../appointments/appointment-form/appointment-form';
 import { DateTimeUtils } from '../shared/utils/date-time.utils';
@@ -121,12 +121,15 @@ export class Calendar {
 
   // Signals rather than plain fields: the app is zoneless, so data arriving from the API
   // only re-renders the view (including the getters below that read these) via signals.
-  readonly doctors = signal<StaffMember[]>([]);
+  // Everyone who is or was on staff, so past appointments of removed doctors keep their
+  // name; the doctor filter and count only use current doctors.
+  private readonly staff = signal<StaffMember[]>([]);
+  readonly doctors = computed(() => this.staff().filter((s) => s.role === StaffRole.Doctor && !s.removedAt));
   private readonly appointments = signal<Appointment[]>([]);
   private readonly patients = signal<Patient[]>([]);
 
   constructor() {
-    this.staffSrv.getDoctors().subscribe((doctors) => this.doctors.set(doctors));
+    this.staffSrv.getClinicStaff().subscribe((staff) => this.staff.set(staff));
     this.loadPatients();
     this.loadAppointments();
   }
@@ -159,7 +162,7 @@ export class Calendar {
   }
 
   get events(): CalendarEvent<AppointmentEventMeta>[] {
-    const doctorsById = new Map(this.doctors().map((d) => [d.id, d]));
+    const doctorsById = new Map(this.staff().map((s) => [s.id, s]));
     const patientsById = new Map(this.patients().map((p) => [p.id, p]));
 
     return this.appointments()
@@ -215,7 +218,7 @@ export class Calendar {
   }
 
   doctorName(doctorId: string): string {
-    const doctor = this.doctors().find((d) => d.id === doctorId);
+    const doctor = this.staff().find((s) => s.id === doctorId);
     return doctor ? `Dr. ${doctor.firstName} ${doctor.lastName}` : 'Unknown doctor';
   }
 

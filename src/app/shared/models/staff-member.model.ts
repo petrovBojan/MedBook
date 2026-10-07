@@ -21,6 +21,11 @@ export interface StaffMember {
   hasAccount?: boolean;
   /** When the profile photo last changed; absent when there is no photo. Part of the photo URL (cache busting). */
   photoUpdatedAt?: string;
+  /**
+   * Set once the person has been removed from the clinic. Removed people are only listed so
+   * past appointments can still show their name - leave them out of pickers and team lists.
+   */
+  removedAt?: string;
 }
 
 /** What a staff member can change on their own profile page. */

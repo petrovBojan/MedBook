@@ -39,6 +39,14 @@ export class AdminService {
     return this.http.get<StaffMember[]>(`${this.baseUrl}/${encodeURIComponent(id)}/staff`);
   }
 
+  /** Gives or takes away clinic admin rights. The person is logged out and gets the new rights on their next login. */
+  setClinicAdmin(clinicId: string, staffId: string, isClinicAdmin: boolean): Observable<StaffMember> {
+    return this.http.put<StaffMember>(
+      `${this.baseUrl}/${encodeURIComponent(clinicId)}/staff/${encodeURIComponent(staffId)}/admin`,
+      { isClinicAdmin }
+    );
+  }
+
   regenerateInvitation(clinicId: string, staffId: string): Observable<Invitation> {
     return this.http.post<Invitation>(
       `${this.baseUrl}/${encodeURIComponent(clinicId)}/staff/${encodeURIComponent(staffId)}/invitation`,

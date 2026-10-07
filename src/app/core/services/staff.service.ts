@@ -40,6 +40,11 @@ export class StaffService {
     return this.http.put<StaffMember>(`${this.baseUrl}/${encodeURIComponent(staffId)}/role`, dto);
   }
 
+  /** Clinic admins: takes someone off staff. They're logged out and can't log in again; past appointments keep their name. */
+  removeStaff(staffId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${encodeURIComponent(staffId)}`);
+  }
+
   /** Clinic admins: a new invitation link for someone who hasn't registered (the old link stops working). */
   regenerateInvitation(staffId: string): Observable<Invitation> {
     return this.http.post<Invitation>(`${this.baseUrl}/${encodeURIComponent(staffId)}/invitation`, null);

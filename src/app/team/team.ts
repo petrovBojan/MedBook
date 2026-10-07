@@ -12,6 +12,7 @@ import { StaffForm } from './staff-form/staff-form';
 import { StaffRoleDialog } from './staff-role-dialog/staff-role-dialog';
 import { AuthService } from '../core/services/auth.service';
 import { Avatar } from '../shared/components/avatar/avatar';
+import { ConfirmDialog, ConfirmDialogData } from '../shared/components/confirm-dialog/confirm-dialog';
 
 /** Clinic admins: who has access to the clinic, adding people, invitation and password reset links. */
 @Component({
@@ -29,8 +30,35 @@ export class Team {
   readonly staff = signal<StaffMember[]>([]);
   readonly errorMessage = signal<string | null>(null);
 
+  /** The signed-in admin - they can't remove themselves. */
+  readonly currentUserId = this.authSrv.getCurrentUser()?.id;
+
   constructor() {
     this.load();
+  }
+
+  removeStaff(member: StaffMember): void {
+    const name = `${member.firstName} ${member.lastName}`;
+    this.dialog
+      .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {
+        maxWidth: '95vw',
+        data: {
+          title: 'Remove staff member',
+          message: `${name} will be logged out and won't be able to log in again. Past appointments keep their name.`,
+          confirmLabel: 'Remove'
+        }
+      })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        if (!confirmed) {
+          return;
+        }
+        this.errorMessage.set(null);
+        this.staffSrv.removeStaff(member.id).subscribe({
+          next: () => this.load(),
+          error: (err: Error) => this.errorMessage.set(err.message)
+        });
+      });
   }
 
   addStaff(): void {
@@ -94,7 +122,8 @@ export class Team {
 
   private load(): void {
     this.staffSrv.getClinicStaff().subscribe({
-      next: (staff) => this.staff.set(staff),
+      // Removed people are only listed by the API for appointment history.
+      next: (staff) => this.staff.set(staff.filter((member) => !member.removedAt)),
       error: (err: Error) => this.errorMessage.set(err.message)
     });
   }

@@ -123,7 +123,10 @@
     },
     "list": {
       "empty": "No booked appointments.",
-      "addAppointment": "Add appointment"
+      "addAppointment": "Add appointment",
+      "previous": "Previous",
+      "showMore": "Show more",
+      "noneSoon": "No appointments today or in the next two days."
     },
     "unconfirmedPrefix": "(Unconfirmed)"
   },
@@ -225,7 +228,10 @@
     "cancelAppointment": "Cancel appointment",
     "cancelConfirm": "This will mark the appointment as cancelled. Continue?",
     "saveChanges": "Save changes",
-    "book": "Book appointment"
+    "book": "Book appointment",
+    "searchPatient": "Search by name, phone or email",
+    "noPatientsFound": "No patients found.",
+    "morePatients": "Showing the first {{ count }} - keep typing to narrow it down."
   },
   "patients": {
     "search": "Search patients",
@@ -365,6 +371,60 @@
       "adminSection": "First administrator",
       "adminHint": "They manage the clinic's team. You'll get an invitation link to send them - they choose their own password.",
       "submit": "Create clinic"
+    }
+  },
+  "errors": {
+    "network": "Can't reach the server. Check your connection and try again.",
+    "generic": "Something went wrong (error {{ status }}). Please try again.",
+    "slotUnavailable": "This time slot is not available.",
+    "auth": {
+      "invalidCredentials": "Invalid email or password.",
+      "tooManyAttempts": "Too many login attempts. Please wait a minute and try again.",
+      "wrongPassword": "Your current password is incorrect.",
+      "samePassword": "Choose a new password that is different from the current one.",
+      "clinicDeactivated": "Your clinic's access to MedBook has been deactivated. Please contact the platform administrator.",
+      "invalidInvitation": "This invitation link is invalid or has expired. Ask your clinic administrator for a new one.",
+      "invalidResetLink": "This password reset link is invalid or has expired. Ask your clinic administrator for a new one."
+    },
+    "appointment": {
+      "notFound": "Appointment not found.",
+      "doctorNotFound": "Selected doctor was not found.",
+      "patientNotFound": "Selected patient was not found.",
+      "endBeforeStart": "End time must be after the start time.",
+      "notSameDay": "Appointments must start and end on the same day.",
+      "clinicClosed": "{{ clinic }} is closed {{ on }}.",
+      "outsideClinicHours": "{{ clinic }}'s hours {{ on }} are {{ start }}–{{ end }}.",
+      "doctorOff": "Dr. {{ doctor }} doesn't work {{ on }}.",
+      "outsideDoctorHours": "Dr. {{ doctor }}'s hours {{ on }} are {{ start }}–{{ end }}.",
+      "doctorBusy": "This doctor already has an appointment during that time."
+    },
+    "clinic": {
+      "notFound": "Clinic not found.",
+      "unknownTimeZone": "Unknown time zone '{{ timeZone }}'."
+    },
+    "workingHours": {
+      "incomplete": "Working hours must contain exactly one entry for each day of the week.",
+      "endBeforeStart": "{{ day }}: end time must be after the start time."
+    },
+    "staff": {
+      "notFound": "Staff member not found.",
+      "noPhoto": "This staff member has no photo.",
+      "adminOnly": "Only clinic administrators can manage staff members.",
+      "removeSelf": "You can't remove yourself from the clinic.",
+      "hasUpcoming": "Dr. {{ doctor }} still has upcoming appointments. Move them to another doctor or cancel them first.",
+      "alreadyRegistered": "{{ name }} has already registered.",
+      "notRegistered": "{{ name }} hasn't registered yet - send them a new invitation link instead.",
+      "onlyAdmin": "{{ name }} is the clinic's only admin. Make someone else an admin first.",
+      "emailRemoved": "This email address belongs to a staff member who was removed, so it can't be used again.",
+      "emailTaken": "Someone with this email address already has an account."
+    },
+    "patient": {
+      "notFound": "Patient not found."
+    },
+    "photo": {
+      "empty": "The photo is empty.",
+      "tooLarge": "The photo is too large (maximum {{ max }} MB).",
+      "wrongType": "The photo must be a JPEG, PNG or WebP image."
     }
   }
 }

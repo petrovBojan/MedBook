@@ -27,12 +27,38 @@
             t('appointmentForm.patient')
           }}</label>
           <mat-form-field appearance="outline">
-            <mat-select formControlName="patientId" [placeholder]="t('appointmentForm.patient')">
-              @for (patient of patients(); track patient.id) {
-                <mat-option [value]="patient.id">{{ patient.firstName }} {{ patient.lastName }}</mat-option>
+            <input
+              matInput
+              [formControl]="patientSearch"
+              [matAutocomplete]="patientList"
+              [placeholder]="t('appointmentForm.searchPatient')"
+              autocomplete="off"
+            />
+            <mat-icon matSuffix>search</mat-icon>
+            <mat-autocomplete #patientList [displayWith]="patientLabel" autoActiveFirstOption>
+              @for (patient of patientMatches().patients; track patient.id) {
+                <mat-option [value]="patient" class="patient-option">
+                  <span class="patient-option-name">{{ patient.firstName }} {{ patient.lastName }}</span>
+                  @if (patient.dateOfBirth || patient.phone) {
+                    <span class="patient-option-details">
+                      {{ patient.dateOfBirth | appDate: 'mediumDate' }}
+                      @if (patient.dateOfBirth && patient.phone) {
+                        &middot;
+                      }
+                      {{ patient.phone }}
+                    </span>
+                  }
+                </mat-option>
+              } @empty {
+                <mat-option disabled>{{ t('appointmentForm.noPatientsFound') }}</mat-option>
               }
-            </mat-select>
-            @if (form.controls.patientId.hasError('required') && form.controls.patientId.touched) {
+              @if (patientMatches().more) {
+                <mat-option disabled class="patient-option-more">{{
+                  t('appointmentForm.morePatients', { count: patientMatches().patients.length })
+                }}</mat-option>
+              }
+            </mat-autocomplete>
+            @if (patientSearch.invalid && patientSearch.touched) {
               <mat-error>{{ t('appointmentForm.choosePatient') }}</mat-error>
             }
           </mat-form-field>

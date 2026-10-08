@@ -17,6 +17,7 @@ import {
   provideCalendar
 } from 'angular-calendar';
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
+import { addDays, startOfDay } from 'date-fns';
 import { formatDate } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -56,6 +57,18 @@ interface AppointmentListGroup {
   dateParam: string;
   items: Appointment[];
 }
+
+interface AppointmentList {
+  groups: AppointmentListGroup[];
+  /** Matching appointments exist before the shown days ("Previous"). */
+  hasEarlier: boolean;
+  /** Matching appointments exist after the shown days ("Show more"). */
+  hasLater: boolean;
+}
+
+/** The list starts with today plus this many days after it; "Show more" adds this many days that have appointments. */
+const LIST_DAYS_AHEAD = 2;
+const LIST_MORE_DAYS = 3;
 
 // Overrides the hour gutter labels in the week/day views to 24h ("14:00" instead of "2 PM").
 @Injectable()
@@ -129,6 +142,12 @@ export class Calendar {
   selectedDate: Date | null = null;
   selectedStatuses: AppointmentStatus[] = [];
 
+  // The days the list view shows: [listFrom, listUntil). Starts as today and the next two
+  // days; "Previous" and "Show more" widen it. Ignored when a single day is picked in the
+  // Day filter.
+  private listFrom = startOfDay(new Date());
+  private listUntil = addDays(this.listFrom, LIST_DAYS_AHEAD + 1);
+
   // Signals rather than plain fields: the app is zoneless, so data arriving from the API
   // only re-renders the view (including the getters below that read these) via signals.
   // Everyone who is or was on staff, so past appointments of removed doctors keep their
@@ -180,6 +199,7 @@ export class Calendar {
     this.selectedDoctorId = null;
     this.selectedDate = null;
     this.selectedStatuses = [AppointmentStatus.Unconfirmed];
+    this.resetListWindow();
   }
 
   get totalPatientsCount(): number {
@@ -195,16 +215,67 @@ export class Calendar {
       .map((appt) => this.toCalendarEvent(appt, doctorsById, patientsById));
   }
 
-  get listAppointments(): AppointmentListGroup[] {
-    const filtered = this.appointments()
-      // Cancelled appointments stay hidden by default, unless the user explicitly
-      // filters for them via the status filter.
-      .filter((appt) => this.selectedStatuses.length > 0 || appt.status !== AppointmentStatus.Cancelled)
-      .filter((appt) => this.matchesFilters(appt))
-      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+  get appointmentList(): AppointmentList {
+    const filtered = this.listCandidates();
+    // A day picked in the filter shows just that day, whatever the window.
+    if (this.selectedDate) {
+      return { groups: this.groupByDay(filtered), hasEarlier: false, hasLater: false };
+    }
 
+    const from = this.listFrom.getTime();
+    const until = this.listUntil.getTime();
+    const startOf = (appt: Appointment) => new Date(appt.start).getTime();
+    return {
+      groups: this.groupByDay(filtered.filter((appt) => startOf(appt) >= from && startOf(appt) < until)),
+      hasEarlier: filtered.some((appt) => startOf(appt) < from),
+      hasLater: filtered.some((appt) => startOf(appt) >= until)
+    };
+  }
+
+  /** Adds the next few days that have appointments to the end of the list (empty days in between are skipped). */
+  showMoreDays(): void {
+    const laterDays = this.daysWithAppointments().filter((day) => day >= this.listUntil.getTime());
+    const lastDay = laterDays[Math.min(LIST_MORE_DAYS, laterDays.length) - 1];
+    if (lastDay !== undefined) {
+      this.listUntil = addDays(new Date(lastDay), 1);
+    }
+  }
+
+  /** Adds the closest earlier day that has appointments to the top of the list, one day per click. */
+  showPreviousDay(): void {
+    const earlierDays = this.daysWithAppointments().filter((day) => day < this.listFrom.getTime());
+    const previousDay = earlierDays.at(-1);
+    if (previousDay !== undefined) {
+      this.listFrom = new Date(previousDay);
+    }
+  }
+
+  private resetListWindow(): void {
+    this.listFrom = startOfDay(new Date());
+    this.listUntil = addDays(this.listFrom, LIST_DAYS_AHEAD + 1);
+  }
+
+  /** The appointments the list could show with the current filters, oldest first. */
+  private listCandidates(): Appointment[] {
+    return (
+      this.appointments()
+        // Cancelled appointments stay hidden by default, unless the user explicitly
+        // filters for them via the status filter.
+        .filter((appt) => this.selectedStatuses.length > 0 || appt.status !== AppointmentStatus.Cancelled)
+        .filter((appt) => this.matchesFilters(appt))
+        .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+    );
+  }
+
+  /** Start-of-day timestamps of the days with matching appointments, ascending and distinct. */
+  private daysWithAppointments(): number[] {
+    const days = this.listCandidates().map((appt) => startOfDay(new Date(appt.start)).getTime());
+    return [...new Set(days)];
+  }
+
+  private groupByDay(appointments: Appointment[]): AppointmentListGroup[] {
     const groups = new Map<string, Appointment[]>();
-    for (const appt of filtered) {
+    for (const appt of appointments) {
       const key = new Date(appt.start).toDateString();
       const group = groups.get(key);
       if (group) {

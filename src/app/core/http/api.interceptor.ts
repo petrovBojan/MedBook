@@ -1,6 +1,7 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslocoService } from '@jsverse/transloco';
 import { catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../services/auth.service';
@@ -12,7 +13,7 @@ export const CSRF_HEADER_VALUE = 'XMLHttpRequest';
 
 // For calls to our own API: sends the HttpOnly session cookie along (withCredentials) plus
 // the CSRF header, and turns failures into ApiError so components can show `err.message`
-// directly.
+// directly - already translated into the current language.
 export const apiInterceptor: HttpInterceptorFn = (req, next) => {
   if (!req.url.startsWith(environment.apiUrl)) {
     return next(req);
@@ -20,6 +21,7 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
 
   const authSrv = inject(AuthService);
   const router = inject(Router);
+  const transloco = inject(TranslocoService);
   const request = req.clone({ withCredentials: true, setHeaders: { [CSRF_HEADER]: CSRF_HEADER_VALUE } });
   const isAuthCall = req.url.startsWith(`${environment.apiUrl}/auth/`);
 
@@ -37,7 +39,7 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
         router.navigate(['/login'], { queryParams: { returnUrl: router.url } });
       }
 
-      return throwError(() => ApiError.from(err));
+      return throwError(() => ApiError.from(err, transloco));
     })
   );
 };

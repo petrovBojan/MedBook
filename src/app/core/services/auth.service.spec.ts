@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 import { apiInterceptor } from '../http/api.interceptor';
 import { StaffMember, StaffRole } from '../../shared/models/staff-member.model';
 import { environment } from '../../../environments/environment';
+import { provideTranslocoTesting } from '../i18n/transloco-testing';
 
 const loginUrl = `${environment.apiUrl}/auth/login`;
 const logoutUrl = `${environment.apiUrl}/auth/logout`;
@@ -27,7 +28,12 @@ describe('AuthService', () => {
   beforeEach(() => {
     localStorage.clear();
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(withInterceptors([apiInterceptor])), provideHttpClientTesting(), provideRouter([])]
+      providers: [
+        provideHttpClient(withInterceptors([apiInterceptor])),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        provideTranslocoTesting()
+      ]
     });
     service = TestBed.inject(AuthService);
     httpMock = TestBed.inject(HttpTestingController);

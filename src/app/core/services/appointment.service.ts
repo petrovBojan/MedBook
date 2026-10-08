@@ -4,12 +4,17 @@ import { Observable, map } from 'rxjs';
 import { Appointment, AppointmentDto } from '../../shared/models/appointment.model';
 import { environment } from '../../../environments/environment';
 import { undefinedIfNotFound } from '../http/api-error';
+import { TranslocoService } from '@jsverse/transloco';
+import { ErrorArgs, translateErrorCode } from '../i18n/translate-error';
 
 export type AvailabilityCheckDto = Pick<AppointmentDto, 'doctorId' | 'start' | 'end' | 'status'>;
 
 interface AvailabilityResponse {
   available: boolean;
+  /** Why not, in English; `code` and `args` say the same for translating. */
   message?: string;
+  code?: string;
+  args?: ErrorArgs;
 }
 
 // Scheduling rules (working hours, same-day, no double-booking) are enforced by the API
@@ -19,6 +24,7 @@ interface AvailabilityResponse {
 })
 export class AppointmentService {
   private readonly http = inject(HttpClient);
+  private readonly transloco = inject(TranslocoService);
   private readonly baseUrl = `${environment.apiUrl}/appointments`;
 
   getAppointments(): Observable<Appointment[]> {
@@ -46,6 +52,11 @@ export class AppointmentService {
   checkAvailability(dto: AvailabilityCheckDto, excludeId?: string): Observable<string | null> {
     return this.http
       .post<AvailabilityResponse>(`${this.baseUrl}/check-availability`, { ...dto, excludeId })
-      .pipe(map((res) => (res.available ? null : (res.message ?? 'This time slot is not available.'))));
+      .pipe(map((res) => (res.available ? null : this.unavailableMessage(res))));
+  }
+
+  private unavailableMessage(res: AvailabilityResponse): string {
+    const translated = res.code ? translateErrorCode(this.transloco, res.code, res.args) : null;
+    return translated ?? res.message ?? this.transloco.translate('errors.slotUnavailable');
   }
 }

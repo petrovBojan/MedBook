@@ -3,11 +3,13 @@ import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, provideRouter } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
 import { apiInterceptor } from './api.interceptor';
 import { ApiError } from './api-error';
 import { AuthService } from '../services/auth.service';
 import { StaffRole } from '../../shared/models/staff-member.model';
 import { environment } from '../../../environments/environment';
+import { provideTranslocoTesting } from '../i18n/transloco-testing';
 
 describe('apiInterceptor', () => {
   const patientsUrl = `${environment.apiUrl}/patients`;
@@ -18,7 +20,12 @@ describe('apiInterceptor', () => {
   beforeEach(() => {
     localStorage.clear();
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(withInterceptors([apiInterceptor])), provideHttpClientTesting(), provideRouter([])]
+      providers: [
+        provideHttpClient(withInterceptors([apiInterceptor])),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        provideTranslocoTesting()
+      ]
     });
     http = TestBed.inject(HttpClient);
     httpMock = TestBed.inject(HttpTestingController);
@@ -92,6 +99,36 @@ describe('apiInterceptor', () => {
       status: 400,
       message: 'This doctor already has an appointment during that time.'
     });
+  });
+
+  it("translates the API's error code into the current language, args included", async () => {
+    TestBed.inject(TranslocoService).setActiveLang('mk');
+
+    const result = firstValueFrom(http.get(patientsUrl));
+    httpMock.expectOne(patientsUrl).flush(
+      {
+        title: 'Request rejected',
+        detail: "Dr. Carter doesn't work on Saturdays.",
+        code: 'appointment.doctorOff',
+        args: { doctor: 'Carter', day: 'Saturday' }
+      },
+      { status: 400, statusText: 'Bad Request' }
+    );
+
+    await expect(result).rejects.toMatchObject({
+      status: 400,
+      code: 'appointment.doctorOff',
+      message: 'Д-р Carter не работи во сабота.'
+    });
+  });
+
+  it("falls back to the English 'detail' for an error code this frontend doesn't know", async () => {
+    TestBed.inject(TranslocoService).setActiveLang('mk');
+
+    const result = firstValueFrom(http.get(patientsUrl));
+    httpMock.expectOne(patientsUrl).flush({ detail: 'Something brand new.', code: 'brand.new' }, { status: 400, statusText: 'Bad Request' });
+
+    await expect(result).rejects.toThrow('Something brand new.');
   });
 
   it('falls back to the first field message for validation errors', async () => {

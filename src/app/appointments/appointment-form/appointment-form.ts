@@ -1,8 +1,11 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AbstractControl, FormBuilder, FormControl, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatTimepickerModule } from '@angular/material/timepicker';
@@ -25,6 +28,15 @@ import { ClinicService } from '../../core/services/clinic.service';
 import { DaySchedule, WorkingHours } from '../../shared/models/working-hours.model';
 import { SLOT_MINUTES, atTime, firstAvailableStart, openHoursOn, weekdayOf } from '../../shared/utils/clinic-hours.utils';
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
+import { AppDatePipe } from '../../shared/pipes/app-date.pipe';
+
+/** At most this many patients are listed while searching - the clinic's list can be long. */
+const MAX_PATIENT_MATCHES = 50;
+
+/** The patient search box is only valid once a patient has been picked from the suggestions. */
+function patientPicked(control: AbstractControl): ValidationErrors | null {
+  return control.value && typeof control.value === 'object' ? null : { patientNotPicked: true };
+}
 
 export interface AppointmentFormDialogData {
   appointmentId?: string;
@@ -45,6 +57,9 @@ export interface AppointmentFormDialogData {
     MatDatepickerModule,
     MatTimepickerModule,
     MatDialogModule,
+    MatAutocompleteModule,
+    MatIconModule,
+    AppDatePipe,
     TranslocoDirective
   ]
 })
@@ -80,6 +95,25 @@ export class AppointmentForm {
   readonly scheduleWarning = signal<string | null>(null);
   readonly doctors = signal<StaffMember[]>([]);
   readonly patients = signal<Patient[]>([]);
+
+  // The patient is picked by searching (name, phone or email) rather than from one long
+  // dropdown. The search box holds the typed text, or the Patient once one is picked;
+  // picking one fills in the form's patientId.
+  readonly patientSearch = new FormControl<string | Patient>('', { nonNullable: true, validators: patientPicked });
+  private readonly patientSearchValue = toSignal(this.patientSearch.valueChanges, { initialValue: '' });
+  readonly patientMatches = computed(() => {
+    const value = this.patientSearchValue();
+    const terms = (typeof value === 'string' ? value : '').trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const matches = this.patients()
+      .filter((patient) => {
+        const haystack = [patient.firstName, patient.lastName, patient.phone, patient.email].join(' ').toLowerCase();
+        return terms.every((term) => haystack.includes(term));
+      })
+      .sort((a, b) => `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`));
+    return { patients: matches.slice(0, MAX_PATIENT_MATCHES), more: matches.length > MAX_PATIENT_MATCHES };
+  });
+  readonly patientLabel = (value: string | Patient | null): string =>
+    value && typeof value === 'object' ? `${value.firstName} ${value.lastName}` : (value ?? '');
 
   private readonly scheduleChecks = new Subject<void>();
 
@@ -127,7 +161,13 @@ export class AppointmentForm {
 
   constructor() {
     this.staffSrv.getDoctors().subscribe((doctors) => this.doctors.set(doctors));
-    this.patientSrv.getPatients().subscribe((patients) => this.patients.set(patients));
+    this.patientSearch.valueChanges.subscribe((value) =>
+      this.form.controls.patientId.setValue(typeof value === 'object' ? value.id : '')
+    );
+    this.patientSrv.getPatients().subscribe((patients) => {
+      this.patients.set(patients);
+      this.showPatient(this.form.controls.patientId.value);
+    });
     this.clinicSrv.getCurrentClinic().subscribe((clinic) => {
       if (!clinic?.workingHours?.length) {
         return;
@@ -161,11 +201,13 @@ export class AppointmentForm {
           { emitEvent: false }
         );
         this.startDay.set(start);
+        this.showPatient(appointment.patientId);
         this.scheduleChecks.next();
       });
     } else {
       if (this.data.patientId) {
         this.form.patchValue({ patientId: this.data.patientId });
+        this.showPatient(this.data.patientId);
       }
 
       if (this.data.date) {
@@ -261,6 +303,7 @@ export class AppointmentForm {
     const isCancelling = this.form.controls.status.value === AppointmentStatus.Cancelled;
     if (this.form.invalid && !isCancelling) {
       this.form.markAllAsTouched();
+      this.patientSearch.markAsTouched();
       return;
     }
 
@@ -325,8 +368,16 @@ export class AppointmentForm {
         return;
       }
       this.patients.update((patients) => [...patients, patient]);
-      this.form.patchValue({ patientId: patient.id });
+      this.patientSearch.setValue(patient);
     });
+  }
+
+  /** Shows an already chosen patient (editing, booking from a patient's page) in the search box, once the list has loaded. */
+  private showPatient(patientId: string): void {
+    const patient = patientId ? this.patients().find((p) => p.id === patientId) : undefined;
+    if (patient) {
+      this.patientSearch.setValue(patient);
+    }
   }
 
   close(): void {

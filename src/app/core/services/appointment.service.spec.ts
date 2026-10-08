@@ -7,6 +7,7 @@ import { AppointmentService } from './appointment.service';
 import { apiInterceptor } from '../http/api.interceptor';
 import { AppointmentDto, AppointmentStatus } from '../../shared/models/appointment.model';
 import { environment } from '../../../environments/environment';
+import { provideTranslocoTesting } from '../i18n/transloco-testing';
 
 // The scheduling rules themselves live (and are tested) in MedBook.Api - these tests
 // cover the HTTP contract: what's sent, and how the API's answers reach the caller.
@@ -26,7 +27,12 @@ describe('AppointmentService', () => {
   beforeEach(() => {
     localStorage.clear();
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(withInterceptors([apiInterceptor])), provideHttpClientTesting(), provideRouter([])]
+      providers: [
+        provideHttpClient(withInterceptors([apiInterceptor])),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        provideTranslocoTesting()
+      ]
     });
     service = TestBed.inject(AppointmentService);
     httpMock = TestBed.inject(HttpTestingController);

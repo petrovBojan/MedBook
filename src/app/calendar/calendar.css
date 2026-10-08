@@ -113,6 +113,18 @@
   cursor: pointer;
 }
 
+.list-previous {
+  display: flex;
+  margin: 0 auto 4px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.list-more {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0 8px;
+}
+
 .list-day-footer {
   display: flex;
   justify-content: flex-end;

@@ -251,10 +251,19 @@
       }
       @case ('list') {
         <div class="appointment-list">
-          @if (listAppointments.length === 0) {
-            <p class="empty-state">{{ t('calendar.list.empty') }}</p>
+          @let list = appointmentList;
+          @if (list.hasEarlier) {
+            <button mat-button type="button" class="list-previous" (click)="showPreviousDay()">
+              <mat-icon>keyboard_arrow_up</mat-icon>
+              {{ t('calendar.list.previous') }}
+            </button>
           }
-          @for (group of listAppointments; track group.dateLabel) {
+          @if (list.groups.length === 0) {
+            <p class="empty-state">
+              {{ list.hasEarlier || list.hasLater ? t('calendar.list.noneSoon') : t('calendar.list.empty') }}
+            </p>
+          }
+          @for (group of list.groups; track group.dateLabel) {
             <h3 class="list-date-heading">{{ group.dateLabel }}</h3>
             <mat-card class="list-day-card">
               <mat-list class="list-day">
@@ -293,6 +302,14 @@
               >
                 <mat-icon>add</mat-icon>
                 {{ t('calendar.list.addAppointment') }}
+              </button>
+            </div>
+          }
+          @if (list.hasLater) {
+            <div class="list-more">
+              <button mat-stroked-button type="button" class="pill-button" (click)="showMoreDays()">
+                <mat-icon>expand_more</mat-icon>
+                {{ t('calendar.list.showMore') }}
               </button>
             </div>
           }

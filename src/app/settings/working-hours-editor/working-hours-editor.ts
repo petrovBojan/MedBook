@@ -5,6 +5,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTimepickerModule } from '@angular/material/timepicker';
 import { Weekday } from '../../shared/models/working-hours.model';
+import { TranslocoDirective } from '@jsverse/transloco';
 
 export type DayFormGroup = FormGroup<{
   day: FormControl<Weekday>;
@@ -17,7 +18,14 @@ export type DayFormGroup = FormGroup<{
   selector: 'app-working-hours-editor',
   templateUrl: './working-hours-editor.html',
   styleUrl: './working-hours-editor.css',
-  imports: [ReactiveFormsModule, MatCheckboxModule, MatFormFieldModule, MatInputModule, MatTimepickerModule]
+  imports: [
+    ReactiveFormsModule,
+    MatCheckboxModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatTimepickerModule,
+    TranslocoDirective
+  ]
 })
 export class WorkingHoursEditor {
   @Input({ required: true }) days!: FormArray<DayFormGroup>;

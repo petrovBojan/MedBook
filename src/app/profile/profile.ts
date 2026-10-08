@@ -13,6 +13,9 @@ import { Avatar } from '../shared/components/avatar/avatar';
 import { ChangePasswordDialog } from '../shared/components/change-password-dialog/change-password-dialog';
 import { STAFF_COLORS } from '../shared/utils/staff-colors';
 import { resizeToSquare } from '../shared/utils/image.utils';
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { APP_LANGUAGES, LanguageService } from '../core/services/language.service';
 
 /**
  * The logged-in staff member's own profile: photo, name, specialty and calendar color.
@@ -29,13 +32,18 @@ import { resizeToSquare } from '../shared/utils/image.utils';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    Avatar
+    Avatar,
+    TranslocoDirective,
+    MatButtonToggleModule
   ]
 })
 export class Profile {
   private readonly fb = inject(FormBuilder);
   private readonly profileSrv = inject(ProfileService);
   private readonly dialog = inject(MatDialog);
+  private readonly transloco = inject(TranslocoService);
+  readonly language = inject(LanguageService);
+  readonly languages = APP_LANGUAGES;
 
   readonly StaffRole = StaffRole;
   readonly colors = STAFF_COLORS;
@@ -122,7 +130,7 @@ export class Profile {
       photo = await resizeToSquare(file);
     } catch {
       this.isPhotoBusy.set(false);
-      this.photoError.set("That file couldn't be read as an image. Try a JPEG, PNG or WebP photo.");
+      this.photoError.set(this.transloco.translate('profile.photoUnreadable'));
       return;
     }
 

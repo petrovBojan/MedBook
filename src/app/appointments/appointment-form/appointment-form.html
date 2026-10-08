@@ -1,162 +1,211 @@
-<h2 mat-dialog-title>{{ isEditMode ? 'Edit appointment' : 'New appointment' }}</h2>
+<ng-container *transloco="let t">
+  <h2 mat-dialog-title>{{ isEditMode ? t('appointmentForm.editTitle') : t('appointmentForm.newTitle') }}</h2>
 
-<form [formGroup]="form" (ngSubmit)="submit()" class="appointment-form">
-  <mat-dialog-content>
-    <div class="field-row">
-      <div class="field-col">
-        <label class="field-label" [class.field-label--empty]="!form.controls.doctorId.value">Doctor</label>
-        <mat-form-field appearance="outline">
-          <mat-select formControlName="doctorId" placeholder="Doctor">
-            @for (doctor of doctors(); track doctor.id) {
-              <mat-option [value]="doctor.id">Dr. {{ doctor.firstName }} {{ doctor.lastName }}</mat-option>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="appointment-form">
+    <mat-dialog-content>
+      <div class="field-row">
+        <div class="field-col">
+          <label class="field-label" [class.field-label--empty]="!form.controls.doctorId.value">{{
+            t('appointmentForm.doctor')
+          }}</label>
+          <mat-form-field appearance="outline">
+            <mat-select formControlName="doctorId" [placeholder]="t('appointmentForm.doctor')">
+              @for (doctor of doctors(); track doctor.id) {
+                <mat-option [value]="doctor.id">{{
+                  t('common.doctorName', { name: doctor.firstName + ' ' + doctor.lastName })
+                }}</mat-option>
+              }
+            </mat-select>
+            @if (form.controls.doctorId.hasError('required') && form.controls.doctorId.touched) {
+              <mat-error>{{ t('appointmentForm.chooseDoctor') }}</mat-error>
             }
-          </mat-select>
-          @if (form.controls.doctorId.hasError('required') && form.controls.doctorId.touched) {
-            <mat-error>Choose a doctor.</mat-error>
-          }
-        </mat-form-field>
-      </div>
+          </mat-form-field>
+        </div>
 
-      <div class="field-col">
-        <label class="field-label" [class.field-label--empty]="!form.controls.patientId.value">Patient</label>
-        <mat-form-field appearance="outline">
-          <mat-select formControlName="patientId" placeholder="Patient">
-            @for (patient of patients(); track patient.id) {
-              <mat-option [value]="patient.id">{{ patient.firstName }} {{ patient.lastName }}</mat-option>
+        <div class="field-col">
+          <label class="field-label" [class.field-label--empty]="!form.controls.patientId.value">{{
+            t('appointmentForm.patient')
+          }}</label>
+          <mat-form-field appearance="outline">
+            <mat-select formControlName="patientId" [placeholder]="t('appointmentForm.patient')">
+              @for (patient of patients(); track patient.id) {
+                <mat-option [value]="patient.id">{{ patient.firstName }} {{ patient.lastName }}</mat-option>
+              }
+            </mat-select>
+            @if (form.controls.patientId.hasError('required') && form.controls.patientId.touched) {
+              <mat-error>{{ t('appointmentForm.choosePatient') }}</mat-error>
             }
-          </mat-select>
-          @if (form.controls.patientId.hasError('required') && form.controls.patientId.touched) {
-            <mat-error>Choose a patient.</mat-error>
-          }
-        </mat-form-field>
-        <button type="button" class="add-patient-link" (click)="openAddPatient()">+ Add a new patient</button>
-      </div>
-    </div>
-
-    <div class="field-row">
-      <div class="field-col">
-        <label class="field-label" [class.field-label--empty]="!form.controls.startDate.value">Start date</label>
-        <mat-form-field appearance="outline">
-          <input
-            matInput
-            [matDatepicker]="startDatePicker"
-            [matDatepickerFilter]="isOpenDay"
-            formControlName="startDate"
-            placeholder="Start date"
-          />
-          <mat-datepicker-toggle matIconSuffix [for]="startDatePicker" />
-          <mat-datepicker #startDatePicker [touchUi]="layout.isHandset()" />
-          @if (form.controls.startDate.hasError('matDatepickerFilter')) {
-            <mat-error>{{ closedDayMessage(form.controls.startDate.value) }}</mat-error>
-          }
-        </mat-form-field>
+          </mat-form-field>
+          <button type="button" class="add-patient-link" (click)="openAddPatient()">
+            {{ t('appointmentForm.addPatient') }}
+          </button>
+        </div>
       </div>
 
-      <div class="field-col">
-        <label class="field-label" [class.field-label--empty]="!form.controls.startTime.value">Start time</label>
-        <mat-form-field appearance="outline">
-          <input
-            matInput
-            [matTimepicker]="startTimePicker"
-            [matTimepickerMin]="startTimeMin()"
-            [matTimepickerMax]="startTimeMax()"
-            formControlName="startTime"
-            placeholder="Start time"
-          />
-          <mat-timepicker-toggle matIconSuffix [for]="startTimePicker" />
-          <mat-timepicker #startTimePicker interval="15m" />
-          @if (form.controls.startTime.hasError('matTimepickerMin') || form.controls.startTime.hasError('matTimepickerMax')) {
-            <mat-error>{{ openHoursHint() }}</mat-error>
-          }
-        </mat-form-field>
+      <div class="field-row">
+        <div class="field-col">
+          <label class="field-label" [class.field-label--empty]="!form.controls.startDate.value">{{
+            t('appointmentForm.startDate')
+          }}</label>
+          <mat-form-field appearance="outline">
+            <input
+              matInput
+              [matDatepicker]="startDatePicker"
+              [matDatepickerFilter]="isOpenDay"
+              formControlName="startDate"
+              [placeholder]="t('appointmentForm.startDate')"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="startDatePicker" />
+            <mat-datepicker #startDatePicker [touchUi]="layout.isHandset()" />
+            @if (form.controls.startDate.hasError('matDatepickerFilter')) {
+              <mat-error>{{
+                t('appointmentForm.closedOn', { on: t('enums.weekdayOn.' + weekdayOf(form.controls.startDate.value)) })
+              }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="field-col">
+          <label class="field-label" [class.field-label--empty]="!form.controls.startTime.value">{{
+            t('appointmentForm.startTime')
+          }}</label>
+          <mat-form-field appearance="outline">
+            <input
+              matInput
+              [matTimepicker]="startTimePicker"
+              [matTimepickerMin]="startTimeMin()"
+              [matTimepickerMax]="startTimeMax()"
+              formControlName="startTime"
+              [placeholder]="t('appointmentForm.startTime')"
+            />
+            <mat-timepicker-toggle matIconSuffix [for]="startTimePicker" />
+            <mat-timepicker #startTimePicker interval="15m" />
+            @if (
+              form.controls.startTime.hasError('matTimepickerMin') ||
+              form.controls.startTime.hasError('matTimepickerMax')
+            ) {
+              @if (openHours(); as open) {
+                <mat-error>{{
+                  t('appointmentForm.openHours', {
+                    start: open.start,
+                    end: open.end,
+                    on: t('enums.weekdayOn.' + startWeekday())
+                  })
+                }}</mat-error>
+              }
+            }
+          </mat-form-field>
+        </div>
       </div>
-    </div>
 
-    <div class="field-row">
-      <div class="field-col">
-        <label class="field-label" [class.field-label--empty]="!form.controls.endDate.value">End date</label>
-        <mat-form-field appearance="outline">
-          <input
-            matInput
-            [matDatepicker]="endDatePicker"
-            [matDatepickerFilter]="isOpenDay"
-            formControlName="endDate"
-            placeholder="End date"
-          />
-          <mat-datepicker-toggle matIconSuffix [for]="endDatePicker" />
-          <mat-datepicker #endDatePicker [touchUi]="layout.isHandset()" />
-          @if (form.controls.endDate.hasError('matDatepickerFilter')) {
-            <mat-error>{{ closedDayMessage(form.controls.endDate.value) }}</mat-error>
-          }
-        </mat-form-field>
+      <div class="field-row">
+        <div class="field-col">
+          <label class="field-label" [class.field-label--empty]="!form.controls.endDate.value">{{
+            t('appointmentForm.endDate')
+          }}</label>
+          <mat-form-field appearance="outline">
+            <input
+              matInput
+              [matDatepicker]="endDatePicker"
+              [matDatepickerFilter]="isOpenDay"
+              formControlName="endDate"
+              [placeholder]="t('appointmentForm.endDate')"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="endDatePicker" />
+            <mat-datepicker #endDatePicker [touchUi]="layout.isHandset()" />
+            @if (form.controls.endDate.hasError('matDatepickerFilter')) {
+              <mat-error>{{
+                t('appointmentForm.closedOn', { on: t('enums.weekdayOn.' + weekdayOf(form.controls.endDate.value)) })
+              }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="field-col">
+          <label class="field-label" [class.field-label--empty]="!form.controls.endTime.value">{{
+            t('appointmentForm.endTime')
+          }}</label>
+          <mat-form-field appearance="outline">
+            <input
+              matInput
+              [matTimepicker]="endTimePicker"
+              [matTimepickerMin]="endTimeMin()"
+              [matTimepickerMax]="endTimeMax()"
+              formControlName="endTime"
+              [placeholder]="t('appointmentForm.endTime')"
+            />
+            <mat-timepicker-toggle matIconSuffix [for]="endTimePicker" />
+            <mat-timepicker #endTimePicker interval="15m" />
+            @if (
+              form.controls.endTime.hasError('matTimepickerMin') || form.controls.endTime.hasError('matTimepickerMax')
+            ) {
+              @if (openHours(); as open) {
+                <mat-error>{{
+                  t('appointmentForm.openHours', {
+                    start: open.start,
+                    end: open.end,
+                    on: t('enums.weekdayOn.' + startWeekday())
+                  })
+                }}</mat-error>
+              }
+            }
+          </mat-form-field>
+        </div>
       </div>
 
-      <div class="field-col">
-        <label class="field-label" [class.field-label--empty]="!form.controls.endTime.value">End time</label>
-        <mat-form-field appearance="outline">
-          <input
-            matInput
-            [matTimepicker]="endTimePicker"
-            [matTimepickerMin]="endTimeMin()"
-            [matTimepickerMax]="endTimeMax()"
-            formControlName="endTime"
-            placeholder="End time"
-          />
-          <mat-timepicker-toggle matIconSuffix [for]="endTimePicker" />
-          <mat-timepicker #endTimePicker interval="15m" />
-          @if (form.controls.endTime.hasError('matTimepickerMin') || form.controls.endTime.hasError('matTimepickerMax')) {
-            <mat-error>{{ openHoursHint() }}</mat-error>
+      <label class="field-label" [class.field-label--empty]="!form.controls.reason.value">{{
+        t('appointmentForm.reason')
+      }}</label>
+      <mat-form-field appearance="outline">
+        <input matInput formControlName="reason" [placeholder]="t('appointmentForm.reason')" />
+      </mat-form-field>
+
+      <label class="field-label" [class.field-label--empty]="!form.controls.notes.value">{{
+        t('appointmentForm.notes')
+      }}</label>
+      <mat-form-field appearance="outline">
+        <textarea matInput formControlName="notes" rows="3" [placeholder]="t('appointmentForm.notes')"></textarea>
+      </mat-form-field>
+
+      <label class="field-label" [class.field-label--empty]="!form.controls.status.value">{{
+        t('appointmentForm.status')
+      }}</label>
+      <mat-form-field appearance="outline">
+        <mat-select formControlName="status" [placeholder]="t('appointmentForm.status')">
+          @for (status of statusOptions; track status) {
+            <mat-option [value]="status">{{ t('enums.appointmentStatus.' + status) }}</mat-option>
           }
-        </mat-form-field>
-      </div>
-    </div>
-
-    <label class="field-label" [class.field-label--empty]="!form.controls.reason.value">Reason for visit</label>
-    <mat-form-field appearance="outline">
-      <input matInput formControlName="reason" placeholder="Reason for visit" />
-    </mat-form-field>
-
-    <label class="field-label" [class.field-label--empty]="!form.controls.notes.value">Notes</label>
-    <mat-form-field appearance="outline">
-      <textarea matInput formControlName="notes" rows="3" placeholder="Notes"></textarea>
-    </mat-form-field>
-
-    <label class="field-label" [class.field-label--empty]="!form.controls.status.value">Status</label>
-    <mat-form-field appearance="outline">
-      <mat-select formControlName="status" placeholder="Status">
-        @for (status of statusOptions; track status) {
-          <mat-option [value]="status">{{ status }}</mat-option>
+        </mat-select>
+        @if (form.controls.status.value === AppointmentStatus.Unconfirmed) {
+          <mat-hint>{{ t('appointmentForm.unconfirmedHint') }}</mat-hint>
         }
-      </mat-select>
-      @if (form.controls.status.value === AppointmentStatus.Unconfirmed) {
-        <mat-hint>Holds the slot until you've confirmed with the patient.</mat-hint>
+      </mat-form-field>
+
+      @if (scheduleWarning()) {
+        <p class="error-message">{{ scheduleWarning() }}</p>
       }
-    </mat-form-field>
 
-    @if (scheduleWarning()) {
-      <p class="error-message">{{ scheduleWarning() }}</p>
-    }
+      @if (errorMessage()) {
+        <p class="error-message">{{ errorMessage() }}</p>
+      }
+    </mat-dialog-content>
 
-    @if (errorMessage()) {
-      <p class="error-message">{{ errorMessage() }}</p>
-    }
-  </mat-dialog-content>
-
-  <mat-dialog-actions align="end">
-    <button mat-button type="button" class="cancel-button" (click)="close()">Cancel</button>
-    @if (isEditMode) {
-      <button mat-stroked-button color="warn" type="button" (click)="cancelAppointment()">
-        Cancel appointment
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" class="cancel-button" (click)="close()">{{ t('common.cancel') }}</button>
+      @if (isEditMode) {
+        <button mat-stroked-button color="warn" type="button" (click)="cancelAppointment()">
+          {{ t('appointmentForm.cancelAppointment') }}
+        </button>
+      }
+      <button
+        mat-flat-button
+        color="primary"
+        class="pill-button"
+        type="submit"
+        [disabled]="isSubmitting() || !!scheduleWarning()"
+      >
+        {{ isEditMode ? t('appointmentForm.saveChanges') : t('appointmentForm.book') }}
       </button>
-    }
-    <button
-      mat-flat-button
-      color="primary"
-      class="pill-button"
-      type="submit"
-      [disabled]="isSubmitting() || !!scheduleWarning()"
-    >
-      {{ isEditMode ? 'Save changes' : 'Book appointment' }}
-    </button>
-  </mat-dialog-actions>
-</form>
+    </mat-dialog-actions>
+  </form>
+</ng-container>

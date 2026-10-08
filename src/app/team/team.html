@@ -1,66 +1,69 @@
-<div class="page-header">
-  <div>
-    <h1>Team</h1>
-    <p>Everyone with access to your clinic. New people get an invitation link to set their own password.</p>
+<ng-container *transloco="let t">
+  <div class="page-header">
+    <div>
+      <h1>{{ t('team.title') }}</h1>
+      <p>{{ t('team.intro') }}</p>
+    </div>
+    @if (!layout.isHandset()) {
+      <button mat-flat-button color="primary" class="pill-button" (click)="addStaff()">
+        <mat-icon>person_add</mat-icon>
+        {{ t('team.add') }}
+      </button>
+    }
   </div>
-  @if (!layout.isHandset()) {
-    <button mat-flat-button color="primary" class="pill-button" (click)="addStaff()">
+
+  @if (layout.isHandset()) {
+    <button mat-fab color="primary" class="page-fab" [attr.aria-label]="t('team.add')" (click)="addStaff()">
       <mat-icon>person_add</mat-icon>
-      Add staff member
     </button>
   }
-</div>
 
-@if (layout.isHandset()) {
-  <button mat-fab color="primary" class="page-fab" aria-label="Add staff member" (click)="addStaff()">
-    <mat-icon>person_add</mat-icon>
-  </button>
-}
+  @if (errorMessage()) {
+    <p class="error-message">{{ errorMessage() }}</p>
+  }
 
-@if (errorMessage()) {
-  <p class="error-message">{{ errorMessage() }}</p>
-}
-
-<div class="entity-list">
-  @for (member of staff(); track member.id) {
-    <div class="entity-row">
-      <app-avatar [person]="member" [size]="40" />
-      <div class="entity-main">
-        <div class="entity-title">{{ member.firstName }} {{ member.lastName }}</div>
-        <div class="entity-subtitle">
-          {{ member.role }}{{ member.specialty ? ' · ' + member.specialty : '' }} · {{ member.email }}
+  <div class="entity-list">
+    @for (member of staff(); track member.id) {
+      <div class="entity-row">
+        <app-avatar [person]="member" [size]="40" />
+        <div class="entity-main">
+          <div class="entity-title">{{ member.firstName }} {{ member.lastName }}</div>
+          <div class="entity-subtitle">
+            {{ t('enums.staffRole.' + member.role) }}{{ member.specialty ? ' · ' + member.specialty : '' }} ·
+            {{ member.email }}
+          </div>
+        </div>
+        <div class="entity-meta">
+          @if (member.isClinicAdmin) {
+            <span class="status-pill">{{ t('team.admin') }}</span>
+          }
+          <button mat-stroked-button class="invite-button" (click)="editRole(member)">
+            <mat-icon>badge</mat-icon>
+            {{ t('team.editRole') }}
+          </button>
+          @if (member.hasAccount) {
+            <span class="status-pill status-pill--success">{{ t('team.active') }}</span>
+            <button mat-stroked-button class="invite-button" (click)="passwordReset(member)">
+              <mat-icon>lock_reset</mat-icon>
+              {{ t('team.resetPassword') }}
+            </button>
+          } @else {
+            <span class="status-pill status-pill--warning">{{ t('team.invitationPending') }}</span>
+            <button mat-stroked-button class="invite-button" (click)="newInvitation(member)">
+              <mat-icon>link</mat-icon>
+              {{ t('team.newInvite') }}
+            </button>
+          }
+          @if (member.id !== currentUserId) {
+            <button mat-stroked-button color="warn" class="invite-button" (click)="removeStaff(member)">
+              <mat-icon>person_remove</mat-icon>
+              {{ t('team.remove') }}
+            </button>
+          }
         </div>
       </div>
-      <div class="entity-meta">
-        @if (member.isClinicAdmin) {
-          <span class="status-pill">Admin</span>
-        }
-        <button mat-stroked-button class="invite-button" (click)="editRole(member)">
-          <mat-icon>badge</mat-icon>
-          Edit role
-        </button>
-        @if (member.hasAccount) {
-          <span class="status-pill status-pill--success">Active</span>
-          <button mat-stroked-button class="invite-button" (click)="passwordReset(member)">
-            <mat-icon>lock_reset</mat-icon>
-            Reset password
-          </button>
-        } @else {
-          <span class="status-pill status-pill--warning">Invitation pending</span>
-          <button mat-stroked-button class="invite-button" (click)="newInvitation(member)">
-            <mat-icon>link</mat-icon>
-            New invite link
-          </button>
-        }
-        @if (member.id !== currentUserId) {
-          <button mat-stroked-button color="warn" class="invite-button" (click)="removeStaff(member)">
-            <mat-icon>person_remove</mat-icon>
-            Remove
-          </button>
-        }
-      </div>
-    </div>
-  } @empty {
-    <p class="empty-state">No staff members yet.</p>
-  }
-</div>
+    } @empty {
+      <p class="empty-state">{{ t('team.empty') }}</p>
+    }
+  </div>
+</ng-container>

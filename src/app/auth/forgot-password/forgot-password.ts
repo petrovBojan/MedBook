@@ -3,6 +3,8 @@ import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { TranslocoDirective } from '@jsverse/transloco';
+import { LanguageToggle } from '../../shared/components/language-toggle/language-toggle';
 
 /**
  * MedBook doesn't send email, so a forgotten password is reset through an administrator,
@@ -13,6 +15,6 @@ import { MatIconModule } from '@angular/material/icon';
   selector: 'app-forgot-password',
   templateUrl: './forgot-password.html',
   styleUrls: ['../register/register.css', './forgot-password.css'],
-  imports: [RouterLink, MatCardModule, MatButtonModule, MatIconModule]
+  imports: [RouterLink, MatCardModule, MatButtonModule, MatIconModule, TranslocoDirective, LanguageToggle]
 })
 export class ForgotPassword {}

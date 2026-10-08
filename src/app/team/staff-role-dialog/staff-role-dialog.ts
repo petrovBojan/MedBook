@@ -7,13 +7,22 @@ import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { StaffService } from '../../core/services/staff.service';
 import { StaffMember, StaffRole } from '../../shared/models/staff-member.model';
+import { TranslocoDirective } from '@jsverse/transloco';
 
 /** A clinic admin switching a staff member between doctor and employee. Closes with the updated member. */
 @Component({
   selector: 'app-staff-role-dialog',
   templateUrl: './staff-role-dialog.html',
   styleUrl: './staff-role-dialog.css',
-  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatDialogModule]
+  imports: [
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatDialogModule,
+    TranslocoDirective
+  ]
 })
 export class StaffRoleDialog {
   private readonly fb = inject(FormBuilder);

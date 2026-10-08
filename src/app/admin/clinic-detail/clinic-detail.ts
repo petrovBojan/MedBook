@@ -1,5 +1,4 @@
 import { Component, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,16 +8,19 @@ import { ClinicSummary, Invitation, PasswordResetLink } from '../../shared/model
 import { StaffMember } from '../../shared/models/staff-member.model';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { InviteLinkDialog, InviteLinkDialogData } from '../../shared/components/invite-link-dialog/invite-link-dialog';
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
+import { AppDatePipe } from '../../shared/pipes/app-date.pipe';
 
 /** One clinic: its details, activation status and who has access. */
 @Component({
   selector: 'app-clinic-detail',
   templateUrl: './clinic-detail.html',
   styleUrl: './clinic-detail.css',
-  imports: [DatePipe, RouterLink, MatButtonModule, MatIconModule]
+  imports: [AppDatePipe, RouterLink, MatButtonModule, MatIconModule, TranslocoDirective]
 })
 export class ClinicDetail {
   private readonly adminSrv = inject(AdminService);
+  private readonly transloco = inject(TranslocoService);
   private readonly dialog = inject(MatDialog);
   private readonly clinicId = inject(ActivatedRoute).snapshot.paramMap.get('id')!;
 
@@ -39,14 +41,14 @@ export class ClinicDetail {
     const activate = !clinic.isActive;
     const data: ConfirmDialogData = activate
       ? {
-          title: 'Reactivate clinic',
-          message: `${clinic.name}'s staff will be able to log in again.`,
-          confirmLabel: 'Reactivate'
+          title: this.transloco.translate('admin.detail.reactivateTitle'),
+          message: this.transloco.translate('admin.detail.reactivateMessage', { name: clinic.name }),
+          confirmLabel: this.transloco.translate('admin.detail.reactivate')
         }
       : {
-          title: 'Deactivate clinic',
-          message: `${clinic.name}'s staff will be logged out immediately and can't log in until it's reactivated. No data is deleted.`,
-          confirmLabel: 'Deactivate'
+          title: this.transloco.translate('admin.detail.deactivateTitle'),
+          message: this.transloco.translate('admin.detail.deactivateMessage', { name: clinic.name }),
+          confirmLabel: this.transloco.translate('admin.detail.deactivate')
         };
 
     this.dialog
@@ -76,14 +78,14 @@ export class ClinicDetail {
     const name = `${member.firstName} ${member.lastName}`;
     const data: ConfirmDialogData = makeAdmin
       ? {
-          title: 'Make clinic admin',
-          message: `${name} will be able to add and remove staff and send invitations. They'll be logged out and get the new rights when they log in again.`,
-          confirmLabel: 'Make admin'
+          title: this.transloco.translate('admin.detail.makeAdminTitle'),
+          message: this.transloco.translate('admin.detail.makeAdminMessage', { name }),
+          confirmLabel: this.transloco.translate('admin.detail.makeAdmin')
         }
       : {
-          title: 'Remove admin rights',
-          message: `${name} will no longer be able to manage staff. They'll be logged out and can log in again as regular staff.`,
-          confirmLabel: 'Remove admin rights'
+          title: this.transloco.translate('admin.detail.removeAdminTitle'),
+          message: this.transloco.translate('admin.detail.removeAdminMessage', { name }),
+          confirmLabel: this.transloco.translate('admin.detail.removeAdminTitle')
         };
 
     this.dialog

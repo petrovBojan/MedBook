@@ -1,7 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { DatePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
@@ -16,12 +15,23 @@ import { StaffMember } from '../../shared/models/staff-member.model';
 import { PatientForm } from '../patient-form/patient-form';
 import { AppointmentForm, AppointmentFormDialogData } from '../../appointments/appointment-form/appointment-form';
 import { formDialogConfig } from '../../shared/utils/dialog.utils';
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
+import { AppDatePipe } from '../../shared/pipes/app-date.pipe';
 
 @Component({
   selector: 'app-patient-detail',
   templateUrl: './patient-detail.html',
   styleUrl: './patient-detail.css',
-  imports: [DatePipe, RouterLink, MatIconModule, MatCardModule, MatButtonModule, MatListModule, MatChipsModule]
+  imports: [
+    AppDatePipe,
+    RouterLink,
+    MatIconModule,
+    MatCardModule,
+    MatButtonModule,
+    MatListModule,
+    MatChipsModule,
+    TranslocoDirective
+  ]
 })
 export class PatientDetail {
   private readonly route = inject(ActivatedRoute);
@@ -29,6 +39,7 @@ export class PatientDetail {
   private readonly appointmentSrv = inject(AppointmentService);
   private readonly staffSrv = inject(StaffService);
   private readonly dialog = inject(MatDialog);
+  private readonly transloco = inject(TranslocoService);
 
   private readonly patientId = this.route.snapshot.paramMap.get('id')!;
 
@@ -50,7 +61,9 @@ export class PatientDetail {
 
   doctorName(doctorId: string): string {
     const doctor = this.doctorsById().get(doctorId);
-    return doctor ? `Dr. ${doctor.firstName} ${doctor.lastName}` : 'Unknown doctor';
+    return doctor
+      ? this.transloco.translate('common.doctorName', { name: `${doctor.firstName} ${doctor.lastName}` })
+      : this.transloco.translate('common.unknownDoctor');
   }
 
   editPatient(): void {

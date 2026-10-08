@@ -1,70 +1,94 @@
-<mat-toolbar color="primary" class="shell-toolbar">
-  <span class="clinic-name">{{ (clinic$ | async)?.name ?? 'MedBook' }}</span>
-  <span class="spacer"></span>
-  @if (currentUser$ | async; as user) {
-    <button type="button" class="avatar-trigger" [matMenuTriggerFor]="accountMenu" aria-label="Account menu">
-      <span class="current-user">{{ user.firstName }} {{ user.lastName }} &middot; {{ user.role }}</span>
-      <app-avatar [person]="user" [size]="36" />
-    </button>
-
-    <mat-menu #accountMenu="matMenu" xPosition="before" class="account-menu">
-      <div class="account-menu-header" (click)="$event.stopPropagation()">
-        <app-avatar [person]="user" [size]="44" />
-        <div class="account-menu-who">
-          <div class="account-menu-name">{{ user.firstName }} {{ user.lastName }}</div>
-          <div class="account-menu-email">{{ user.email }}</div>
-        </div>
-      </div>
-      <mat-divider />
-      <a mat-menu-item routerLink="/profile">
-        <mat-icon>person</mat-icon>
-        <span>My profile</span>
-      </a>
-      <button mat-menu-item (click)="changePassword()">
-        <mat-icon>key</mat-icon>
-        <span>Change password</span>
-      </button>
-      <button mat-menu-item (click)="logout()">
-        <mat-icon>logout</mat-icon>
-        <span>Log out</span>
-      </button>
-    </mat-menu>
-  }
-</mat-toolbar>
-
-<mat-sidenav-container class="shell-container">
-  @if (!layout.isCompact()) {
-    <mat-sidenav mode="side" opened class="shell-sidenav">
-      <mat-nav-list>
-        @for (item of navItems(); track item.path) {
-          <a mat-list-item [routerLink]="item.path" routerLinkActive="active-link">
-            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-            <span matListItemTitle>{{ item.label }}</span>
-          </a>
-        }
-      </mat-nav-list>
-    </mat-sidenav>
-  }
-  <mat-sidenav-content class="shell-content">
-    <router-outlet />
-  </mat-sidenav-content>
-</mat-sidenav-container>
-
-<!-- Phones and tablets: the same destinations as a bottom tab bar, in thumb reach
-     (the pattern expostudio-app uses for its sidebar on small screens). -->
-@if (layout.isCompact()) {
-  <nav class="bottom-nav" aria-label="Main">
-    @for (item of navItems(); track item.path) {
-      <a
-        class="bottom-nav-item"
-        [routerLink]="item.path"
-        routerLinkActive="active"
-        #rla="routerLinkActive"
-        [attr.aria-current]="rla.isActive ? 'page' : null"
+<ng-container *transloco="let t">
+  <mat-toolbar color="primary" class="shell-toolbar">
+    <span class="clinic-name">{{ (clinic$ | async)?.name ?? 'MedBook' }}</span>
+    <span class="spacer"></span>
+    @if (currentUser$ | async; as user) {
+      <button
+        type="button"
+        class="avatar-trigger"
+        [matMenuTriggerFor]="accountMenu"
+        [attr.aria-label]="t('account.menu')"
       >
-        <span class="bottom-nav-icon"><mat-icon>{{ item.icon }}</mat-icon></span>
-        <span class="bottom-nav-label">{{ item.label }}</span>
-      </a>
+        <span class="current-user"
+          >{{ user.firstName }} {{ user.lastName }} &middot; {{ t('enums.staffRole.' + user.role) }}</span
+        >
+        <app-avatar [person]="user" [size]="36" />
+      </button>
+
+      <mat-menu #accountMenu="matMenu" xPosition="before" class="account-menu">
+        <div class="account-menu-header" (click)="$event.stopPropagation()">
+          <app-avatar [person]="user" [size]="44" />
+          <div class="account-menu-who">
+            <div class="account-menu-name">{{ user.firstName }} {{ user.lastName }}</div>
+            <div class="account-menu-email">{{ user.email }}</div>
+          </div>
+        </div>
+        <mat-divider />
+        <a mat-menu-item routerLink="/profile">
+          <mat-icon>person</mat-icon>
+          <span>{{ t('account.myProfile') }}</span>
+        </a>
+        <button mat-menu-item [matMenuTriggerFor]="languageMenu">
+          <mat-icon>translate</mat-icon>
+          <span>{{ t('account.language') }}</span>
+        </button>
+        <button mat-menu-item (click)="changePassword()">
+          <mat-icon>key</mat-icon>
+          <span>{{ t('account.changePassword') }}</span>
+        </button>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          <span>{{ t('account.logOut') }}</span>
+        </button>
+      </mat-menu>
+
+      <mat-menu #languageMenu="matMenu">
+        @for (lang of languages; track lang.code) {
+          <button mat-menu-item (click)="language.use(lang.code)">
+            <mat-icon>{{ lang.code === language.current() ? 'check' : '' }}</mat-icon>
+            <span>{{ lang.label }}</span>
+          </button>
+        }
+      </mat-menu>
     }
-  </nav>
-}
+  </mat-toolbar>
+
+  <mat-sidenav-container class="shell-container">
+    @if (!layout.isCompact()) {
+      <mat-sidenav mode="side" opened class="shell-sidenav">
+        <mat-nav-list>
+          @for (item of navItems(); track item.path) {
+            <a mat-list-item [routerLink]="item.path" routerLinkActive="active-link">
+              <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+              <span matListItemTitle>{{ t(item.labelKey) }}</span>
+            </a>
+          }
+        </mat-nav-list>
+      </mat-sidenav>
+    }
+    <mat-sidenav-content class="shell-content">
+      <router-outlet />
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+
+  <!-- Phones and tablets: the same destinations as a bottom tab bar, in thumb reach
+     (the pattern expostudio-app uses for its sidebar on small screens). -->
+  @if (layout.isCompact()) {
+    <nav class="bottom-nav" aria-label="Main">
+      @for (item of navItems(); track item.path) {
+        <a
+          class="bottom-nav-item"
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          #rla="routerLinkActive"
+          [attr.aria-current]="rla.isActive ? 'page' : null"
+        >
+          <span class="bottom-nav-icon"
+            ><mat-icon>{{ item.icon }}</mat-icon></span
+          >
+          <span class="bottom-nav-label">{{ t(item.labelKey) }}</span>
+        </a>
+      }
+    </nav>
+  }
+</ng-container>

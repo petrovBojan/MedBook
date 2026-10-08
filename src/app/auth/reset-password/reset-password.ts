@@ -11,6 +11,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PasswordService } from '../../core/services/password.service';
 import { PasswordResetDetails } from '../../shared/models/account.model';
 import { MIN_PASSWORD_LENGTH, passwordsMatch } from '../../shared/utils/password.utils';
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
+import { LanguageToggle } from '../../shared/components/language-toggle/language-toggle';
 
 /**
  * Where a staff member lands from a password reset link their admin gave them: shows whose
@@ -29,13 +31,16 @@ import { MIN_PASSWORD_LENGTH, passwordsMatch } from '../../shared/utils/password
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    TranslocoDirective,
+    LanguageToggle
   ]
 })
 export class ResetPassword {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly passwordSrv = inject(PasswordService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly minPasswordLength = MIN_PASSWORD_LENGTH;
   readonly state = signal<'loading' | 'ready' | 'invalid'>('loading');
@@ -61,7 +66,7 @@ export class ResetPassword {
 
     if (!this.token) {
       this.state.set('invalid');
-      this.errorMessage.set('This page needs the password reset link you were given. Ask your clinic administrator for one.');
+      this.errorMessage.set(this.transloco.translate('auth.reset.noToken'));
       return;
     }
 

@@ -15,6 +15,9 @@ import { ClinicService } from '../../../core/services/clinic.service';
 import { LayoutService } from '../../../core/services/layout.service';
 import { ChangePasswordDialog } from '../change-password-dialog/change-password-dialog';
 import { Avatar } from '../avatar/avatar';
+import { TranslocoDirective } from '@jsverse/transloco';
+import { translateDatepickerLabels } from '../../../core/i18n/translated-datepicker-intl';
+import { APP_LANGUAGES, LanguageService } from '../../../core/services/language.service';
 
 @Component({
   selector: 'app-shell',
@@ -32,7 +35,8 @@ import { Avatar } from '../avatar/avatar';
     MatButtonModule,
     MatMenuModule,
     MatDividerModule,
-    Avatar
+    Avatar,
+    TranslocoDirective
   ]
 })
 export class Shell {
@@ -40,19 +44,25 @@ export class Shell {
   private readonly clinicSrv = inject(ClinicService);
   private readonly router = inject(Router);
   readonly layout = inject(LayoutService);
+  readonly language = inject(LanguageService);
+  readonly languages = APP_LANGUAGES;
 
   readonly currentUser$ = this.authSrv.currentUser$;
   private readonly currentUser = toSignal(this.currentUser$, { initialValue: this.authSrv.getCurrentUser() });
 
   // "Team" only for clinic admins - the only ones who can add staff or send invitations.
   readonly navItems = computed(() => [
-    { path: '/calendar', icon: 'calendar_month', label: 'Calendar' },
-    { path: '/patients', icon: 'people', label: 'Patients' },
-    ...(this.currentUser()?.isClinicAdmin ? [{ path: '/team', icon: 'group', label: 'Team' }] : []),
-    { path: '/settings', icon: 'settings_heart', label: 'Settings' }
+    { path: '/calendar', icon: 'calendar_month', labelKey: 'nav.calendar' },
+    { path: '/patients', icon: 'people', labelKey: 'nav.patients' },
+    ...(this.currentUser()?.isClinicAdmin ? [{ path: '/team', icon: 'group', labelKey: 'nav.team' }] : []),
+    { path: '/settings', icon: 'settings_heart', labelKey: 'nav.settings' }
   ]);
   readonly clinic$ = this.clinicSrv.getCurrentClinic();
   private readonly dialog = inject(MatDialog);
+
+  constructor() {
+    translateDatepickerLabels();
+  }
 
   changePassword(): void {
     this.dialog.open(ChangePasswordDialog, { width: '440px', maxWidth: '95vw', autoFocus: false });

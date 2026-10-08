@@ -11,6 +11,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RegistrationService } from '../../core/services/registration.service';
 import { InvitationDetails } from '../../shared/models/account.model';
 import { MIN_PASSWORD_LENGTH, passwordsMatch } from '../../shared/utils/password.utils';
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
+import { LanguageToggle } from '../../shared/components/language-toggle/language-toggle';
 
 /**
  * Where an invited staff member lands from their invitation link: shows who the
@@ -28,13 +30,16 @@ import { MIN_PASSWORD_LENGTH, passwordsMatch } from '../../shared/utils/password
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    TranslocoDirective,
+    LanguageToggle
   ]
 })
 export class Register {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly registrationSrv = inject(RegistrationService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly minPasswordLength = MIN_PASSWORD_LENGTH;
   readonly state = signal<'loading' | 'ready' | 'invalid'>('loading');
@@ -60,7 +65,7 @@ export class Register {
 
     if (!this.token) {
       this.state.set('invalid');
-      this.errorMessage.set('This page needs the invitation link you were sent. Ask your clinic administrator for one.');
+      this.errorMessage.set(this.transloco.translate('auth.register.noToken'));
       return;
     }
 

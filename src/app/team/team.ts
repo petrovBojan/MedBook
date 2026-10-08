@@ -13,18 +13,20 @@ import { StaffRoleDialog } from './staff-role-dialog/staff-role-dialog';
 import { AuthService } from '../core/services/auth.service';
 import { Avatar } from '../shared/components/avatar/avatar';
 import { ConfirmDialog, ConfirmDialogData } from '../shared/components/confirm-dialog/confirm-dialog';
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
 
 /** Clinic admins: who has access to the clinic, adding people, invitation and password reset links. */
 @Component({
   selector: 'app-team',
   templateUrl: './team.html',
   styleUrl: './team.css',
-  imports: [MatButtonModule, MatIconModule, Avatar]
+  imports: [MatButtonModule, MatIconModule, Avatar, TranslocoDirective]
 })
 export class Team {
   private readonly staffSrv = inject(StaffService);
   private readonly dialog = inject(MatDialog);
   private readonly authSrv = inject(AuthService);
+  private readonly transloco = inject(TranslocoService);
   readonly layout = inject(LayoutService);
 
   readonly staff = signal<StaffMember[]>([]);
@@ -43,9 +45,9 @@ export class Team {
       .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {
         maxWidth: '95vw',
         data: {
-          title: 'Remove staff member',
-          message: `${name} will be logged out and won't be able to log in again. Past appointments keep their name.`,
-          confirmLabel: 'Remove'
+          title: this.transloco.translate('team.removeTitle'),
+          message: this.transloco.translate('team.removeMessage', { name }),
+          confirmLabel: this.transloco.translate('team.remove')
         }
       })
       .afterClosed()
@@ -70,7 +72,11 @@ export class Team {
           return;
         }
         this.load();
-        this.showInvitation(result.staff, result.invitation, `${result.staff.firstName} has been added.`);
+        this.showInvitation(
+          result.staff,
+          result.invitation,
+          this.transloco.translate('team.added', { name: result.staff.firstName })
+        );
       });
   }
 

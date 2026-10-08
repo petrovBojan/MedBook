@@ -17,7 +17,7 @@ import {
   provideCalendar
 } from 'angular-calendar';
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
-import { DatePipe, formatDate } from '@angular/common';
+import { formatDate } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
@@ -41,6 +41,9 @@ import { formDialogConfig } from '../shared/utils/dialog.utils';
 import { LayoutService } from '../core/services/layout.service';
 import { AuthService } from '../core/services/auth.service';
 import { RouterLink } from '@angular/router';
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
+import { LanguageService } from '../core/services/language.service';
+import { AppDatePipe } from '../shared/pipes/app-date.pipe';
 
 interface AppointmentEventMeta {
   appointmentId: string;
@@ -89,8 +92,9 @@ class TwentyFourHourDateFormatter extends CalendarAngularDateFormatter {
     MatCardModule,
     MatListModule,
     MatDividerModule,
-    DatePipe,
-    RouterLink
+    AppDatePipe,
+    RouterLink,
+    TranslocoDirective
   ],
   providers: [
     provideCalendar({
@@ -106,7 +110,9 @@ export class Calendar {
   private readonly patientSrv = inject(PatientService);
   private readonly dialog = inject(MatDialog);
   private readonly authSrv = inject(AuthService);
+  private readonly transloco = inject(TranslocoService);
   readonly layout = inject(LayoutService);
+  readonly language = inject(LanguageService);
 
   readonly CalendarView = CalendarView;
   readonly statusOptions = [
@@ -211,7 +217,7 @@ export class Calendar {
     return Array.from(groups.entries()).map(([key, items]) => {
       const date = new Date(key);
       return {
-        dateLabel: date.toLocaleDateString('en-US', {
+        dateLabel: date.toLocaleDateString(this.language.locale(), {
           weekday: 'long',
           year: 'numeric',
           month: 'long',
@@ -238,12 +244,16 @@ export class Calendar {
 
   doctorName(doctorId: string): string {
     const doctor = this.staff().find((s) => s.id === doctorId);
-    return doctor ? `Dr. ${doctor.firstName} ${doctor.lastName}` : 'Unknown doctor';
+    return doctor
+      ? this.transloco.translate('common.doctorName', {
+          name: `${doctor.firstName} ${doctor.lastName}`
+        })
+      : this.transloco.translate('common.unknownDoctor');
   }
 
   patientName(patientId: string): string {
     const patient = this.patients().find((p) => p.id === patientId);
-    return patient ? `${patient.firstName} ${patient.lastName}` : 'Unknown patient';
+    return patient ? `${patient.firstName} ${patient.lastName}` : this.transloco.translate('common.unknownPatient');
   }
 
   setView(view: CalendarPageView): void {
@@ -301,16 +311,19 @@ export class Calendar {
   ): CalendarEvent<AppointmentEventMeta> {
     const doctor = doctorsById.get(appointment.doctorId);
     const patient = patientsById.get(appointment.patientId);
-    const patientName = patient ? `${patient.firstName} ${patient.lastName}` : 'Unknown patient';
-    const doctorName = doctor ? `Dr. ${doctor.lastName}` : '';
+    const patientName = patient
+      ? `${patient.firstName} ${patient.lastName}`
+      : this.transloco.translate('common.unknownPatient');
+    const doctorName = doctor ? this.transloco.translate('common.doctorName', { name: doctor.lastName }) : '';
     const color = doctor?.color ?? '#607d8b';
     const isUnconfirmed = appointment.status === AppointmentStatus.Unconfirmed;
+    const unconfirmedPrefix = isUnconfirmed ? this.transloco.translate('calendar.unconfirmedPrefix') + ' ' : '';
 
     return {
       id: appointment.id,
       start: new Date(appointment.start),
       end: new Date(appointment.end),
-      title: `${isUnconfirmed ? '(Unconfirmed) ' : ''}${patientName}${doctorName ? ' · ' + doctorName : ''}${appointment.reason ? ' — ' + appointment.reason : ''}`,
+      title: `${unconfirmedPrefix}${patientName}${doctorName ? ' · ' + doctorName : ''}${appointment.reason ? ' — ' + appointment.reason : ''}`,
       color: { primary: color, secondary: color + '22' },
       cssClass:
         appointment.status === AppointmentStatus.Cancelled ? 'appt-cancelled' : isUnconfirmed ? 'appt-unconfirmed' : '',

@@ -1,173 +1,303 @@
-<div class="stats-row">
-  <button type="button" class="stat-tile stat-tile-button" aria-label="Show today's appointments" (click)="showToday()">
-    <span class="stat-tile-icon"><mat-icon>today</mat-icon></span>
-    <div>
-      <div class="stat-tile-value">{{ todaysAppointmentsCount }}</div>
-      <div class="stat-tile-label">Appointments today</div>
-    </div>
-  </button>
-  <button
-    type="button"
-    class="stat-tile stat-tile-button"
-    [class.stat-tile--attention]="toConfirmCount > 0"
-    aria-label="Show unconfirmed appointments"
-    (click)="showUnconfirmed()"
-  >
-    <span class="stat-tile-icon"><mat-icon>phone_callback</mat-icon></span>
-    <div>
-      <div class="stat-tile-value">{{ toConfirmCount }}</div>
-      <div class="stat-tile-label">To confirm</div>
-    </div>
-  </button>
-  <a class="stat-tile stat-tile-button" [routerLink]="doctorsLink">
-    <span class="stat-tile-icon"><mat-icon>medical_services</mat-icon></span>
-    <div>
-      <div class="stat-tile-value">{{ doctors().length }}</div>
-      <div class="stat-tile-label">Doctors</div>
-    </div>
-  </a>
-  <a class="stat-tile stat-tile-button" routerLink="/patients">
-    <span class="stat-tile-icon"><mat-icon>groups</mat-icon></span>
-    <div>
-      <div class="stat-tile-value">{{ totalPatientsCount }}</div>
-      <div class="stat-tile-label">Patients on file</div>
-    </div>
-  </a>
-</div>
-
-<div class="calendar-toolbar">
-  @if (view !== 'list') {
-    <div class="nav-controls">
-      <button mat-icon-button mwlCalendarPreviousView [view]="view" [viewDate]="viewDate" (viewDateChange)="viewDate = $event">
-        <mat-icon>chevron_left</mat-icon>
-      </button>
-      <button mat-stroked-button mwlCalendarToday [(viewDate)]="viewDate">Today</button>
-      <button mat-icon-button mwlCalendarNextView [view]="view" [viewDate]="viewDate" (viewDateChange)="viewDate = $event">
-        <mat-icon>chevron_right</mat-icon>
-      </button>
-      <h2 class="view-title">{{ viewDate | calendarDate: view + 'ViewTitle' : 'en' }}</h2>
-    </div>
-  } @else {
-    <h2 class="view-title">All booked appointments</h2>
-  }
-
-  <div class="right-controls">
-    <mat-button-toggle-group class="view-toggle" [value]="view" (change)="setView($event.value)">
-      <mat-button-toggle [value]="CalendarView.Day">Day</mat-button-toggle>
-      <mat-button-toggle [value]="CalendarView.Week">Week</mat-button-toggle>
-      <mat-button-toggle [value]="CalendarView.Month">Month</mat-button-toggle>
-      <mat-button-toggle value="list">List</mat-button-toggle>
-    </mat-button-toggle-group>
-
-    @if (!layout.isHandset()) {
-      <button mat-flat-button color="primary" class="pill-button" (click)="createAppointment()">
-        <mat-icon>add</mat-icon>
-        New appointment
-      </button>
-    }
-  </div>
-</div>
-
-@if (layout.isHandset()) {
-  <button mat-fab color="primary" class="page-fab" aria-label="New appointment" (click)="createAppointment()">
-    <mat-icon>add</mat-icon>
-  </button>
-}
-
-@if (view === 'list') {
-  <div class="filters-row">
-    <div class="filter-field-group">
-      <label class="field-label" [class.field-label--empty]="!selectedDoctorId">Doctor</label>
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-select [(ngModel)]="selectedDoctorId" placeholder="Doctor">
-          <mat-option [value]="null">All doctors</mat-option>
-          @for (doctor of doctors(); track doctor.id) {
-            <mat-option [value]="doctor.id">Dr. {{ doctor.lastName }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-    </div>
-
-    <div class="filter-field-group">
-      <label class="field-label" [class.field-label--empty]="!selectedDate">Day</label>
-      <mat-form-field appearance="outline" class="filter-field">
-        <input matInput [matDatepicker]="dayPicker" [(ngModel)]="selectedDate" placeholder="Day" />
-        @if (selectedDate) {
-          <button matSuffix mat-icon-button type="button" aria-label="Clear day filter" (click)="selectedDate = null">
-            <mat-icon>close</mat-icon>
-          </button>
-        }
-        <mat-datepicker-toggle matIconSuffix [for]="dayPicker" />
-        <mat-datepicker #dayPicker [touchUi]="layout.isHandset()" />
-      </mat-form-field>
-    </div>
-
-    <div class="filter-field-group">
-      <label class="field-label" [class.field-label--empty]="!selectedStatuses.length">Status</label>
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-select [(ngModel)]="selectedStatuses" placeholder="Status" multiple>
-          @for (status of statusOptions; track status) {
-            <mat-option [value]="status">{{ status }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-    </div>
-  </div>
-}
-
-<div class="calendar-body">
-  @switch (view) {
-    @case (CalendarView.Month) {
-      <mwl-calendar-month-view
-        [viewDate]="viewDate"
-        [events]="events"
-        (dayClicked)="onDayClicked($event.day)"
-        (eventClicked)="onEventClicked($event)"
-      />
-    }
-    @case (CalendarView.Week) {
-      <mwl-calendar-week-view [viewDate]="viewDate" [events]="events" (eventClicked)="onEventClicked($event)" />
-    }
-    @case (CalendarView.Day) {
-      <mwl-calendar-day-view [viewDate]="viewDate" [events]="events" (eventClicked)="onEventClicked($event)" />
-    }
-    @case ('list') {
-      <div class="appointment-list">
-        @if (listAppointments.length === 0) {
-          <p class="empty-state">No booked appointments.</p>
-        }
-        @for (group of listAppointments; track group.dateLabel) {
-          <h3 class="list-date-heading">{{ group.dateLabel }}</h3>
-          <mat-card class="list-day-card">
-            <mat-list class="list-day">
-              @for (appt of group.items; track appt.id; let last = $last) {
-                <mat-list-item class="list-appt-row" (click)="goToAppointment(appt.id)">
-                  <span matListItemTitle>
-                    <span class="list-appt-time">{{ appt.start | date: 'HH:mm' }}</span>
-                    {{ patientName(appt.patientId) }}
-                  </span>
-                  <span matListItemLine>
-                    {{ doctorName(appt.doctorId) }}
-                    @if (appt.reason) {
-                      &middot; {{ appt.reason }}
-                    }
-                  </span>
-                  <span matListItemMeta class="status-chip" [class]="'status-' + appt.status.toLowerCase()">{{ appt.status }}</span>
-                </mat-list-item>
-                @if (!last) {
-                  <mat-divider />
-                }
-              }
-            </mat-list>
-          </mat-card>
-          <div class="list-day-footer">
-            <button mat-stroked-button color="primary" class="add-day-appointment" (click)="createAppointmentForDate(group.dateParam)">
-              <mat-icon>add</mat-icon>
-              Add appointment
-            </button>
-          </div>
-        }
+<ng-container *transloco="let t">
+  <div class="stats-row">
+    <button
+      type="button"
+      class="stat-tile stat-tile-button"
+      [attr.aria-label]="t('calendar.stats.showToday')"
+      (click)="showToday()"
+    >
+      <span class="stat-tile-icon"><mat-icon>today</mat-icon></span>
+      <div>
+        <div class="stat-tile-value">{{ todaysAppointmentsCount }}</div>
+        <div class="stat-tile-label">{{ t('calendar.stats.appointmentsToday') }}</div>
       </div>
+    </button>
+    <button
+      type="button"
+      class="stat-tile stat-tile-button"
+      [class.stat-tile--attention]="toConfirmCount > 0"
+      [attr.aria-label]="t('calendar.stats.showUnconfirmed')"
+      (click)="showUnconfirmed()"
+    >
+      <span class="stat-tile-icon"><mat-icon>phone_callback</mat-icon></span>
+      <div>
+        <div class="stat-tile-value">{{ toConfirmCount }}</div>
+        <div class="stat-tile-label">{{ t('calendar.stats.toConfirm') }}</div>
+      </div>
+    </button>
+    <a class="stat-tile stat-tile-button" [routerLink]="doctorsLink">
+      <span class="stat-tile-icon"><mat-icon>medical_services</mat-icon></span>
+      <div>
+        <div class="stat-tile-value">{{ doctors().length }}</div>
+        <div class="stat-tile-label">{{ t('calendar.stats.doctors') }}</div>
+      </div>
+    </a>
+    <a class="stat-tile stat-tile-button" routerLink="/patients">
+      <span class="stat-tile-icon"><mat-icon>groups</mat-icon></span>
+      <div>
+        <div class="stat-tile-value">{{ totalPatientsCount }}</div>
+        <div class="stat-tile-label">{{ t('calendar.stats.patientsOnFile') }}</div>
+      </div>
+    </a>
+  </div>
+
+  <div class="calendar-toolbar">
+    @if (view !== 'list') {
+      <div class="nav-controls">
+        <button
+          mat-icon-button
+          mwlCalendarPreviousView
+          [view]="view"
+          [viewDate]="viewDate"
+          (viewDateChange)="viewDate = $event"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button mat-stroked-button mwlCalendarToday [(viewDate)]="viewDate">
+          {{ t('calendar.today') }}
+        </button>
+        <button
+          mat-icon-button
+          mwlCalendarNextView
+          [view]="view"
+          [viewDate]="viewDate"
+          (viewDateChange)="viewDate = $event"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+        <h2 class="view-title">
+          {{ viewDate | calendarDate: view + 'ViewTitle' : language.locale() }}
+        </h2>
+      </div>
+    } @else {
+      <h2 class="view-title">{{ t('calendar.allBooked') }}</h2>
     }
+
+    <div class="right-controls">
+      <mat-button-toggle-group class="view-toggle" [value]="view" (change)="setView($event.value)">
+        <mat-button-toggle [value]="CalendarView.Day">{{ t('calendar.views.day') }}</mat-button-toggle>
+        <mat-button-toggle [value]="CalendarView.Week">{{ t('calendar.views.week') }}</mat-button-toggle>
+        <mat-button-toggle [value]="CalendarView.Month">{{ t('calendar.views.month') }}</mat-button-toggle>
+        <mat-button-toggle value="list">{{ t('calendar.views.list') }}</mat-button-toggle>
+      </mat-button-toggle-group>
+
+      @if (!layout.isHandset()) {
+        <button mat-flat-button color="primary" class="pill-button" (click)="createAppointment()">
+          <mat-icon>add</mat-icon>
+          {{ t('calendar.newAppointment') }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (layout.isHandset()) {
+    <button
+      mat-fab
+      color="primary"
+      class="page-fab"
+      [attr.aria-label]="t('calendar.newAppointment')"
+      (click)="createAppointment()"
+    >
+      <mat-icon>add</mat-icon>
+    </button>
   }
-</div>
+
+  @if (view === 'list' && layout.isHandset()) {
+    <!-- Phones: one compact row of pill filters instead of full-size form fields. -->
+    <div class="filter-chips">
+      <mat-select
+        class="filter-chip"
+        [class.filter-chip--active]="selectedDoctorId"
+        [(ngModel)]="selectedDoctorId"
+        [placeholder]="t('calendar.filters.doctor')"
+        panelWidth=""
+        [attr.aria-label]="t('calendar.filters.doctor')"
+      >
+        <mat-option [value]="null">{{ t('calendar.filters.allDoctors') }}</mat-option>
+        @for (doctor of doctors(); track doctor.id) {
+          <mat-option [value]="doctor.id">Dr. {{ doctor.lastName }}</mat-option>
+        }
+      </mat-select>
+
+      <button
+        type="button"
+        class="filter-chip filter-chip-button"
+        [class.filter-chip--active]="selectedDate"
+        (click)="mobileDayPicker.open()"
+      >
+        <span class="filter-chip-text">{{
+          selectedDate ? (selectedDate | appDate: 'MMM d') : t('calendar.filters.day')
+        }}</span>
+        @if (selectedDate) {
+          <mat-icon
+            class="filter-chip-icon"
+            role="button"
+            [attr.aria-label]="t('calendar.filters.clearDay')"
+            (click)="selectedDate = null; $event.stopPropagation()"
+            >close</mat-icon
+          >
+        } @else {
+          <mat-icon class="filter-chip-icon">expand_more</mat-icon>
+        }
+      </button>
+      <input
+        class="filter-chip-date-input"
+        [matDatepicker]="mobileDayPicker"
+        [(ngModel)]="selectedDate"
+        tabindex="-1"
+        aria-hidden="true"
+      />
+      <mat-datepicker #mobileDayPicker [touchUi]="true" />
+
+      <mat-select
+        class="filter-chip"
+        [class.filter-chip--active]="selectedStatuses.length"
+        [(ngModel)]="selectedStatuses"
+        [placeholder]="t('calendar.filters.status')"
+        panelWidth=""
+        [attr.aria-label]="t('calendar.filters.status')"
+        multiple
+      >
+        <mat-select-trigger>
+          {{ t('calendar.filters.status') }}{{ selectedStatuses.length ? ' (' + selectedStatuses.length + ')' : '' }}
+        </mat-select-trigger>
+        @for (status of statusOptions; track status) {
+          <mat-option [value]="status">{{ t('enums.appointmentStatus.' + status) }}</mat-option>
+        }
+      </mat-select>
+    </div>
+  } @else if (view === 'list') {
+    <div class="filters-row">
+      <div class="filter-field-group">
+        <label class="field-label" [class.field-label--empty]="!selectedDoctorId">{{
+          t('calendar.filters.doctor')
+        }}</label>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-select [(ngModel)]="selectedDoctorId" [placeholder]="t('calendar.filters.doctor')">
+            <mat-option [value]="null">{{ t('calendar.filters.allDoctors') }}</mat-option>
+            @for (doctor of doctors(); track doctor.id) {
+              <mat-option [value]="doctor.id">Dr. {{ doctor.lastName }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="filter-field-group">
+        <label class="field-label" [class.field-label--empty]="!selectedDate">{{ t('calendar.filters.day') }}</label>
+        <mat-form-field appearance="outline" class="filter-field">
+          <input
+            matInput
+            [matDatepicker]="dayPicker"
+            [(ngModel)]="selectedDate"
+            [placeholder]="t('calendar.filters.day')"
+          />
+          @if (selectedDate) {
+            <button
+              matSuffix
+              mat-icon-button
+              type="button"
+              [attr.aria-label]="t('calendar.filters.clearDay')"
+              (click)="selectedDate = null"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+          <mat-datepicker-toggle matIconSuffix [for]="dayPicker" />
+          <mat-datepicker #dayPicker [touchUi]="layout.isHandset()" />
+        </mat-form-field>
+      </div>
+
+      <div class="filter-field-group">
+        <label class="field-label" [class.field-label--empty]="!selectedStatuses.length">{{
+          t('calendar.filters.status')
+        }}</label>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-select [(ngModel)]="selectedStatuses" [placeholder]="t('calendar.filters.status')" multiple>
+            @for (status of statusOptions; track status) {
+              <mat-option [value]="status">{{ t('enums.appointmentStatus.' + status) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+  }
+
+  <div class="calendar-body">
+    @switch (view) {
+      @case (CalendarView.Month) {
+        <mwl-calendar-month-view
+          [locale]="language.locale()"
+          [viewDate]="viewDate"
+          [events]="events"
+          (dayClicked)="onDayClicked($event.day)"
+          (eventClicked)="onEventClicked($event)"
+        />
+      }
+      @case (CalendarView.Week) {
+        <mwl-calendar-week-view
+          [locale]="language.locale()"
+          [viewDate]="viewDate"
+          [events]="events"
+          (eventClicked)="onEventClicked($event)"
+        />
+      }
+      @case (CalendarView.Day) {
+        <mwl-calendar-day-view
+          [locale]="language.locale()"
+          [viewDate]="viewDate"
+          [events]="events"
+          (eventClicked)="onEventClicked($event)"
+        />
+      }
+      @case ('list') {
+        <div class="appointment-list">
+          @if (listAppointments.length === 0) {
+            <p class="empty-state">{{ t('calendar.list.empty') }}</p>
+          }
+          @for (group of listAppointments; track group.dateLabel) {
+            <h3 class="list-date-heading">{{ group.dateLabel }}</h3>
+            <mat-card class="list-day-card">
+              <mat-list class="list-day">
+                @for (appt of group.items; track appt.id; let last = $last) {
+                  <mat-list-item class="list-appt-row" (click)="goToAppointment(appt.id)">
+                    <span matListItemTitle>
+                      <span class="list-appt-time">{{ appt.start | appDate: 'HH:mm' }}</span>
+                      {{ patientName(appt.patientId) }}
+                    </span>
+                    <span matListItemLine>
+                      {{ doctorName(appt.doctorId) }}
+                      @if (appt.reason && !layout.isHandset()) {
+                        &middot; {{ appt.reason }}
+                      }
+                    </span>
+                    <!-- Phones: reason gets its own line so it isn't truncated next to the doctor. -->
+                    @if (appt.reason && layout.isHandset()) {
+                      <span matListItemLine>{{ appt.reason }}</span>
+                    }
+                    <span matListItemMeta class="status-chip" [class]="'status-' + appt.status.toLowerCase()">{{
+                      t('enums.appointmentStatus.' + appt.status)
+                    }}</span>
+                  </mat-list-item>
+                  @if (!last) {
+                    <mat-divider />
+                  }
+                }
+              </mat-list>
+            </mat-card>
+            <div class="list-day-footer">
+              <button
+                mat-stroked-button
+                color="primary"
+                class="add-day-appointment"
+                (click)="createAppointmentForDate(group.dateParam)"
+              >
+                <mat-icon>add</mat-icon>
+                {{ t('calendar.list.addAppointment') }}
+              </button>
+            </div>
+          }
+        </div>
+      }
+    }
+  </div>
+</ng-container>

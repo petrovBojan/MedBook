@@ -8,6 +8,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../core/services/auth.service';
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
+import { LanguageToggle } from '../../shared/components/language-toggle/language-toggle';
 
 @Component({
   selector: 'app-login',
@@ -21,7 +23,9 @@ import { AuthService } from '../../core/services/auth.service';
     MatButtonModule,
     MatCardModule,
     MatProgressSpinnerModule,
-    MatIconModule
+    MatIconModule,
+    TranslocoDirective,
+    LanguageToggle
   ]
 })
 export class Login {
@@ -29,6 +33,7 @@ export class Login {
   private readonly authSrv = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly transloco = inject(TranslocoService);
 
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
@@ -61,7 +66,7 @@ export class Login {
       },
       error: (err: Error) => {
         this.isSubmitting.set(false);
-        this.errorMessage.set(err.message || 'Unable to log in. Please try again.');
+        this.errorMessage.set(err.message || this.transloco.translate('auth.login.failed'));
       }
     });
   }

@@ -9,6 +9,7 @@ import { StaffMember } from '../shared/models/staff-member.model';
 import { DaySchedule, WorkingHours, createDefaultWorkingHours } from '../shared/models/working-hours.model';
 import { DateTimeUtils } from '../shared/utils/date-time.utils';
 import { DayFormGroup, WorkingHoursEditor } from './working-hours-editor/working-hours-editor';
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
 
 type ScheduleForm = FormGroup<{ days: FormArray<DayFormGroup> }>;
 
@@ -24,12 +25,20 @@ interface StaffScheduleEntry {
   selector: 'app-settings',
   templateUrl: './settings.html',
   styleUrl: './settings.css',
-  imports: [ReactiveFormsModule, MatExpansionModule, MatButtonModule, MatIconModule, WorkingHoursEditor]
+  imports: [
+    ReactiveFormsModule,
+    MatExpansionModule,
+    MatButtonModule,
+    MatIconModule,
+    WorkingHoursEditor,
+    TranslocoDirective
+  ]
 })
 export class Settings {
   private readonly fb = inject(FormBuilder);
   private readonly clinicSrv = inject(ClinicService);
   private readonly staffSrv = inject(StaffService);
+  private readonly transloco = inject(TranslocoService);
 
   private clinicId = '';
   // The clinic hours staff schedules are validated against - the last-saved value,
@@ -132,10 +141,16 @@ export class Settings {
       }
       const clinicDay = clinicByDay.get(day.day);
       if (!clinicDay?.enabled) {
-        return `The clinic is closed on ${day.day}s - disable this day or update the clinic hours first.`;
+        return this.transloco.translate('settings.clinicClosedOn', {
+          on: this.transloco.translate(`enums.weekdayOn.${day.day}`)
+        });
       }
       if (day.start < clinicDay.start || day.end > clinicDay.end) {
-        return `${day.day} hours must fall within the clinic's hours (${clinicDay.start}–${clinicDay.end}).`;
+        return this.transloco.translate('settings.outsideClinicHours', {
+          day: this.transloco.translate(`enums.weekday.${day.day}`),
+          start: clinicDay.start,
+          end: clinicDay.end
+        });
       }
     }
 

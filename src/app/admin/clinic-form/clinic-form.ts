@@ -10,6 +10,7 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { AdminService } from '../../core/services/admin.service';
 import { StaffRole } from '../../shared/models/staff-member.model';
 import { CreatedClinic } from '../../shared/models/account.model';
+import { TranslocoDirective } from '@jsverse/transloco';
 
 // Every IANA time zone the browser knows ("Europe/Belgrade", ...). The API validates it too.
 const TIME_ZONES: string[] = Intl.supportedValuesOf('timeZone');
@@ -30,7 +31,8 @@ function knownTimeZone(control: AbstractControl): ValidationErrors | null {
     MatSelectModule,
     MatAutocompleteModule,
     MatButtonModule,
-    MatDialogModule
+    MatDialogModule,
+    TranslocoDirective
   ]
 })
 export class ClinicForm {
@@ -64,7 +66,10 @@ export class ClinicForm {
   /** Matching zones for the autocomplete - capped, since there are ~400. */
   readonly timeZoneOptions = computed(() => {
     const term = this.timeZoneInput().trim().toLowerCase().replace(/\s+/g, '_');
-    const matches = term && !TIME_ZONES.includes(this.timeZoneInput()) ? TIME_ZONES.filter((zone) => zone.toLowerCase().includes(term)) : TIME_ZONES;
+    const matches =
+      term && !TIME_ZONES.includes(this.timeZoneInput())
+        ? TIME_ZONES.filter((zone) => zone.toLowerCase().includes(term))
+        : TIME_ZONES;
     return matches.slice(0, 50);
   });
 

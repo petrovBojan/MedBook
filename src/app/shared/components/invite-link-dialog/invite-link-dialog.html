@@ -1,47 +1,39 @@
-<h2 mat-dialog-title>{{ isPasswordReset ? 'Password reset link' : 'Invitation link' }}</h2>
+<ng-container *transloco="let t">
+  <h2 mat-dialog-title>{{ isPasswordReset ? t('inviteLink.resetTitle') : t('inviteLink.inviteTitle') }}</h2>
 
-<mat-dialog-content class="invite-content">
-  @if (data.intro) {
-    <p class="intro">{{ data.intro }}</p>
-  }
+  <mat-dialog-content class="invite-content">
+    @if (data.intro) {
+      <p class="intro">{{ data.intro }}</p>
+    }
 
-  @if (isPasswordReset) {
     <p>
-      Send this link to <strong>{{ data.personName }}</strong> ({{ data.email }}). They'll use it to choose a new
-      password. Their current password keeps working until they do.
+      {{ t('inviteLink.sendTo') }} <strong>{{ data.personName }}</strong> ({{ data.email }}).
+      {{ isPasswordReset ? t('inviteLink.resetText') : t('inviteLink.inviteText') }}
     </p>
-  } @else {
-    <p>
-      Send this link to <strong>{{ data.personName }}</strong> ({{ data.email }}). They'll use it to set their own
-      password and can then log in.
+
+    <div class="link-row">
+      <input
+        #linkInput
+        class="link-input"
+        type="text"
+        readonly
+        [value]="link"
+        [attr.aria-label]="isPasswordReset ? t('inviteLink.resetTitle') : t('inviteLink.inviteTitle')"
+        (focus)="linkInput.select()"
+      />
+      <button mat-flat-button color="primary" class="pill-button" type="button" (click)="copy(linkInput)">
+        <mat-icon>{{ copied() ? 'check' : 'content_copy' }}</mat-icon>
+        {{ copied() ? t('inviteLink.copied') : t('inviteLink.copy') }}
+      </button>
+    </div>
+
+    <p class="notice">
+      <mat-icon>info</mat-icon>
+      <span>{{ t('inviteLink.notice', { expires: data.invitation.expiresAt | appDate: 'MMM d, y, HH:mm' }) }}</span>
     </p>
-  }
+  </mat-dialog-content>
 
-  <div class="link-row">
-    <input
-      #linkInput
-      class="link-input"
-      type="text"
-      readonly
-      [value]="link"
-      [attr.aria-label]="isPasswordReset ? 'Password reset link' : 'Invitation link'"
-      (focus)="linkInput.select()"
-    />
-    <button mat-flat-button color="primary" class="pill-button" type="button" (click)="copy(linkInput)">
-      <mat-icon>{{ copied() ? 'check' : 'content_copy' }}</mat-icon>
-      {{ copied() ? 'Copied' : 'Copy link' }}
-    </button>
-  </div>
-
-  <p class="notice">
-    <mat-icon>info</mat-icon>
-    <span>
-      This link works once and expires on {{ data.invitation.expiresAt | date: 'MMM d, y, HH:mm' }}. It won't be shown
-      again - if it gets lost, generate a new one.
-    </span>
-  </p>
-</mat-dialog-content>
-
-<mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close class="cancel-button">Done</button>
-</mat-dialog-actions>
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close class="cancel-button">{{ t('common.done') }}</button>
+  </mat-dialog-actions>
+</ng-container>

@@ -26,6 +26,8 @@ export interface StaffMember {
    * past appointments can still show their name - leave them out of pickers and team lists.
    */
   removedAt?: string;
+  /** The app language they chose ("en", "mk"); absent if they never picked one. */
+  preferredLanguage?: string;
 }
 
 /** What a staff member can change on their own profile page. */

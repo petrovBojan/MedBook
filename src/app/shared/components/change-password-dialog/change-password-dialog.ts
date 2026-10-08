@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PasswordService } from '../../../core/services/password.service';
 import { MIN_PASSWORD_LENGTH, passwordsMatch } from '../../utils/password.utils';
+import { TranslocoDirective } from '@jsverse/transloco';
 
 /**
  * The logged-in user (clinic staff or the platform owner) changes their own password. This
@@ -24,7 +25,8 @@ import { MIN_PASSWORD_LENGTH, passwordsMatch } from '../../utils/password.utils'
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    TranslocoDirective
   ]
 })
 export class ChangePasswordDialog {

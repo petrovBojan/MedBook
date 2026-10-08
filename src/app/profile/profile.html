@@ -1,138 +1,162 @@
-<div class="page-header">
-  <div>
-    <h1>My profile</h1>
-    <p>How you appear to your colleagues in MedBook.</p>
-  </div>
-</div>
-
-@if (profile(); as p) {
-  <section class="profile-card">
-    <div class="photo-row">
-      <app-avatar [person]="p" [size]="96" />
-
-      <div class="photo-details">
-        <div class="profile-name">{{ p.firstName }} {{ p.lastName }}</div>
-        <div class="profile-role">
-          {{ p.role }}{{ p.specialty ? ' · ' + p.specialty : '' }}
-          @if (p.isClinicAdmin) {
-            <span class="status-pill">Admin</span>
-          }
-        </div>
-
-        <div class="photo-actions">
-          <input
-            #photoInput
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            hidden
-            (change)="onPhotoSelected(photoInput)"
-          />
-          <button mat-stroked-button class="pill-button" type="button" [disabled]="isPhotoBusy()" (click)="photoInput.click()">
-            <mat-icon>photo_camera</mat-icon>
-            {{ p.photoUpdatedAt ? 'Change photo' : 'Upload photo' }}
-          </button>
-          @if (p.photoUpdatedAt) {
-            <button mat-button class="cancel-button" type="button" [disabled]="isPhotoBusy()" (click)="removePhoto()">
-              Remove
-            </button>
-          }
-          @if (isPhotoBusy()) {
-            <mat-spinner diameter="20" />
-          }
-        </div>
-        <p class="hint">JPEG, PNG or WebP. It's cropped to a square.</p>
-        @if (photoError()) {
-          <p class="error-message">{{ photoError() }}</p>
-        }
-      </div>
+<ng-container *transloco="let t">
+  <div class="page-header">
+    <div>
+      <h1>{{ t('profile.title') }}</h1>
+      <p>{{ t('profile.intro') }}</p>
     </div>
-  </section>
+  </div>
 
-  <section class="profile-card">
-    <h2>Personal details</h2>
+  @if (profile(); as p) {
+    <section class="profile-card">
+      <div class="photo-row">
+        <app-avatar [person]="p" [size]="96" />
 
-    <form [formGroup]="form" (ngSubmit)="save()">
-      <div class="field-row">
-        <div class="field-col">
-          <label class="field-label">First name</label>
-          <mat-form-field appearance="outline">
-            <input matInput formControlName="firstName" autocomplete="given-name" />
-            @if (form.controls.firstName.hasError('required') && form.controls.firstName.touched) {
-              <mat-error>First name is required.</mat-error>
+        <div class="photo-details">
+          <div class="profile-name">{{ p.firstName }} {{ p.lastName }}</div>
+          <div class="profile-role">
+            {{ t('enums.staffRole.' + p.role) }}{{ p.specialty ? ' · ' + p.specialty : '' }}
+            @if (p.isClinicAdmin) {
+              <span class="status-pill">{{ t('team.admin') }}</span>
             }
-          </mat-form-field>
-        </div>
+          </div>
 
-        <div class="field-col">
-          <label class="field-label">Last name</label>
-          <mat-form-field appearance="outline">
-            <input matInput formControlName="lastName" autocomplete="family-name" />
-            @if (form.controls.lastName.hasError('required') && form.controls.lastName.touched) {
-              <mat-error>Last name is required.</mat-error>
+          <div class="photo-actions">
+            <input
+              #photoInput
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              hidden
+              (change)="onPhotoSelected(photoInput)"
+            />
+            <button
+              mat-stroked-button
+              class="pill-button"
+              type="button"
+              [disabled]="isPhotoBusy()"
+              (click)="photoInput.click()"
+            >
+              <mat-icon>photo_camera</mat-icon>
+              {{ p.photoUpdatedAt ? t('profile.changePhoto') : t('profile.uploadPhoto') }}
+            </button>
+            @if (p.photoUpdatedAt) {
+              <button mat-button class="cancel-button" type="button" [disabled]="isPhotoBusy()" (click)="removePhoto()">
+                {{ t('common.remove') }}
+              </button>
             }
-          </mat-form-field>
+            @if (isPhotoBusy()) {
+              <mat-spinner diameter="20" />
+            }
+          </div>
+          <p class="hint">{{ t('profile.photoHint') }}</p>
+          @if (photoError()) {
+            <p class="error-message">{{ photoError() }}</p>
+          }
         </div>
       </div>
+    </section>
 
-      @if (p.role === StaffRole.Doctor) {
-        <label class="field-label">Specialty</label>
-        <mat-form-field appearance="outline">
-          <input matInput formControlName="specialty" placeholder="e.g. Family Medicine" />
-        </mat-form-field>
-      }
+    <section class="profile-card">
+      <h2>{{ t('profile.personalDetails') }}</h2>
 
-      <label class="field-label">Calendar color</label>
-      <div class="color-options" role="radiogroup" aria-label="Calendar color">
-        @for (color of colors; track color) {
-          <button
-            type="button"
-            class="color-swatch"
-            role="radio"
-            [style.background]="color"
-            [class.selected]="form.controls.color.value === color"
-            [attr.aria-checked]="form.controls.color.value === color"
-            [attr.aria-label]="color"
-            (click)="form.controls.color.setValue(color); form.markAsDirty()"
-          ></button>
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="field-row">
+          <div class="field-col">
+            <label class="field-label">{{ t('common.firstName') }}</label>
+            <mat-form-field appearance="outline">
+              <input matInput formControlName="firstName" autocomplete="given-name" />
+              @if (form.controls.firstName.hasError('required') && form.controls.firstName.touched) {
+                <mat-error>{{ t('common.firstNameRequired') }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="field-col">
+            <label class="field-label">{{ t('common.lastName') }}</label>
+            <mat-form-field appearance="outline">
+              <input matInput formControlName="lastName" autocomplete="family-name" />
+              @if (form.controls.lastName.hasError('required') && form.controls.lastName.touched) {
+                <mat-error>{{ t('common.lastNameRequired') }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
+
+        @if (p.role === StaffRole.Doctor) {
+          <label class="field-label">{{ t('common.specialty') }}</label>
+          <mat-form-field appearance="outline">
+            <input matInput formControlName="specialty" [placeholder]="t('profile.specialtyPlaceholder')" />
+          </mat-form-field>
         }
+
+        <label class="field-label">{{ t('common.calendarColor') }}</label>
+        <div class="color-options" role="radiogroup" [attr.aria-label]="t('common.calendarColor')">
+          @for (color of colors; track color) {
+            <button
+              type="button"
+              class="color-swatch"
+              role="radio"
+              [style.background]="color"
+              [class.selected]="form.controls.color.value === color"
+              [attr.aria-checked]="form.controls.color.value === color"
+              [attr.aria-label]="color"
+              (click)="form.controls.color.setValue(color); form.markAsDirty()"
+            ></button>
+          }
+        </div>
+
+        <dl class="account-facts">
+          <dt>{{ t('profile.emailLogin') }}</dt>
+          <dd>{{ p.email }}</dd>
+          <dt>{{ t('common.role') }}</dt>
+          <dd>{{ t('enums.staffRole.' + p.role) }}{{ p.isClinicAdmin ? t('profile.clinicAdminSuffix') : '' }}</dd>
+        </dl>
+        <p class="hint">{{ t('profile.managedHint') }}</p>
+
+        @if (errorMessage()) {
+          <p class="error-message">{{ errorMessage() }}</p>
+        }
+
+        <div class="form-actions">
+          @if (justSaved()) {
+            <span class="saved-message">
+              <mat-icon>check_circle</mat-icon>
+              {{ t('common.saved') }}
+            </span>
+          }
+          <button mat-flat-button color="primary" class="pill-button" type="submit" [disabled]="isSaving()">
+            {{ t('common.saveChanges') }}
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="profile-card">
+      <h2>{{ t('profile.language') }}</h2>
+      <div class="password-row">
+        <p class="hint">{{ t('profile.languageHint') }}</p>
+        <mat-button-toggle-group
+          [value]="language.current()"
+          (change)="language.use($event.value)"
+          [attr.aria-label]="t('profile.language')"
+        >
+          @for (lang of languages; track lang.code) {
+            <mat-button-toggle [value]="lang.code">{{ lang.label }}</mat-button-toggle>
+          }
+        </mat-button-toggle-group>
       </div>
+    </section>
 
-      <dl class="account-facts">
-        <dt>Email (your login)</dt>
-        <dd>{{ p.email }}</dd>
-        <dt>Role</dt>
-        <dd>{{ p.role }}{{ p.isClinicAdmin ? ', clinic administrator' : '' }}</dd>
-      </dl>
-      <p class="hint">Your email, role and admin rights are managed by your clinic administrator.</p>
-
-      @if (errorMessage()) {
-        <p class="error-message">{{ errorMessage() }}</p>
-      }
-
-      <div class="form-actions">
-        @if (justSaved()) {
-          <span class="saved-message">
-            <mat-icon>check_circle</mat-icon>
-            Saved
-          </span>
-        }
-        <button mat-flat-button color="primary" class="pill-button" type="submit" [disabled]="isSaving()">
-          Save changes
+    <section class="profile-card">
+      <h2>{{ t('profile.password') }}</h2>
+      <div class="password-row">
+        <p class="hint">{{ t('profile.passwordHint') }}</p>
+        <button mat-stroked-button class="pill-button" type="button" (click)="changePassword()">
+          <mat-icon>key</mat-icon>
+          {{ t('account.changePassword') }}
         </button>
       </div>
-    </form>
-  </section>
-
-  <section class="profile-card">
-    <h2>Password</h2>
-    <div class="password-row">
-      <p class="hint">Changing your password signs you out on your other devices.</p>
-      <button mat-stroked-button class="pill-button" type="button" (click)="changePassword()">
-        <mat-icon>key</mat-icon>
-        Change password
-      </button>
-    </div>
-  </section>
-} @else if (errorMessage()) {
-  <p class="error-message">{{ errorMessage() }}</p>
-}
+    </section>
+  } @else if (errorMessage()) {
+    <p class="error-message">{{ errorMessage() }}</p>
+  }
+</ng-container>

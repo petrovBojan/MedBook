@@ -24,6 +24,7 @@ import { formDialogConfig } from '../../shared/utils/dialog.utils';
 import { ClinicService } from '../../core/services/clinic.service';
 import { DaySchedule, WorkingHours } from '../../shared/models/working-hours.model';
 import { SLOT_MINUTES, atTime, firstAvailableStart, openHoursOn, weekdayOf } from '../../shared/utils/clinic-hours.utils';
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
 
 export interface AppointmentFormDialogData {
   appointmentId?: string;
@@ -43,7 +44,8 @@ export interface AppointmentFormDialogData {
     MatButtonModule,
     MatDatepickerModule,
     MatTimepickerModule,
-    MatDialogModule
+    MatDialogModule,
+    TranslocoDirective
   ]
 })
 export class AppointmentForm {
@@ -55,6 +57,7 @@ export class AppointmentForm {
   private readonly dialog = inject(MatDialog);
   private readonly dialogRef = inject(MatDialogRef<AppointmentForm, boolean>);
   private readonly data = inject<AppointmentFormDialogData>(MAT_DIALOG_DATA, { optional: true }) ?? {};
+  private readonly transloco = inject(TranslocoService);
   readonly layout = inject(LayoutService);
 
   readonly AppointmentStatus = AppointmentStatus;
@@ -87,7 +90,7 @@ export class AppointmentForm {
   // The selected start day, tracked separately because prefilling the form for an edit
   // patches it without emitting value changes.
   private readonly startDay = signal(new Date());
-  private readonly openHours = computed(() => {
+  readonly openHours = computed(() => {
     const hours = this.clinicHours();
     return hours ? openHoursOn(hours, this.startDay()) : undefined;
   });
@@ -98,11 +101,8 @@ export class AppointmentForm {
   readonly endTimeMin = computed(() => this.limit((open) => open.start, SLOT_MINUTES));
   readonly endTimeMax = computed(() => this.limit((open) => open.end));
 
-  /** Shown when a picked time is outside opening hours, e.g. "Open 09:00–17:00 on Mondays." */
-  readonly openHoursHint = computed(() => {
-    const open = this.openHours();
-    return open ? `Open ${open.start}–${open.end} on ${weekdayOf(this.startDay())}s.` : '';
-  });
+  /** For the "Open 09:00–17:00 on Mondays." error shown when a picked time is outside opening hours. */
+  readonly startWeekday = computed(() => weekdayOf(this.startDay()));
 
   /** Greys out the days the clinic is closed in the date pickers (and flags them if typed in). */
   readonly isOpenDay = (date: Date | null): boolean => {
@@ -110,9 +110,8 @@ export class AppointmentForm {
     return !date || !hours || !!openHoursOn(hours, date);
   };
 
-  closedDayMessage(date: Date | null): string {
-    return date ? `The clinic is closed on ${weekdayOf(date)}s.` : '';
-  }
+  /** For the "The clinic is closed on Sundays." error on a date picker. */
+  readonly weekdayOf = weekdayOf;
 
   readonly form = this.fb.nonNullable.group({
     doctorId: ['', Validators.required],
@@ -140,7 +139,7 @@ export class AppointmentForm {
     if (this.appointmentId) {
       this.appointmentSrv.getAppointment(this.appointmentId).subscribe((appointment) => {
         if (!appointment) {
-          this.errorMessage.set('Appointment not found.');
+          this.errorMessage.set(this.transloco.translate('appointmentForm.notFound'));
           return;
         }
         const start = new Date(appointment.start);
@@ -303,9 +302,9 @@ export class AppointmentForm {
     }
     const dialogRef = this.dialog.open(ConfirmDialog, {
       data: {
-        title: 'Cancel appointment',
-        message: 'This will mark the appointment as cancelled. Continue?',
-        confirmLabel: 'Cancel appointment'
+        title: this.transloco.translate('appointmentForm.cancelAppointment'),
+        message: this.transloco.translate('appointmentForm.cancelConfirm'),
+        confirmLabel: this.transloco.translate('appointmentForm.cancelAppointment')
       }
     });
 

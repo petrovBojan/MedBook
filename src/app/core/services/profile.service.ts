@@ -22,6 +22,11 @@ export class ProfileService {
     return this.http.put<StaffMember>(`${this.baseUrl}/profile`, dto).pipe(tap((user) => this.authSrv.updateCurrentUser(user)));
   }
 
+  /** Saves the app language on the profile, so it follows the user to other devices. */
+  updateLanguage(language: string): Observable<StaffMember> {
+    return this.http.put<StaffMember>(`${this.baseUrl}/language`, { language }).pipe(tap((user) => this.authSrv.updateCurrentUser(user)));
+  }
+
   /** Uploads an already-resized photo (see resizeToSquare). */
   uploadPhoto(photo: Blob): Observable<StaffMember> {
     const form = new FormData();

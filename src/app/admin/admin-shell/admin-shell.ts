@@ -10,6 +10,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../core/services/auth.service';
 import { ChangePasswordDialog } from '../../shared/components/change-password-dialog/change-password-dialog';
 import { Avatar } from '../../shared/components/avatar/avatar';
+import { TranslocoDirective } from '@jsverse/transloco';
+import { APP_LANGUAGES, LanguageService } from '../../core/services/language.service';
 
 /**
  * Layout for the platform owner's panel. Separate from the clinic app's shell: the owner
@@ -28,13 +30,16 @@ import { Avatar } from '../../shared/components/avatar/avatar';
     MatIconModule,
     MatMenuModule,
     MatDividerModule,
-    Avatar
+    Avatar,
+    TranslocoDirective
   ]
 })
 export class AdminShell {
   private readonly authSrv = inject(AuthService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  readonly language = inject(LanguageService);
+  readonly languages = APP_LANGUAGES;
 
   readonly admin$ = this.authSrv.platformAdmin$;
 

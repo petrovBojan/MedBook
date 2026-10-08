@@ -10,6 +10,7 @@ import { StaffService } from '../../core/services/staff.service';
 import { StaffRole } from '../../shared/models/staff-member.model';
 import { StaffInvitation } from '../../shared/models/account.model';
 import { STAFF_COLORS as COLORS } from '../../shared/utils/staff-colors';
+import { TranslocoDirective } from '@jsverse/transloco';
 
 /** A clinic admin adding a staff member. Closes with the created member and their invitation. */
 @Component({
@@ -23,7 +24,8 @@ import { STAFF_COLORS as COLORS } from '../../shared/utils/staff-colors';
     MatSelectModule,
     MatCheckboxModule,
     MatButtonModule,
-    MatDialogModule
+    MatDialogModule,
+    TranslocoDirective
   ]
 })
 export class StaffForm {

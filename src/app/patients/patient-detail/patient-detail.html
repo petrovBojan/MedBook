@@ -1,51 +1,60 @@
-<a mat-button routerLink="/patients" class="back-link">
-  <mat-icon>arrow_back</mat-icon>
-  Patients
-</a>
+<ng-container *transloco="let t">
+  <a mat-button routerLink="/patients" class="back-link">
+    <mat-icon>arrow_back</mat-icon>
+    {{ t('patients.back') }}
+  </a>
 
-@if (patient(); as p) {
-  <mat-card class="patient-summary">
-    <mat-card-header>
-      <mat-card-title>{{ p.firstName }} {{ p.lastName }}</mat-card-title>
-      <mat-card-subtitle>{{ p.dateOfBirth ? (p.dateOfBirth | date: 'longDate') : 'Date of birth not set' }}</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <dl class="patient-facts">
-        <dt>Gender</dt>
-        <dd>{{ p.gender || '—' }}</dd>
-        <dt>Phone</dt>
-        <dd>{{ p.phone || '—' }}</dd>
-        <dt>Email</dt>
-        <dd>{{ p.email || '—' }}</dd>
-        <dt>Address</dt>
-        <dd>{{ p.address || '—' }}</dd>
-        @if (p.notes) {
-          <dt>Notes</dt>
-          <dd>{{ p.notes }}</dd>
+  @if (patient(); as p) {
+    <mat-card class="patient-summary">
+      <mat-card-header>
+        <mat-card-title>{{ p.firstName }} {{ p.lastName }}</mat-card-title>
+        <mat-card-subtitle>{{
+          p.dateOfBirth ? (p.dateOfBirth | appDate: 'longDate') : t('patients.dobNotSet')
+        }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <dl class="patient-facts">
+          <dt>{{ t('patients.gender') }}</dt>
+          <dd>{{ p.gender ? t('enums.gender.' + p.gender) : '—' }}</dd>
+          <dt>{{ t('patients.phone') }}</dt>
+          <dd>{{ p.phone || '—' }}</dd>
+          <dt>{{ t('patients.email') }}</dt>
+          <dd>{{ p.email || '—' }}</dd>
+          <dt>{{ t('patients.address') }}</dt>
+          <dd>{{ p.address || '—' }}</dd>
+          @if (p.notes) {
+            <dt>{{ t('patients.notes') }}</dt>
+            <dd>{{ p.notes }}</dd>
+          }
+        </dl>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-button (click)="editPatient()">{{ t('patients.edit') }}</button>
+        <button mat-flat-button color="primary" class="pill-button" (click)="bookAppointment()">
+          {{ t('patients.book') }}
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <h3 class="section-title">{{ t('patients.history') }}</h3>
+    @if (appointmentsForPatient().length > 0) {
+      <mat-list class="history-list">
+        @for (appt of appointmentsForPatient(); track appt.id) {
+          <mat-list-item (click)="openAppointment(appt.id)" class="appointment-row" lines="2">
+            <span matListItemTitle
+              >{{ appt.start | appDate: 'MMM d, y, HH:mm' }} &middot; {{ doctorName(appt.doctorId) }}</span
+            >
+            <span matListItemLine
+              >{{ appt.reason || t('patients.noReason') }} &mdash;
+              {{ t('enums.appointmentStatus.' + appt.status) }}</span
+            >
+          </mat-list-item>
         }
-      </dl>
-    </mat-card-content>
-    <mat-card-actions>
-      <button mat-button (click)="editPatient()">Edit patient</button>
-      <button mat-flat-button color="primary" class="pill-button" (click)="bookAppointment()">
-        Book appointment
-      </button>
-    </mat-card-actions>
-  </mat-card>
-
-  <h3 class="section-title">Appointment history</h3>
-  @if (appointmentsForPatient().length > 0) {
-    <mat-list class="history-list">
-      @for (appt of appointmentsForPatient(); track appt.id) {
-        <mat-list-item (click)="openAppointment(appt.id)" class="appointment-row" lines="2">
-          <span matListItemTitle>{{ appt.start | date: 'MMM d, y, HH:mm' }} &middot; {{ doctorName(appt.doctorId) }}</span>
-          <span matListItemLine>{{ appt.reason || 'No reason given' }} &mdash; {{ appt.status }}</span>
-        </mat-list-item>
-      }
-    </mat-list>
+      </mat-list>
+    } @else {
+      <p class="empty-state">{{ t('patients.noAppointments') }}</p>
+    }
   } @else {
-    <p class="empty-state">No appointments yet.</p>
+    <p class="empty-state">{{ t('patients.notFound') }}</p>
   }
-} @else {
-  <p class="empty-state">Patient not found.</p>
-}
+</ng-container>

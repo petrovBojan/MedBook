@@ -10,6 +10,7 @@ import { PatientService } from '../../core/services/patient.service';
 import { Gender, Patient, PatientDto } from '../../shared/models/patient.model';
 import { DateTimeUtils } from '../../shared/utils/date-time.utils';
 import { LayoutService } from '../../core/services/layout.service';
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
 
 export interface PatientFormDialogData {
   patientId?: string;
@@ -26,7 +27,8 @@ export interface PatientFormDialogData {
     MatSelectModule,
     MatButtonModule,
     MatDatepickerModule,
-    MatDialogModule
+    MatDialogModule,
+    TranslocoDirective
   ]
 })
 export class PatientForm {
@@ -34,6 +36,7 @@ export class PatientForm {
   private readonly patientSrv = inject(PatientService);
   private readonly dialogRef = inject(MatDialogRef<PatientForm, Patient | undefined>);
   private readonly data = inject<PatientFormDialogData>(MAT_DIALOG_DATA, { optional: true }) ?? {};
+  private readonly transloco = inject(TranslocoService);
   readonly layout = inject(LayoutService);
 
   readonly Gender = Gender;
@@ -62,7 +65,7 @@ export class PatientForm {
     if (this.patientId) {
       this.patientSrv.getPatient(this.patientId).subscribe((patient) => {
         if (!patient) {
-          this.errorMessage.set('Patient not found.');
+          this.errorMessage.set(this.transloco.translate('patients.notFound'));
           return;
         }
         this.form.patchValue({

@@ -1,9 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
-import { DOCUMENT, DatePipe } from '@angular/common';
+import { DOCUMENT } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Invitation, PasswordResetLink } from '../../models/account.model';
+import { TranslocoDirective } from '@jsverse/transloco';
+import { AppDatePipe } from '../../pipes/app-date.pipe';
 
 export interface InviteLinkDialogData {
   /** Who the link is for, e.g. "Dr. Ana Kovac". */
@@ -25,7 +27,7 @@ export interface InviteLinkDialogData {
   selector: 'app-invite-link-dialog',
   templateUrl: './invite-link-dialog.html',
   styleUrl: './invite-link-dialog.css',
-  imports: [DatePipe, MatDialogModule, MatButtonModule, MatIconModule]
+  imports: [AppDatePipe, MatDialogModule, MatButtonModule, MatIconModule, TranslocoDirective]
 })
 export class InviteLinkDialog {
   readonly data = inject<InviteLinkDialogData>(MAT_DIALOG_DATA);

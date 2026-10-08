@@ -1,82 +1,84 @@
-<a mat-button routerLink="/admin" class="back-link">
-  <mat-icon>arrow_back</mat-icon>
-  Clinics
-</a>
+<ng-container *transloco="let t">
+  <a mat-button routerLink="/admin" class="back-link">
+    <mat-icon>arrow_back</mat-icon>
+    {{ t('admin.clinics') }}
+  </a>
 
-@if (errorMessage()) {
-  <p class="error-message">{{ errorMessage() }}</p>
-}
-
-@if (clinic(); as c) {
-  <div class="page-header">
-    <div>
-      <h1>{{ c.name }}</h1>
-      <p>
-        @if (c.isActive) {
-          <span class="status-pill status-pill--success">Active</span>
-        } @else {
-          <span class="status-pill status-pill--danger">Deactivated</span>
-        }
-      </p>
-    </div>
-    <button
-      mat-stroked-button
-      [color]="c.isActive ? 'warn' : 'primary'"
-      class="pill-button status-button"
-      [disabled]="isSaving()"
-      (click)="toggleActive(c)"
-    >
-      <mat-icon>{{ c.isActive ? 'block' : 'check_circle' }}</mat-icon>
-      {{ c.isActive ? 'Deactivate' : 'Reactivate' }}
-    </button>
-  </div>
-
-  <dl class="clinic-facts">
-    <dt>Address</dt>
-    <dd>{{ c.address || '—' }}</dd>
-    <dt>Phone</dt>
-    <dd>{{ c.phone || '—' }}</dd>
-    <dt>Email</dt>
-    <dd>{{ c.email || '—' }}</dd>
-    <dt>Time zone</dt>
-    <dd>{{ c.timeZone }}</dd>
-    <dt>Created</dt>
-    <dd>{{ c.createdAt ? (c.createdAt | date: 'mediumDate') : '—' }}</dd>
-  </dl>
-}
-
-<h2 class="section-title">Staff</h2>
-<div class="entity-list">
-  @for (member of staff(); track member.id) {
-    <div class="entity-row">
-      <div class="entity-main">
-        <div class="entity-title">{{ member.firstName }} {{ member.lastName }}</div>
-        <div class="entity-subtitle">{{ member.role }} · {{ member.email }}</div>
-      </div>
-      <div class="entity-meta">
-        @if (member.isClinicAdmin) {
-          <span class="status-pill">Admin</span>
-        }
-        <button mat-stroked-button class="invite-button" (click)="toggleClinicAdmin(member)">
-          <mat-icon>{{ member.isClinicAdmin ? 'remove_moderator' : 'add_moderator' }}</mat-icon>
-          {{ member.isClinicAdmin ? 'Remove admin' : 'Make admin' }}
-        </button>
-        @if (member.hasAccount) {
-          <span class="status-pill status-pill--success">Active</span>
-          <button mat-stroked-button class="invite-button" (click)="passwordReset(member)">
-            <mat-icon>lock_reset</mat-icon>
-            Reset password
-          </button>
-        } @else {
-          <span class="status-pill status-pill--warning">Invitation pending</span>
-          <button mat-stroked-button class="invite-button" (click)="newInvitation(member)">
-            <mat-icon>link</mat-icon>
-            New invite link
-          </button>
-        }
-      </div>
-    </div>
-  } @empty {
-    <p class="empty-state">No staff members.</p>
+  @if (errorMessage()) {
+    <p class="error-message">{{ errorMessage() }}</p>
   }
-</div>
+
+  @if (clinic(); as c) {
+    <div class="page-header">
+      <div>
+        <h1>{{ c.name }}</h1>
+        <p>
+          @if (c.isActive) {
+            <span class="status-pill status-pill--success">{{ t('admin.active') }}</span>
+          } @else {
+            <span class="status-pill status-pill--danger">{{ t('admin.deactivated') }}</span>
+          }
+        </p>
+      </div>
+      <button
+        mat-stroked-button
+        [color]="c.isActive ? 'warn' : 'primary'"
+        class="pill-button status-button"
+        [disabled]="isSaving()"
+        (click)="toggleActive(c)"
+      >
+        <mat-icon>{{ c.isActive ? 'block' : 'check_circle' }}</mat-icon>
+        {{ c.isActive ? t('admin.detail.deactivate') : t('admin.detail.reactivate') }}
+      </button>
+    </div>
+
+    <dl class="clinic-facts">
+      <dt>{{ t('admin.detail.address') }}</dt>
+      <dd>{{ c.address || '—' }}</dd>
+      <dt>{{ t('admin.detail.phone') }}</dt>
+      <dd>{{ c.phone || '—' }}</dd>
+      <dt>{{ t('admin.detail.email') }}</dt>
+      <dd>{{ c.email || '—' }}</dd>
+      <dt>{{ t('admin.detail.timeZone') }}</dt>
+      <dd>{{ c.timeZone }}</dd>
+      <dt>{{ t('admin.detail.createdLabel') }}</dt>
+      <dd>{{ c.createdAt ? (c.createdAt | appDate: 'mediumDate') : '—' }}</dd>
+    </dl>
+  }
+
+  <h2 class="section-title">{{ t('admin.detail.staff') }}</h2>
+  <div class="entity-list">
+    @for (member of staff(); track member.id) {
+      <div class="entity-row">
+        <div class="entity-main">
+          <div class="entity-title">{{ member.firstName }} {{ member.lastName }}</div>
+          <div class="entity-subtitle">{{ t('enums.staffRole.' + member.role) }} · {{ member.email }}</div>
+        </div>
+        <div class="entity-meta">
+          @if (member.isClinicAdmin) {
+            <span class="status-pill">{{ t('team.admin') }}</span>
+          }
+          <button mat-stroked-button class="invite-button" (click)="toggleClinicAdmin(member)">
+            <mat-icon>{{ member.isClinicAdmin ? 'remove_moderator' : 'add_moderator' }}</mat-icon>
+            {{ member.isClinicAdmin ? t('admin.detail.removeAdmin') : t('admin.detail.makeAdmin') }}
+          </button>
+          @if (member.hasAccount) {
+            <span class="status-pill status-pill--success">{{ t('team.active') }}</span>
+            <button mat-stroked-button class="invite-button" (click)="passwordReset(member)">
+              <mat-icon>lock_reset</mat-icon>
+              {{ t('team.resetPassword') }}
+            </button>
+          } @else {
+            <span class="status-pill status-pill--warning">{{ t('team.invitationPending') }}</span>
+            <button mat-stroked-button class="invite-button" (click)="newInvitation(member)">
+              <mat-icon>link</mat-icon>
+              {{ t('team.newInvite') }}
+            </button>
+          }
+        </div>
+      </div>
+    } @empty {
+      <p class="empty-state">{{ t('admin.detail.noStaff') }}</p>
+    }
+  </div>
+</ng-container>

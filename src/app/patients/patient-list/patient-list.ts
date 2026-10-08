@@ -1,7 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
-import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -14,12 +13,24 @@ import { Patient } from '../../shared/models/patient.model';
 import { PatientForm } from '../patient-form/patient-form';
 import { LayoutService } from '../../core/services/layout.service';
 import { formDialogConfig } from '../../shared/utils/dialog.utils';
+import { TranslocoDirective } from '@jsverse/transloco';
+import { AppDatePipe } from '../../shared/pipes/app-date.pipe';
 
 @Component({
   selector: 'app-patient-list',
   templateUrl: './patient-list.html',
   styleUrl: './patient-list.css',
-  imports: [RouterLink, DatePipe, FormsModule, MatTableModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule]
+  imports: [
+    RouterLink,
+    AppDatePipe,
+    FormsModule,
+    MatTableModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    TranslocoDirective
+  ]
 })
 export class PatientList {
   private readonly patientSrv = inject(PatientService);

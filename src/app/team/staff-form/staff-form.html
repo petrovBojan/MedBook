@@ -1,95 +1,103 @@
-<h2 mat-dialog-title>Add staff member</h2>
+<ng-container *transloco="let t">
+  <h2 mat-dialog-title>{{ t('team.form.title') }}</h2>
 
-<form [formGroup]="form" (ngSubmit)="submit()" class="staff-form">
-  <mat-dialog-content>
-    <p class="intro">
-      You'll get an invitation link to send them - they choose their own password when they open it.
-    </p>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="staff-form">
+    <mat-dialog-content>
+      <p class="intro">{{ t('team.form.intro') }}</p>
 
-    <div class="field-row">
-      <div class="field-col">
-        <label class="field-label" [class.field-label--empty]="!form.controls.firstName.value">First name</label>
-        <mat-form-field appearance="outline">
-          <input matInput formControlName="firstName" autocomplete="off" placeholder="First name" />
-          @if (form.controls.firstName.hasError('required') && form.controls.firstName.touched) {
-            <mat-error>First name is required.</mat-error>
-          }
-        </mat-form-field>
-      </div>
-
-      <div class="field-col">
-        <label class="field-label" [class.field-label--empty]="!form.controls.lastName.value">Last name</label>
-        <mat-form-field appearance="outline">
-          <input matInput formControlName="lastName" autocomplete="off" placeholder="Last name" />
-          @if (form.controls.lastName.hasError('required') && form.controls.lastName.touched) {
-            <mat-error>Last name is required.</mat-error>
-          }
-        </mat-form-field>
-      </div>
-    </div>
-
-    <label class="field-label" [class.field-label--empty]="!form.controls.email.value">Email (their login)</label>
-    <mat-form-field appearance="outline">
-      <input matInput type="email" formControlName="email" autocomplete="off" placeholder="Email (their login)" />
-      @if (form.controls.email.hasError('required') && form.controls.email.touched) {
-        <mat-error>Email is required.</mat-error>
-      }
-      @if (form.controls.email.hasError('email') && form.controls.email.touched) {
-        <mat-error>Enter a valid email address.</mat-error>
-      }
-    </mat-form-field>
-
-    <div class="field-row">
-      <div class="field-col">
-        <label class="field-label">Role</label>
-        <mat-form-field appearance="outline">
-          <mat-select formControlName="role">
-            <mat-option [value]="StaffRole.Doctor">Doctor</mat-option>
-            <mat-option [value]="StaffRole.Employee">Employee</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <div class="field-col">
-        @if (form.controls.role.value === StaffRole.Doctor) {
-          <label class="field-label" [class.field-label--empty]="!form.controls.specialty.value">Specialty</label>
+      <div class="field-row">
+        <div class="field-col">
+          <label class="field-label" [class.field-label--empty]="!form.controls.firstName.value">{{
+            t('common.firstName')
+          }}</label>
           <mat-form-field appearance="outline">
-            <input matInput formControlName="specialty" placeholder="Specialty (optional)" />
+            <input matInput formControlName="firstName" autocomplete="off" [placeholder]="t('common.firstName')" />
+            @if (form.controls.firstName.hasError('required') && form.controls.firstName.touched) {
+              <mat-error>{{ t('common.firstNameRequired') }}</mat-error>
+            }
           </mat-form-field>
+        </div>
+
+        <div class="field-col">
+          <label class="field-label" [class.field-label--empty]="!form.controls.lastName.value">{{
+            t('common.lastName')
+          }}</label>
+          <mat-form-field appearance="outline">
+            <input matInput formControlName="lastName" autocomplete="off" [placeholder]="t('common.lastName')" />
+            @if (form.controls.lastName.hasError('required') && form.controls.lastName.touched) {
+              <mat-error>{{ t('common.lastNameRequired') }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+
+      <label class="field-label" [class.field-label--empty]="!form.controls.email.value">{{
+        t('team.form.email')
+      }}</label>
+      <mat-form-field appearance="outline">
+        <input matInput type="email" formControlName="email" autocomplete="off" [placeholder]="t('team.form.email')" />
+        @if (form.controls.email.hasError('required') && form.controls.email.touched) {
+          <mat-error>{{ t('validation.emailRequired') }}</mat-error>
+        }
+        @if (form.controls.email.hasError('email') && form.controls.email.touched) {
+          <mat-error>{{ t('validation.emailInvalid') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="field-row">
+        <div class="field-col">
+          <label class="field-label">{{ t('common.role') }}</label>
+          <mat-form-field appearance="outline">
+            <mat-select formControlName="role">
+              <mat-option [value]="StaffRole.Doctor">{{ t('enums.staffRole.Doctor') }}</mat-option>
+              <mat-option [value]="StaffRole.Employee">{{ t('enums.staffRole.Employee') }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="field-col">
+          @if (form.controls.role.value === StaffRole.Doctor) {
+            <label class="field-label" [class.field-label--empty]="!form.controls.specialty.value">{{
+              t('common.specialty')
+            }}</label>
+            <mat-form-field appearance="outline">
+              <input matInput formControlName="specialty" [placeholder]="t('common.specialtyOptional')" />
+            </mat-form-field>
+          }
+        </div>
+      </div>
+
+      <label class="field-label">{{ t('common.calendarColor') }}</label>
+      <div class="color-options" role="radiogroup" [attr.aria-label]="t('common.calendarColor')">
+        @for (color of colors; track color) {
+          <button
+            type="button"
+            class="color-swatch"
+            role="radio"
+            [style.background]="color"
+            [class.selected]="form.controls.color.value === color"
+            [attr.aria-checked]="form.controls.color.value === color"
+            [attr.aria-label]="color"
+            (click)="form.controls.color.setValue(color)"
+          ></button>
         }
       </div>
-    </div>
 
-    <label class="field-label">Calendar color</label>
-    <div class="color-options" role="radiogroup" aria-label="Calendar color">
-      @for (color of colors; track color) {
-        <button
-          type="button"
-          class="color-swatch"
-          role="radio"
-          [style.background]="color"
-          [class.selected]="form.controls.color.value === color"
-          [attr.aria-checked]="form.controls.color.value === color"
-          [attr.aria-label]="color"
-          (click)="form.controls.color.setValue(color)"
-        ></button>
+      <mat-checkbox formControlName="isClinicAdmin" class="admin-checkbox">
+        {{ t('team.form.clinicAdmin') }}
+        <span class="checkbox-hint">{{ t('team.form.clinicAdminHint') }}</span>
+      </mat-checkbox>
+
+      @if (errorMessage()) {
+        <p class="error-message">{{ errorMessage() }}</p>
       }
-    </div>
+    </mat-dialog-content>
 
-    <mat-checkbox formControlName="isClinicAdmin" class="admin-checkbox">
-      Clinic administrator
-      <span class="checkbox-hint">Can add staff members and send invitations.</span>
-    </mat-checkbox>
-
-    @if (errorMessage()) {
-      <p class="error-message">{{ errorMessage() }}</p>
-    }
-  </mat-dialog-content>
-
-  <mat-dialog-actions align="end">
-    <button mat-button type="button" class="cancel-button" (click)="close()">Cancel</button>
-    <button mat-flat-button color="primary" class="pill-button" type="submit" [disabled]="isSubmitting()">
-      Add and get invite link
-    </button>
-  </mat-dialog-actions>
-</form>
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" class="cancel-button" (click)="close()">{{ t('common.cancel') }}</button>
+      <button mat-flat-button color="primary" class="pill-button" type="submit" [disabled]="isSubmitting()">
+        {{ t('team.form.submit') }}
+      </button>
+    </mat-dialog-actions>
+  </form>
+</ng-container>

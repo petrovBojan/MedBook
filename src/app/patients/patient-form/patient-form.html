@@ -1,90 +1,118 @@
-<h2 mat-dialog-title>{{ isEditMode ? 'Edit patient' : 'Add patient' }}</h2>
+<ng-container *transloco="let t">
+  <h2 mat-dialog-title>{{ isEditMode ? t('patients.form.editTitle') : t('patients.form.addTitle') }}</h2>
 
-<form [formGroup]="form" (ngSubmit)="submit()" class="patient-form">
-  <mat-dialog-content>
-    <div class="field-row">
-      <div class="field-col">
-        <label class="field-label" [class.field-label--empty]="!form.controls.firstName.value">First name</label>
-        <mat-form-field appearance="outline">
-          <input matInput formControlName="firstName" placeholder="First name" />
-          @if (form.controls.firstName.hasError('required') && form.controls.firstName.touched) {
-            <mat-error>First name is required.</mat-error>
-          }
-        </mat-form-field>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="patient-form">
+    <mat-dialog-content>
+      <div class="field-row">
+        <div class="field-col">
+          <label class="field-label" [class.field-label--empty]="!form.controls.firstName.value">{{
+            t('patients.form.firstName')
+          }}</label>
+          <mat-form-field appearance="outline">
+            <input matInput formControlName="firstName" [placeholder]="t('patients.form.firstName')" />
+            @if (form.controls.firstName.hasError('required') && form.controls.firstName.touched) {
+              <mat-error>{{ t('patients.form.firstNameRequired') }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="field-col">
+          <label class="field-label" [class.field-label--empty]="!form.controls.lastName.value">{{
+            t('patients.form.lastName')
+          }}</label>
+          <mat-form-field appearance="outline">
+            <input matInput formControlName="lastName" [placeholder]="t('patients.form.lastName')" />
+            @if (form.controls.lastName.hasError('required') && form.controls.lastName.touched) {
+              <mat-error>{{ t('patients.form.lastNameRequired') }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
       </div>
 
-      <div class="field-col">
-        <label class="field-label" [class.field-label--empty]="!form.controls.lastName.value">Last name</label>
-        <mat-form-field appearance="outline">
-          <input matInput formControlName="lastName" placeholder="Last name" />
-          @if (form.controls.lastName.hasError('required') && form.controls.lastName.touched) {
-            <mat-error>Last name is required.</mat-error>
-          }
-        </mat-form-field>
-      </div>
-    </div>
+      <div class="field-row">
+        <div class="field-col">
+          <label class="field-label" [class.field-label--empty]="!form.controls.dateOfBirth.value">{{
+            t('patients.dateOfBirth')
+          }}</label>
+          <mat-form-field appearance="outline">
+            <input
+              matInput
+              [matDatepicker]="dobPicker"
+              formControlName="dateOfBirth"
+              [placeholder]="t('patients.dateOfBirth')"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="dobPicker" />
+            <mat-datepicker
+              #dobPicker
+              startView="multi-year"
+              [startAt]="dobPickerStartDate"
+              [touchUi]="layout.isHandset()"
+            />
+          </mat-form-field>
+        </div>
 
-    <div class="field-row">
-      <div class="field-col">
-        <label class="field-label" [class.field-label--empty]="!form.controls.dateOfBirth.value">Date of birth</label>
-        <mat-form-field appearance="outline">
-          <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth" placeholder="Date of birth" />
-          <mat-datepicker-toggle matIconSuffix [for]="dobPicker" />
-          <mat-datepicker #dobPicker startView="multi-year" [startAt]="dobPickerStartDate" [touchUi]="layout.isHandset()" />
-        </mat-form-field>
-      </div>
-
-      <div class="field-col">
-        <label class="field-label" [class.field-label--empty]="!form.controls.gender.value">Gender</label>
-        <mat-form-field appearance="outline">
-          <mat-select formControlName="gender" placeholder="Gender">
-            <mat-option [value]="null">Not specified</mat-option>
-            <mat-option [value]="Gender.Male">Male</mat-option>
-            <mat-option [value]="Gender.Female">Female</mat-option>
-            <mat-option [value]="Gender.Other">Other</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-    </div>
-
-    <div class="field-row">
-      <div class="field-col">
-        <label class="field-label" [class.field-label--empty]="!form.controls.phone.value">Phone</label>
-        <mat-form-field appearance="outline">
-          <input matInput type="tel" formControlName="phone" autocomplete="off" placeholder="Phone" />
-        </mat-form-field>
+        <div class="field-col">
+          <label class="field-label" [class.field-label--empty]="!form.controls.gender.value">{{
+            t('patients.gender')
+          }}</label>
+          <mat-form-field appearance="outline">
+            <mat-select formControlName="gender" [placeholder]="t('patients.gender')">
+              <mat-option [value]="null">{{ t('patients.form.genderNotSpecified') }}</mat-option>
+              <mat-option [value]="Gender.Male">{{ t('enums.gender.Male') }}</mat-option>
+              <mat-option [value]="Gender.Female">{{ t('enums.gender.Female') }}</mat-option>
+              <mat-option [value]="Gender.Other">{{ t('enums.gender.Other') }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
       </div>
 
-      <div class="field-col">
-        <label class="field-label" [class.field-label--empty]="!form.controls.email.value">Email</label>
-        <mat-form-field appearance="outline">
-          <input matInput type="email" formControlName="email" placeholder="Email" />
-          @if (form.controls.email.hasError('email') && form.controls.email.touched) {
-            <mat-error>Enter a valid email address.</mat-error>
-          }
-        </mat-form-field>
+      <div class="field-row">
+        <div class="field-col">
+          <label class="field-label" [class.field-label--empty]="!form.controls.phone.value">{{
+            t('patients.phone')
+          }}</label>
+          <mat-form-field appearance="outline">
+            <input matInput type="tel" formControlName="phone" autocomplete="off" [placeholder]="t('patients.phone')" />
+          </mat-form-field>
+        </div>
+
+        <div class="field-col">
+          <label class="field-label" [class.field-label--empty]="!form.controls.email.value">{{
+            t('patients.email')
+          }}</label>
+          <mat-form-field appearance="outline">
+            <input matInput type="email" formControlName="email" [placeholder]="t('patients.email')" />
+            @if (form.controls.email.hasError('email') && form.controls.email.touched) {
+              <mat-error>{{ t('validation.emailInvalid') }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
       </div>
-    </div>
 
-    <label class="field-label" [class.field-label--empty]="!form.controls.address.value">Address</label>
-    <mat-form-field appearance="outline">
-      <input matInput formControlName="address" placeholder="Address" />
-    </mat-form-field>
+      <label class="field-label" [class.field-label--empty]="!form.controls.address.value">{{
+        t('patients.address')
+      }}</label>
+      <mat-form-field appearance="outline">
+        <input matInput formControlName="address" [placeholder]="t('patients.address')" />
+      </mat-form-field>
 
-    <label class="field-label" [class.field-label--empty]="!form.controls.notes.value">Notes (allergies, conditions, etc.)</label>
-    <mat-form-field appearance="outline">
-      <textarea matInput formControlName="notes" rows="3" placeholder="Notes (allergies, conditions, etc.)"></textarea>
-    </mat-form-field>
+      <label class="field-label" [class.field-label--empty]="!form.controls.notes.value">{{
+        t('patients.form.notes')
+      }}</label>
+      <mat-form-field appearance="outline">
+        <textarea matInput formControlName="notes" rows="3" [placeholder]="t('patients.form.notes')"></textarea>
+      </mat-form-field>
 
-    @if (errorMessage()) {
-      <p class="error-message">{{ errorMessage() }}</p>
-    }
-  </mat-dialog-content>
+      @if (errorMessage()) {
+        <p class="error-message">{{ errorMessage() }}</p>
+      }
+    </mat-dialog-content>
 
-  <mat-dialog-actions align="end">
-    <button mat-button type="button" class="cancel-button" (click)="close()">Cancel</button>
-    <button mat-flat-button color="primary" class="pill-button" type="submit" [disabled]="isSubmitting()">
-      {{ isEditMode ? 'Save changes' : 'Add patient' }}
-    </button>
-  </mat-dialog-actions>
-</form>
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" class="cancel-button" (click)="close()">{{ t('common.cancel') }}</button>
+      <button mat-flat-button color="primary" class="pill-button" type="submit" [disabled]="isSubmitting()">
+        {{ isEditMode ? t('patients.form.saveChanges') : t('patients.form.add') }}
+      </button>
+    </mat-dialog-actions>
+  </form>
+</ng-container>

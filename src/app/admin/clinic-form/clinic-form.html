@@ -1,121 +1,154 @@
-<h2 mat-dialog-title>New clinic</h2>
+<ng-container *transloco="let t">
+  <h2 mat-dialog-title>{{ t('admin.form.title') }}</h2>
 
-<form [formGroup]="form" (ngSubmit)="submit()" class="clinic-form">
-  <mat-dialog-content>
-    <h3 class="section-title">Clinic</h3>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="clinic-form">
+    <mat-dialog-content>
+      <h3 class="section-title">{{ t('admin.form.clinicSection') }}</h3>
 
-    <label class="field-label" [class.field-label--empty]="!form.controls.name.value">Clinic name</label>
-    <mat-form-field appearance="outline">
-      <input matInput formControlName="name" placeholder="Clinic name" />
-      @if (form.controls.name.hasError('required') && form.controls.name.touched) {
-        <mat-error>Clinic name is required.</mat-error>
-      }
-    </mat-form-field>
-
-    <label class="field-label" [class.field-label--empty]="!form.controls.address.value">Address</label>
-    <mat-form-field appearance="outline">
-      <input matInput formControlName="address" placeholder="Address (optional)" />
-    </mat-form-field>
-
-    <div class="field-row">
-      <div class="field-col">
-        <label class="field-label" [class.field-label--empty]="!form.controls.phone.value">Phone</label>
-        <mat-form-field appearance="outline">
-          <input matInput type="tel" formControlName="phone" placeholder="Phone (optional)" />
-        </mat-form-field>
-      </div>
-      <div class="field-col">
-        <label class="field-label" [class.field-label--empty]="!form.controls.email.value">Clinic email</label>
-        <mat-form-field appearance="outline">
-          <input matInput type="email" formControlName="email" placeholder="Clinic email (optional)" />
-          @if (form.controls.email.hasError('email') && form.controls.email.touched) {
-            <mat-error>Enter a valid email address.</mat-error>
-          }
-        </mat-form-field>
-      </div>
-    </div>
-
-    <label class="field-label">Time zone (working hours are in this zone)</label>
-    <mat-form-field appearance="outline">
-      <input matInput formControlName="timeZone" [matAutocomplete]="timeZoneList" placeholder="e.g. Europe/Belgrade" />
-      <mat-autocomplete #timeZoneList>
-        @for (zone of timeZoneOptions(); track zone) {
-          <mat-option [value]="zone">{{ zone }}</mat-option>
-        }
-      </mat-autocomplete>
-      @if (form.controls.timeZone.hasError('unknownTimeZone') && form.controls.timeZone.touched) {
-        <mat-error>Pick a time zone from the list.</mat-error>
-      }
-    </mat-form-field>
-
-    <h3 class="section-title">First administrator</h3>
-    <p class="section-hint">
-      They manage the clinic's team. You'll get an invitation link to send them - they choose their own password.
-    </p>
-
-    <ng-container formGroupName="admin">
-      <div class="field-row">
-        <div class="field-col">
-          <label class="field-label" [class.field-label--empty]="!form.controls.admin.controls.firstName.value">First name</label>
-          <mat-form-field appearance="outline">
-            <input matInput formControlName="firstName" autocomplete="off" placeholder="First name" />
-            @if (form.controls.admin.controls.firstName.hasError('required') && form.controls.admin.controls.firstName.touched) {
-              <mat-error>First name is required.</mat-error>
-            }
-          </mat-form-field>
-        </div>
-        <div class="field-col">
-          <label class="field-label" [class.field-label--empty]="!form.controls.admin.controls.lastName.value">Last name</label>
-          <mat-form-field appearance="outline">
-            <input matInput formControlName="lastName" autocomplete="off" placeholder="Last name" />
-            @if (form.controls.admin.controls.lastName.hasError('required') && form.controls.admin.controls.lastName.touched) {
-              <mat-error>Last name is required.</mat-error>
-            }
-          </mat-form-field>
-        </div>
-      </div>
-
-      <label class="field-label" [class.field-label--empty]="!form.controls.admin.controls.email.value">Email (their login)</label>
+      <label class="field-label" [class.field-label--empty]="!form.controls.name.value">{{
+        t('admin.form.name')
+      }}</label>
       <mat-form-field appearance="outline">
-        <input matInput type="email" formControlName="email" autocomplete="off" placeholder="Email (their login)" />
-        @if (form.controls.admin.controls.email.hasError('required') && form.controls.admin.controls.email.touched) {
-          <mat-error>Email is required.</mat-error>
+        <input matInput formControlName="name" [placeholder]="t('admin.form.name')" />
+        @if (form.controls.name.hasError('required') && form.controls.name.touched) {
+          <mat-error>{{ t('admin.form.nameRequired') }}</mat-error>
         }
-        @if (form.controls.admin.controls.email.hasError('email') && form.controls.admin.controls.email.touched) {
-          <mat-error>Enter a valid email address.</mat-error>
-        }
+      </mat-form-field>
+
+      <label class="field-label" [class.field-label--empty]="!form.controls.address.value">{{
+        t('admin.form.address')
+      }}</label>
+      <mat-form-field appearance="outline">
+        <input matInput formControlName="address" [placeholder]="t('admin.form.addressOptional')" />
       </mat-form-field>
 
       <div class="field-row">
         <div class="field-col">
-          <label class="field-label">Role</label>
+          <label class="field-label" [class.field-label--empty]="!form.controls.phone.value">{{
+            t('admin.form.phone')
+          }}</label>
           <mat-form-field appearance="outline">
-            <mat-select formControlName="role">
-              <mat-option [value]="StaffRole.Doctor">Doctor</mat-option>
-              <mat-option [value]="StaffRole.Employee">Employee</mat-option>
-            </mat-select>
+            <input matInput type="tel" formControlName="phone" [placeholder]="t('admin.form.phoneOptional')" />
           </mat-form-field>
         </div>
         <div class="field-col">
-          @if (form.controls.admin.controls.role.value === StaffRole.Doctor) {
-            <label class="field-label" [class.field-label--empty]="!form.controls.admin.controls.specialty.value">Specialty</label>
-            <mat-form-field appearance="outline">
-              <input matInput formControlName="specialty" placeholder="Specialty (optional)" />
-            </mat-form-field>
-          }
+          <label class="field-label" [class.field-label--empty]="!form.controls.email.value">{{
+            t('admin.form.email')
+          }}</label>
+          <mat-form-field appearance="outline">
+            <input matInput type="email" formControlName="email" [placeholder]="t('admin.form.emailOptional')" />
+            @if (form.controls.email.hasError('email') && form.controls.email.touched) {
+              <mat-error>{{ t('validation.emailInvalid') }}</mat-error>
+            }
+          </mat-form-field>
         </div>
       </div>
-    </ng-container>
 
-    @if (errorMessage()) {
-      <p class="error-message">{{ errorMessage() }}</p>
-    }
-  </mat-dialog-content>
+      <label class="field-label">{{ t('admin.form.timeZone') }}</label>
+      <mat-form-field appearance="outline">
+        <input
+          matInput
+          formControlName="timeZone"
+          [matAutocomplete]="timeZoneList"
+          [placeholder]="t('admin.form.timeZonePlaceholder')"
+        />
+        <mat-autocomplete #timeZoneList>
+          @for (zone of timeZoneOptions(); track zone) {
+            <mat-option [value]="zone">{{ zone }}</mat-option>
+          }
+        </mat-autocomplete>
+        @if (form.controls.timeZone.hasError('unknownTimeZone') && form.controls.timeZone.touched) {
+          <mat-error>{{ t('admin.form.timeZoneUnknown') }}</mat-error>
+        }
+      </mat-form-field>
 
-  <mat-dialog-actions align="end">
-    <button mat-button type="button" class="cancel-button" (click)="close()">Cancel</button>
-    <button mat-flat-button color="primary" class="pill-button" type="submit" [disabled]="isSubmitting()">
-      Create clinic
-    </button>
-  </mat-dialog-actions>
-</form>
+      <h3 class="section-title">{{ t('admin.form.adminSection') }}</h3>
+      <p class="section-hint">{{ t('admin.form.adminHint') }}</p>
+
+      <ng-container formGroupName="admin">
+        <div class="field-row">
+          <div class="field-col">
+            <label class="field-label" [class.field-label--empty]="!form.controls.admin.controls.firstName.value">{{
+              t('common.firstName')
+            }}</label>
+            <mat-form-field appearance="outline">
+              <input matInput formControlName="firstName" autocomplete="off" [placeholder]="t('common.firstName')" />
+              @if (
+                form.controls.admin.controls.firstName.hasError('required') &&
+                form.controls.admin.controls.firstName.touched
+              ) {
+                <mat-error>{{ t('common.firstNameRequired') }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+          <div class="field-col">
+            <label class="field-label" [class.field-label--empty]="!form.controls.admin.controls.lastName.value">{{
+              t('common.lastName')
+            }}</label>
+            <mat-form-field appearance="outline">
+              <input matInput formControlName="lastName" autocomplete="off" [placeholder]="t('common.lastName')" />
+              @if (
+                form.controls.admin.controls.lastName.hasError('required') &&
+                form.controls.admin.controls.lastName.touched
+              ) {
+                <mat-error>{{ t('common.lastNameRequired') }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
+
+        <label class="field-label" [class.field-label--empty]="!form.controls.admin.controls.email.value">{{
+          t('team.form.email')
+        }}</label>
+        <mat-form-field appearance="outline">
+          <input
+            matInput
+            type="email"
+            formControlName="email"
+            autocomplete="off"
+            [placeholder]="t('team.form.email')"
+          />
+          @if (form.controls.admin.controls.email.hasError('required') && form.controls.admin.controls.email.touched) {
+            <mat-error>{{ t('validation.emailRequired') }}</mat-error>
+          }
+          @if (form.controls.admin.controls.email.hasError('email') && form.controls.admin.controls.email.touched) {
+            <mat-error>{{ t('validation.emailInvalid') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="field-row">
+          <div class="field-col">
+            <label class="field-label">{{ t('common.role') }}</label>
+            <mat-form-field appearance="outline">
+              <mat-select formControlName="role">
+                <mat-option [value]="StaffRole.Doctor">{{ t('enums.staffRole.Doctor') }}</mat-option>
+                <mat-option [value]="StaffRole.Employee">{{ t('enums.staffRole.Employee') }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="field-col">
+            @if (form.controls.admin.controls.role.value === StaffRole.Doctor) {
+              <label class="field-label" [class.field-label--empty]="!form.controls.admin.controls.specialty.value">{{
+                t('common.specialty')
+              }}</label>
+              <mat-form-field appearance="outline">
+                <input matInput formControlName="specialty" [placeholder]="t('common.specialtyOptional')" />
+              </mat-form-field>
+            }
+          </div>
+        </div>
+      </ng-container>
+
+      @if (errorMessage()) {
+        <p class="error-message">{{ errorMessage() }}</p>
+      }
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" class="cancel-button" (click)="close()">{{ t('common.cancel') }}</button>
+      <button mat-flat-button color="primary" class="pill-button" type="submit" [disabled]="isSubmitting()">
+        {{ t('admin.form.submit') }}
+      </button>
+    </mat-dialog-actions>
+  </form>
+</ng-container>

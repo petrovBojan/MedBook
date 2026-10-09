@@ -54,7 +54,7 @@ export class Shell {
   readonly navItems = computed(() => [
     { path: '/calendar', icon: 'calendar_month', labelKey: 'nav.calendar' },
     { path: '/patients', icon: 'patient_list', labelKey: 'nav.patients' },
-    ...(this.currentUser()?.isClinicAdmin ? [{ path: '/team', icon: 'clinical_notes', labelKey: 'nav.team' }] : []),
+    ...(this.currentUser()?.isClinicAdmin ? [{ path: '/team', icon: 'group', labelKey: 'nav.team' }] : []),
     { path: '/settings', icon: 'settings_heart', labelKey: 'nav.settings' }
   ]);
   readonly clinic$ = this.clinicSrv.getCurrentClinic();

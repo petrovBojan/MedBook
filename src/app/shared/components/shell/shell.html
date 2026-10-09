@@ -1,6 +1,6 @@
 <ng-container *transloco="let t">
   <mat-toolbar color="primary" class="shell-toolbar">
-    <span class="clinic-name">{{ (clinic$ | async)?.name ?? 'MedBook' }}</span>
+    <a routerLink="/calendar" class="clinic-name">{{ (clinic$ | async)?.name ?? 'MedBook' }}</a>
     <span class="spacer"></span>
     @if (currentUser$ | async; as user) {
       <button

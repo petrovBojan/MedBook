@@ -1,0 +1,20 @@
+# The server's public entry point. Caddy gets and renews the https certificate for
+# DOMAIN by itself (the domain's DNS must point at this server, ports 80 + 443 open).
+# One origin for both apps, so the SameSite=Strict session cookie and the frontend's
+# apiUrl = '/api' work as designed.
+
+{$DOMAIN} {
+	encode zstd gzip
+
+	handle /api/* {
+		reverse_proxy api:8080
+	}
+
+	handle {
+		# Angular SSR only trusts known hosts; present the request as localhost so the
+		# public domain doesn't need to be allow-listed in the build.
+		reverse_proxy web:4000 {
+			header_up Host localhost:4000
+		}
+	}
+}

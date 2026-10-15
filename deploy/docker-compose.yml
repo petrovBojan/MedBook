@@ -1,0 +1,64 @@
+# MedBook on one server: the API, the Angular frontend and Caddy (https + routing).
+# Expects the two repos side by side - MedBook/ (this one) and MedBook.Api/.
+# Settings come from deploy/.env (copy .env.example). See deploy/README.md.
+#
+#   docker compose up -d --build      start / update
+#   docker compose logs -f            follow the logs
+#   docker compose run --rm backup    copy the database to deploy/backups/
+
+name: medbook
+
+services:
+  api:
+    build: ${API_REPO:-../../MedBook.Api}
+    restart: unless-stopped
+    environment:
+      Jwt__Key: ${JWT_KEY:?Set JWT_KEY in deploy/.env}
+      PlatformAdmin__Email: ${PLATFORM_ADMIN_EMAIL:-}
+      PlatformAdmin__Password: ${PLATFORM_ADMIN_PASSWORD:-}
+      # Time zone of the demo clinic seeded into an empty database.
+      Seed__ClinicTimeZone: ${CLINIC_TIME_ZONE:-Europe/Skopje}
+      # Only Caddy can reach the API (no published port), so its X-Forwarded-* headers
+      # can be trusted - the login rate limit then sees each visitor's real IP.
+      ReverseProxy__TrustForwardedHeaders: "true"
+    volumes:
+      - medbook-data:/data
+
+  web:
+    build: ..
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [api, web]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in deploy/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+  # Not started with the others - run on demand (or from cron): docker compose run --rm backup
+  # Uses SQLite's own .backup, which is safe while the API is running.
+  backup:
+    image: alpine:3
+    profiles: [tools]
+    volumes:
+      - medbook-data:/data
+      - ./backups:/backups
+    command: >
+      sh -c "apk add --no-cache sqlite >/dev/null &&
+             sqlite3 /data/medbook.db \".backup '/backups/medbook-$$(date +%Y%m%d-%H%M%S).db'\" &&
+             ls -lh /backups | tail -n 5"
+
+volumes:
+  # The database. Survives rebuilds and redeploys - only `docker compose down -v` deletes it.
+  medbook-data:
+  # Caddy's https certificates.
+  caddy-data:
+  caddy-config:

@@ -1,5 +1,8 @@
 # Deploying MedBook with Docker
 
+> Already deployed? Day-to-day work on the live server (updates, settings, backups,
+> troubleshooting) is in [SERVER-GUIDE.md](SERVER-GUIDE.md).
+
 Runs the whole app on one Linux server with a permanent https address:
 
 | Container | What it does |

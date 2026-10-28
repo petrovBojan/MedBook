@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { FormBuilder, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -58,7 +58,10 @@ export class ReminderSettings {
     language: 'mk'
   });
 
-  readonly testTo = new FormControl('', { nonNullable: true });
+  // A form group of its own: a bare <form> isn't handled by ReactiveFormsModule, so
+  // submitting it would do a real browser submit and reload the page.
+  readonly testForm = this.fb.nonNullable.group({ to: '' });
+  readonly testTo = this.testForm.controls.to;
   readonly isTesting = signal(false);
   readonly testResult = signal<{ ok: boolean; message: string } | null>(null);
 

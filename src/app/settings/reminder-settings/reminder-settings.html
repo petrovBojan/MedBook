@@ -100,12 +100,12 @@
       <div class="test-panel">
         <h3>{{ t('testTitle') }}</h3>
         <p class="hint-text">{{ channel() === 'Email' ? t('testEmailDescription') : t('testSmsDescription') }}</p>
-        <form class="test-form" (ngSubmit)="sendTest()">
+        <form class="test-form" [formGroup]="testForm" (ngSubmit)="sendTest()">
           <mat-form-field appearance="outline" class="test-to">
             <input
               matInput
               [type]="channel() === 'Email' ? 'email' : 'tel'"
-              [formControl]="testTo"
+              formControlName="to"
               [placeholder]="channel() === 'Email' ? t('testEmailPlaceholder') : t('testSmsPlaceholder')"
             />
           </mat-form-field>

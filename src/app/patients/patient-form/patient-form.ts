@@ -5,6 +5,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { PatientService } from '../../core/services/patient.service';
 import { Gender, Patient, PatientDto } from '../../shared/models/patient.model';
@@ -27,6 +28,7 @@ export interface PatientFormDialogData {
     MatSelectModule,
     MatButtonModule,
     MatDatepickerModule,
+    MatCheckboxModule,
     MatDialogModule,
     TranslocoDirective
   ]
@@ -58,7 +60,8 @@ export class PatientForm {
     phone: [''],
     email: ['', Validators.email],
     address: [''],
-    notes: ['']
+    notes: [''],
+    receiveReminders: [true]
   });
 
   constructor() {
@@ -76,7 +79,8 @@ export class PatientForm {
           phone: patient.phone ?? '',
           email: patient.email ?? '',
           address: patient.address ?? '',
-          notes: patient.notes ?? ''
+          notes: patient.notes ?? '',
+          receiveReminders: patient.receiveReminders ?? true
         });
       });
     }
@@ -100,7 +104,8 @@ export class PatientForm {
       phone: raw.phone || undefined,
       email: raw.email || undefined,
       address: raw.address || undefined,
-      notes: raw.notes || undefined
+      notes: raw.notes || undefined,
+      receiveReminders: raw.receiveReminders
     };
 
     const request = this.isEditMode

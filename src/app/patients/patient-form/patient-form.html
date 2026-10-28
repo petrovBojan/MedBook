@@ -103,6 +103,10 @@
         <textarea matInput formControlName="notes" rows="3" [placeholder]="t('patients.form.notes')"></textarea>
       </mat-form-field>
 
+      <mat-checkbox formControlName="receiveReminders" class="reminders-checkbox">
+        {{ t('patients.form.receiveReminders') }}
+      </mat-checkbox>
+
       @if (errorMessage()) {
         <p class="error-message">{{ errorMessage() }}</p>
       }

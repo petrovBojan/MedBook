@@ -1,0 +1,128 @@
+<ng-container *transloco="let t; prefix: 'settings.reminders'">
+  @if (loadError()) {
+    <p class="error-message">{{ loadError() }}</p>
+  } @else if (settings(); as s) {
+    <form [formGroup]="form" (ngSubmit)="save()" class="reminders-form">
+      <div class="field">
+        <span class="field-label">{{ t('channel') }}</span>
+        <mat-button-toggle-group formControlName="channel" [attr.aria-label]="t('channel')" class="channel-toggle">
+          <mat-button-toggle value="Off">{{ t('off') }}</mat-button-toggle>
+          <mat-button-toggle value="Email" [disabled]="!s.emailAvailable && channel() !== 'Email'">
+            <mat-icon>mail</mat-icon> {{ t('email') }}
+          </mat-button-toggle>
+          <mat-button-toggle value="Sms" [disabled]="!s.smsAvailable && channel() !== 'Sms'">
+            <mat-icon>sms</mat-icon> {{ t('sms') }}
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+
+        @if (!s.emailAvailable || !s.smsAvailable) {
+          <p class="hint">
+            <mat-icon>info</mat-icon>
+            {{
+              !s.emailAvailable && !s.smsAvailable
+                ? t('noneAvailable')
+                : !s.emailAvailable
+                  ? t('emailUnavailable')
+                  : t('smsUnavailable')
+            }}
+          </p>
+        }
+      </div>
+
+      @if (channel() !== 'Off') {
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label" for="reminder-hours">{{ t('when') }}</label>
+            <mat-form-field appearance="outline">
+              <mat-select id="reminder-hours" formControlName="hoursBefore">
+                @for (hours of hoursOptions(); track hours) {
+                  <mat-option [value]="hours">{{ hoursLabel(hours) }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="reminder-language">{{ t('language') }}</label>
+            <mat-form-field appearance="outline">
+              <mat-select id="reminder-language" formControlName="language">
+                <mat-option value="mk">Македонски</mat-option>
+                <mat-option value="en">English</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        @if (canFallBack()) {
+          <mat-checkbox formControlName="fallback">
+            {{ channel() === 'Email' ? t('fallbackToSms') : t('fallbackToEmail') }}
+          </mat-checkbox>
+        }
+
+        @if (channel() === 'Sms' && language() === 'mk') {
+          <p class="hint">
+            <mat-icon>info</mat-icon>
+            {{ t('cyrillicSmsNote') }}
+          </p>
+        }
+
+        <p class="hint">
+          <mat-icon>person_off</mat-icon>
+          {{ t('optOutNote') }}
+        </p>
+      }
+
+      @if (errorMessage()) {
+        <p class="error-message">{{ errorMessage() }}</p>
+      }
+
+      @if (isAdmin) {
+        <div class="actions">
+          @if (justSaved()) {
+            <span class="saved-message">
+              <mat-icon>check_circle</mat-icon>
+              {{ t('saved') }}
+            </span>
+          }
+          <button mat-flat-button color="primary" class="pill-button" type="submit" [disabled]="isSaving()">
+            {{ t('save') }}
+          </button>
+        </div>
+      } @else {
+        <p class="hint">
+          <mat-icon>lock</mat-icon>
+          {{ t('adminOnly') }}
+        </p>
+      }
+    </form>
+
+    @if (isAdmin && channel() !== 'Off') {
+      <div class="test-panel">
+        <h3>{{ t('testTitle') }}</h3>
+        <p class="hint-text">{{ channel() === 'Email' ? t('testEmailDescription') : t('testSmsDescription') }}</p>
+        <form class="test-form" (ngSubmit)="sendTest()">
+          <mat-form-field appearance="outline" class="test-to">
+            <input
+              matInput
+              [type]="channel() === 'Email' ? 'email' : 'tel'"
+              [formControl]="testTo"
+              [placeholder]="channel() === 'Email' ? t('testEmailPlaceholder') : t('testSmsPlaceholder')"
+            />
+          </mat-form-field>
+          <button mat-stroked-button type="submit" [disabled]="isTesting() || !testTo.value.trim()">
+            <mat-icon>send</mat-icon>
+            {{ t('sendTest') }}
+          </button>
+        </form>
+        @if (testResult(); as result) {
+          <p [class]="result.ok ? 'saved-message' : 'error-message'">
+            @if (result.ok) {
+              <mat-icon>check_circle</mat-icon>
+            }
+            {{ result.message }}
+          </p>
+        }
+      </div>
+    }
+  }
+</ng-container>

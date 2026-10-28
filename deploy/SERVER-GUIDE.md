@@ -147,6 +147,27 @@ docker compose up -d      # apply - restarts only what's affected
 | `JWT_KEY` | Signs logins | Changing it logs everyone out. New one: `openssl rand -base64 64 \| tr -d '\n'; echo` |
 | `PLATFORM_ADMIN_EMAIL` / `_PASSWORD` | Super admin account | **Only used when no super admin exists yet.** Changing them later does nothing - change the password inside the app |
 | `CLINIC_TIME_ZONE` | Time zone of the demo clinic | Only used when the database is empty |
+| `SMTP_*`, `EMAIL_FROM*` | Email reminders | See "Patient reminders" below |
+| `TWILIO_*`, `SMS_DEFAULT_COUNTRY_CODE` | SMS reminders | See "Patient reminders" below |
+
+### Patient reminders (email and SMS)
+The server can send patients a reminder before their appointments. The **server** settings
+below say *how* messages can go out. Each **clinic admin** then picks Off / Email / SMS, how long
+before, and the language under **Settings → Patient reminders**. That page also has a
+"Send test" button.
+
+1. **Email:** sign up with any SMTP service and verify the sender address there. Then fill in
+   `SMTP_HOST`, `SMTP_USERNAME`, `SMTP_PASSWORD` and `EMAIL_FROM`. Keep `SMTP_PORT=587`,
+   because Oracle (like most clouds) blocks port 25.
+2. **SMS:** create a Twilio account and fill in `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` and
+   `TWILIO_FROM`. A trial account can only text numbers you have verified in Twilio.
+3. Run `docker compose up -d`. Then check the log line
+   `docker compose logs api | grep "Appointment reminders"`: it should say each channel is
+   `configured`.
+
+The API checks every 5 minutes for appointments that need a reminder. A failed send is
+retried twice, 15 minutes apart. Failures show up in `docker compose logs api` as
+`Appointment reminder failed`.
 
 ### Moving to your own domain
 1. At your domain's DNS settings add an **A record**, e.g. `app` → `141.147.30.34`.

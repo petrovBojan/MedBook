@@ -9,6 +9,7 @@ import { StaffMember } from '../shared/models/staff-member.model';
 import { DaySchedule, WorkingHours, createDefaultWorkingHours } from '../shared/models/working-hours.model';
 import { DateTimeUtils } from '../shared/utils/date-time.utils';
 import { DayFormGroup, WorkingHoursEditor } from './working-hours-editor/working-hours-editor';
+import { ReminderSettings } from './reminder-settings/reminder-settings';
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
 
 type ScheduleForm = FormGroup<{ days: FormArray<DayFormGroup> }>;
@@ -31,6 +32,7 @@ interface StaffScheduleEntry {
     MatButtonModule,
     MatIconModule,
     WorkingHoursEditor,
+    ReminderSettings,
     TranslocoDirective
   ]
 })

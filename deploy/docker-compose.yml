@@ -21,6 +21,17 @@ services:
       # Only Caddy can reach the API (no published port), so its X-Forwarded-* headers
       # can be trusted - the login rate limit then sees each visitor's real IP.
       ReverseProxy__TrustForwardedHeaders: "true"
+      # Appointment reminders. Leave a channel's settings empty and clinics can't choose it.
+      Email__Host: ${SMTP_HOST:-}
+      Email__Port: ${SMTP_PORT:-587}
+      Email__Username: ${SMTP_USERNAME:-}
+      Email__Password: ${SMTP_PASSWORD:-}
+      Email__FromAddress: ${EMAIL_FROM:-}
+      Email__FromName: ${EMAIL_FROM_NAME:-MedBook}
+      Sms__AccountSid: ${TWILIO_ACCOUNT_SID:-}
+      Sms__AuthToken: ${TWILIO_AUTH_TOKEN:-}
+      Sms__From: ${TWILIO_FROM:-}
+      Sms__DefaultCountryCode: ${SMS_DEFAULT_COUNTRY_CODE:-+389}
     volumes:
       - medbook-data:/data
 

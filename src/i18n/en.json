@@ -262,8 +262,12 @@
       "genderNotSpecified": "Not specified",
       "notes": "Notes (allergies, conditions, etc.)",
       "saveChanges": "Save changes",
-      "add": "Add patient"
-    }
+      "add": "Add patient",
+      "receiveReminders": "Send appointment reminders to this patient"
+    },
+    "reminders": "Reminders",
+    "remindersOn": "Gets appointment reminders",
+    "remindersOff": "Doesn't want reminders"
   },
   "team": {
     "title": "Team",
@@ -303,7 +307,38 @@
     "staffHoursDescription": "Narrow the clinic's hours per staff member so appointments are easier to schedule around individual availability. A staff member's hours must fall within the clinic's own hours above.",
     "noStaff": "No staff members found.",
     "clinicClosedOn": "The clinic is closed {{ on }} - disable this day or update the clinic hours first.",
-    "outsideClinicHours": "{{ day }} hours must fall within the clinic's hours ({{ start }}–{{ end }})."
+    "outsideClinicHours": "{{ day }} hours must fall within the clinic's hours ({{ start }}–{{ end }}).",
+    "reminders": {
+      "title": "Patient reminders",
+      "description": "Automatically remind patients of their upcoming appointments by email or SMS. Scheduled and unconfirmed appointments get one reminder; a moved appointment gets a new one for its new time.",
+      "channel": "Send reminders by",
+      "off": "Off",
+      "email": "Email",
+      "sms": "SMS",
+      "noneAvailable": "Email and SMS aren't set up on the server yet. Ask the platform administrator to configure them.",
+      "emailUnavailable": "Email isn't set up on the server yet, so only SMS can be chosen.",
+      "smsUnavailable": "SMS isn't set up on the server yet, so only email can be chosen.",
+      "when": "When",
+      "oneHourBefore": "1 hour before",
+      "hoursBefore": "{{ count }} hours before",
+      "oneDayBefore": "1 day before",
+      "daysBefore": "{{ count }} days before",
+      "language": "Message language",
+      "fallbackToSms": "If a patient has no email address, send an SMS instead",
+      "fallbackToEmail": "If a patient has no phone number, send an email instead",
+      "cyrillicSmsNote": "An SMS in Cyrillic holds fewer characters, so each Macedonian reminder is usually billed as 2-3 messages.",
+      "optOutNote": "Patients who asked not to be reminded can be switched off in their patient details.",
+      "save": "Save reminder settings",
+      "saved": "Saved",
+      "adminOnly": "Only clinic administrators can change reminder settings.",
+      "testTitle": "Send a test",
+      "testEmailDescription": "Send a sample reminder to your own email address to check how it looks.",
+      "testSmsDescription": "Send a sample reminder to your own phone to check that SMS works.",
+      "testEmailPlaceholder": "you@example.com",
+      "testSmsPlaceholder": "070 123 456",
+      "sendTest": "Send test",
+      "testSent": "Test message sent to {{ to }}."
+    }
   },
   "profile": {
     "title": "My profile",
@@ -425,6 +460,10 @@
       "empty": "The photo is empty.",
       "tooLarge": "The photo is too large (maximum {{ max }} MB).",
       "wrongType": "The photo must be a JPEG, PNG or WebP image."
+    },
+    "reminders": {
+      "channelUnavailable": "This channel isn't set up on the server yet. Ask the platform administrator to configure it.",
+      "testFailed": "The test message couldn't be sent: {{ reason }}"
     }
   }
 }

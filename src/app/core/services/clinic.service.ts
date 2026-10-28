@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Clinic } from '../../shared/models/clinic.model';
+import { Clinic, ReminderSettings, ReminderSettingsDto } from '../../shared/models/clinic.model';
 import { WorkingHours } from '../../shared/models/working-hours.model';
 import { environment } from '../../../environments/environment';
 import { undefinedIfNotFound } from '../http/api-error';
@@ -20,5 +20,19 @@ export class ClinicService {
 
   updateWorkingHours(clinicId: string, workingHours: WorkingHours): Observable<Clinic> {
     return this.http.put<Clinic>(`${this.baseUrl}/${encodeURIComponent(clinicId)}/working-hours`, workingHours);
+  }
+
+  getReminderSettings(): Observable<ReminderSettings> {
+    return this.http.get<ReminderSettings>(`${this.baseUrl}/current/reminders`);
+  }
+
+  /** Clinic admins only. */
+  updateReminderSettings(settings: ReminderSettingsDto): Observable<ReminderSettings> {
+    return this.http.put<ReminderSettings>(`${this.baseUrl}/current/reminders`, settings);
+  }
+
+  /** Clinic admins only: sends a sample reminder to an email address or phone number right away. */
+  sendTestReminder(channel: 'Email' | 'Sms', to: string, language: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/current/reminders/test`, { channel, to, language });
   }
 }

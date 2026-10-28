@@ -4,6 +4,12 @@
   </div>
 
   <section class="settings-section">
+    <h2>{{ t('settings.reminders.title') }}</h2>
+    <p class="section-description">{{ t('settings.reminders.description') }}</p>
+    <app-reminder-settings />
+  </section>
+
+  <section class="settings-section">
     <h2>{{ t('settings.clinicHours') }}</h2>
     <p class="section-description">
       {{ t('settings.clinicHoursDescription', { clinic: clinicName() || t('settings.yourClinic') }) }}

@@ -61,7 +61,7 @@ export class PatientForm {
     email: ['', Validators.email],
     address: [''],
     notes: [''],
-    receiveReminders: [true]
+    receiveReminders: [false]
   });
 
   constructor() {
@@ -80,7 +80,7 @@ export class PatientForm {
           email: patient.email ?? '',
           address: patient.address ?? '',
           notes: patient.notes ?? '',
-          receiveReminders: patient.receiveReminders ?? true
+          receiveReminders: patient.receiveReminders ?? false
         });
       });
     }

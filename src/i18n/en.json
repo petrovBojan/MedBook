@@ -267,7 +267,7 @@
     },
     "reminders": "Reminders",
     "remindersOn": "Gets appointment reminders",
-    "remindersOff": "Doesn't want reminders"
+    "remindersOff": "No reminders"
   },
   "team": {
     "title": "Team",
@@ -327,7 +327,7 @@
       "fallbackToSms": "If a patient has no email address, send an SMS instead",
       "fallbackToEmail": "If a patient has no phone number, send an email instead",
       "cyrillicSmsNote": "An SMS in Cyrillic holds fewer characters, so each Macedonian reminder is usually billed as 2-3 messages.",
-      "optOutNote": "Patients who asked not to be reminded can be switched off in their patient details.",
+      "optOutNote": "Only patients who agreed get reminders: tick \"Send appointment reminders\" in their patient details.",
       "save": "Save reminder settings",
       "saved": "Saved",
       "adminOnly": "Only clinic administrators can change reminder settings.",

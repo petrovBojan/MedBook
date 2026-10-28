@@ -15,7 +15,7 @@ export interface Patient {
   email?: string;
   address?: string;
   notes?: string;
-  /** False when the patient asked not to get appointment reminders. */
+  /** Opt-in: only patients with this on get appointment reminders. */
   receiveReminders: boolean;
   createdAt: string;
   updatedAt: string;

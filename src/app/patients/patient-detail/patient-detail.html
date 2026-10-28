@@ -23,7 +23,7 @@
           <dt>{{ t('patients.address') }}</dt>
           <dd>{{ p.address || '—' }}</dd>
           <dt>{{ t('patients.reminders') }}</dt>
-          <dd>{{ p.receiveReminders === false ? t('patients.remindersOff') : t('patients.remindersOn') }}</dd>
+          <dd>{{ p.receiveReminders ? t('patients.remindersOn') : t('patients.remindersOff') }}</dd>
           @if (p.notes) {
             <dt>{{ t('patients.notes') }}</dt>
             <dd>{{ p.notes }}</dd>
